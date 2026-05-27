@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Author Dashboard — BioXape</title>
+<link rel="stylesheet" href="css/dashboard.css"/>
+<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+</head>
+<body>
+
+<div class="page-loader" id="page-loader">
+  <div class="page-loader-logo">Bio<em>Xape</em></div>
+  <div class="spinner"></div>
+  <p id="loader-msg" style="font-size:13px;color:#7a9e8c">Loading your dashboard...</p>
+</div>
+
+<div class="dash-layout" id="dash-layout" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="dash-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 3c0 0-3 4-3 8s3 8 3 8"/><path d="M12 3c0 0 3 4 3 8s-3 8-3 8"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+      </div>
+      <div class="sidebar-brand-name">Bio<em>Xape</em></div>
+    </div>
+    <span class="sidebar-role-badge role-author" id="sidebar-role-badge">AUTHOR</span>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Dashboard</div>
+      <div class="nav-item active" onclick="showTab('overview')"><span class="nav-icon">🏠</span>Overview</div>
+      <div class="nav-section-label">My Posts</div>
+      <div class="nav-item" onclick="showTab('new-post')"><span class="nav-icon">✍️</span>Write New Post</div>
+      <div class="nav-item" onclick="showTab('my-posts')"><span class="nav-icon">📝</span>All My Posts</div>
+      <div class="nav-item" onclick="showTab('drafts')"><span class="nav-icon">💾</span>Drafts</div>
+      <div class="nav-section-label">Account</div>
+      <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
+      <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-user-av" id="sidebar-user-av">AU</div>
+      <div>
+        <div class="sidebar-user-name" id="sidebar-user-name">Author</div>
+        <div class="sidebar-user-email" id="sidebar-user-email">author@bioxape.com</div>
+      </div>
+      <button class="btn-logout">↩</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div class="topbar-title" id="topbar-title">Overview</div>
+      <div class="topbar-right">
+        <a href="https://www.bioxape.com" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
+        <button class="notif-bell" id="notif-bell">🔔<span class="notif-count hidden" id="notif-count">0</span></button>
+      </div>
+    </div>
+
+    <!-- Notification Dropdown -->
+    <div class="notif-dropdown" id="notif-dropdown">
+      <div class="notif-dropdown-head">
+        Notifications
+        <button class="notif-read-all" id="notif-read-all">Mark all read</button>
+      </div>
+      <div class="notif-list" id="notif-list"></div>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- OVERVIEW TAB -->
+      <div id="tab-overview" class="tab-panel active">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-icon si-green">📄</div><div><div class="stat-val" id="stat-total">0</div><div class="stat-lab">Total Posts</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-amber">⏳</div><div><div class="stat-val" id="stat-pending">0</div><div class="stat-lab">Under Review</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-blue">✅</div><div><div class="stat-val" id="stat-published">0</div><div class="stat-lab">Published</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-purple">👁️</div><div><div class="stat-val" id="stat-views">0</div><div class="stat-lab">Total Views</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Recent Posts</div><button class="btn btn-primary btn-sm" onclick="showTab('new-post')">+ New Post</button></div>
+          <div id="recent-posts-list"></div>
+        </div>
+      </div>
+
+      <!-- NEW POST TAB -->
+      <div id="tab-new-post" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Submit New Post</div></div>
+          <form id="post-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Post Title <span>*</span></label>
+                <input class="form-input" type="text" id="post-title" placeholder="Enter a compelling title..." required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Content Type <span>*</span></label>
+                <select class="form-select" id="post-type">
+                  <option value="article">Article / Blog Post</option>
+                  <option value="research_summary">Research Paper Summary</option>
+                  <option value="product_review">Product Review</option>
+                  <option value="interview">Expert Interview</option>
+                  <option value="news">News & Industry Update</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Primary Category <span>*</span></label>
+                <select class="form-select" id="post-category">
+                  <option value="">Select category...</option>
+                  <option>CRISPR &amp; Gene Editing</option><option>Biopharmaceuticals</option>
+                  <option>Synthetic Biology</option><option>Genomics &amp; Sequencing</option>
+                  <option>Agricultural Biotech</option><option>Bioinformatics</option>
+                  <option>Clinical Trials</option><option>Protein Engineering</option>
+                  <option>Microbiome</option><option>Lab Tools &amp; Reviews</option>
+                  <option>Regulatory</option><option>Medical Biotech</option>
+                  <option>Industry News</option><option>Interviews</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tags (press Enter to add)</label>
+                <div class="tags-input-wrap" id="tags-wrap">
+                  <input class="tags-input" type="text" id="tags-input" placeholder="Add tags..."/>
+                </div>
+                <input type="hidden" id="post-tags"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Excerpt / Summary <span>*</span></label>
+              <textarea class="form-textarea" id="post-excerpt" rows="2" placeholder="2-3 sentence summary shown in post cards on the blog..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Upload Word Document (.docx) <span>*</span></label>
+              <div class="upload-zone" id="docx-zone">
+                <div class="upload-zone-icon">📄</div>
+                <div class="upload-zone-text">Drop your .docx file here or click to browse</div>
+                <div class="upload-zone-hint">Maximum 20MB · Microsoft Word format only</div>
+              </div>
+              <input type="file" id="docx-input" accept=".docx" style="display:none"/>
+            </div>
+            <div id="docx-preview-area"></div>
+            <div class="form-group" style="margin-top:18px">
+              <label class="form-label">Cover Image</label>
+              <div class="upload-zone" id="cover-zone" style="padding:18px">
+                <div class="upload-zone-icon" style="font-size:24px">🖼️</div>
+                <div class="upload-zone-text">Upload cover image</div>
+                <div class="upload-zone-hint">JPG, PNG, WebP · Max 5MB</div>
+              </div>
+              <input type="file" id="cover-input" accept="image/*" style="display:none"/>
+              <img id="cover-preview" style="display:none;margin-top:10px;width:100%;max-height:200px;object-fit:cover;border-radius:9px;border:1.5px solid var(--border)"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes for Editor (optional)</label>
+              <textarea class="form-textarea" id="post-notes" rows="2" placeholder="Any context or guidance for the editor..."></textarea>
+            </div>
+            <input type="hidden" id="post-docx-url"/>
+            <input type="hidden" id="post-cover-url"/>
+            <input type="hidden" id="post-word-count"/>
+            <input type="hidden" id="post-read-time"/>
+            <input type="hidden" id="editing-post-id"/>
+            <div style="display:flex;gap:12px;margin-top:8px">
+              <button type="button" class="btn btn-secondary" onclick="saveDraft()">💾 Save Draft</button>
+              <button type="submit" class="btn btn-primary" id="submit-btn">🚀 Submit for Review</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ALL POSTS TAB -->
+      <div id="tab-my-posts" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>All My Posts</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Title</th><th>Type</th><th>Category</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead>
+            <tbody id="all-posts-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- DRAFTS TAB -->
+      <div id="tab-drafts" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>My Drafts</div><button class="btn btn-primary btn-sm" onclick="showTab('new-post')">+ New Post</button></div>
+          <div id="drafts-list"></div>
+        </div>
+      </div>
+
+      <!-- PROFILE TAB -->
+      <div id="tab-profile" class="tab-panel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>My Profile</div></div>
+            <form id="profile-form">
+              <div style="text-align:center;margin-bottom:20px">
+                <img id="profile-photo-preview" src="" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);display:none"/>
+                <div id="profile-av-placeholder" style="width:80px;height:80px;border-radius:50%;background:var(--accent);color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto"></div>
+                <button type="button" class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="document.getElementById('profile-photo').click()">Change Photo</button>
+                <input type="file" id="profile-photo" accept="image/*" style="display:none"/>
+              </div>
+              <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="profile-name"/></div>
+              <div class="form-group"><label class="form-label">Phone (for WhatsApp alerts)</label><input class="form-input" type="tel" id="profile-phone" placeholder="+919876543210"/></div>
+              <div class="form-group"><label class="form-label">Bio (shown on blog)</label><textarea class="form-textarea" id="profile-bio" rows="3"></textarea></div>
+              <div class="form-group"><label class="form-label">Twitter / X URL</label><input class="form-input" type="url" id="profile-twitter" placeholder="https://twitter.com/..."/></div>
+              <div class="form-group"><label class="form-label">LinkedIn URL</label><input class="form-input" type="url" id="profile-linkedin" placeholder="https://linkedin.com/in/..."/></div>
+              <div class="form-group"><label class="form-label">ResearchGate URL</label><input class="form-input" type="url" id="profile-researchgate" placeholder="https://researchgate.net/..."/></div>
+              <button type="submit" class="btn btn-primary btn-full">Save Profile</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>Change Password</div></div>
+            <form id="change-password-form">
+              <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" id="current-password"/></div>
+              <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" id="new-password"/></div>
+              <div class="form-group"><label class="form-label">Confirm New Password</label><input class="form-input" type="password" id="confirm-password"/></div>
+              <button type="submit" class="btn btn-primary btn-full">Change Password</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS TAB -->
+      <div id="tab-notifications-page" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>All Notifications</div><button class="btn btn-secondary btn-sm" onclick="markAllRead()">Mark all read</button></div>
+          <div id="notif-page-list"></div>
+        </div>
+      </div>
+
+    </div><!-- /dash-content -->
+  </div><!-- /dash-main -->
+</div><!-- /dash-layout -->
+
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/docx-preview.js"></script>
+<script>
+let currentDocxFile = null;
+let postDocxMeta    = null;
+let tagsArray       = [];
+
+// ── Init ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!requireAuth()) return;
+  const user = getUser();
+  if (user.role !== 'author') { window.location.href = '/index.html'; return; }
+  fillSidebarUser();
+  hidePageLoader();
+  document.getElementById('dash-layout').style.display = 'flex';
+  await loadOverview();
+  initUploadZone('docx-zone','docx-input','docx-preview-area',(file,meta)=>{ currentDocxFile=file; postDocxMeta=meta; });
+  initCoverUpload();
+  initTagsInput();
+  fillProfileForm();
+  document.getElementById('post-form').addEventListener('submit', submitPost);
+});
+
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('tab-'+name)?.classList.add('active');
+  document.querySelectorAll(`.nav-item`).forEach(i=>{ if(i.textContent.toLowerCase().includes(name.replace('-',' '))) i.classList.add('active'); });
+  const titles = {'overview':'Overview','new-post':'Write New Post','my-posts':'All My Posts','drafts':'Drafts','profile':'My Profile','notifications-page':'Notifications'};
+  document.getElementById('topbar-title').textContent = titles[name] || '';
+  if (name==='my-posts') loadAllPosts();
+  if (name==='drafts') loadDrafts();
+  if (name==='notifications-page') loadNotifPage();
+}
+
+async function loadOverview() {
+  const result = await apiCall('/posts/my-posts?limit=5');
+  if (!result?.success) return;
+  const posts = result.data;
+  const total     = posts.length;
+  const pending   = posts.filter(p=>['submitted','editor_review','admin_review'].includes(p.status)).length;
+  const published = posts.filter(p=>p.status==='published').length;
+  const views     = posts.reduce((a,p)=>a+(p.viewCount||0),0);
+  document.getElementById('stat-total').textContent     = total;
+  document.getElementById('stat-pending').textContent   = pending;
+  document.getElementById('stat-published').textContent = published;
+  document.getElementById('stat-views').textContent     = views.toLocaleString();
+  const el = document.getElementById('recent-posts-list');
+  if (!posts.length) { el.innerHTML = emptyState('📝','No posts yet','Submit your first post to get started','<button class="btn btn-primary" onclick="showTab(\'new-post\')">Write First Post</button>'); return; }
+  el.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>Title</th><th>Status</th><th>Date</th><th>Views</th><th>Action</th></tr></thead><tbody>
+    ${posts.map(p=>`<tr>
+      <td><strong>${p.title}</strong></td>
+      <td>${statusBadge(p.status)}</td>
+      <td>${formatDate(p.createdAt)}</td>
+      <td>${p.viewCount||0}</td>
+      <td>${p.status==='changes_needed'?`<button class="btn btn-amber btn-sm" onclick="editPost('${p._id}')">Revise</button>`:
+           p.status==='published'?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl||'#'}" target="_blank">View</a>`:
+           `<span style="font-size:12px;color:#7a9e8c">In review</span>`}
+      </td>
+    </tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+async function loadAllPosts() {
+  const tbody = document.getElementById('all-posts-tbody');
+  setInnerLoading(tbody,'Loading posts...');
+  const result = await apiCall('/posts/my-posts');
+  if (!result?.success) { tbody.innerHTML='<tr><td colspan="6">Failed to load</td></tr>'; return; }
+  if (!result.data.length) { tbody.innerHTML=`<tr><td colspan="6">${emptyState('📝','No posts yet','')}</td></tr>`; return; }
+  tbody.innerHTML = result.data.map(p=>`<tr>
+    <td><strong>${p.title}</strong>${p.editorComment&&p.status==='changes_needed'?`<div style="font-size:12px;color:#d97706;margin-top:3px">Editor: ${p.editorComment}</div>`:''}</td>
+    <td><span style="font-size:12px;color:#7a9e8c">${p.contentType||'article'}</span></td>
+    <td><span style="font-size:12px">${p.category||'—'}</span></td>
+    <td>${statusBadge(p.status)}</td>
+    <td>${formatDate(p.submittedAt||p.createdAt)}</td>
+    <td style="display:flex;gap:6px;flex-wrap:wrap">
+      ${p.status==='draft'||p.status==='changes_needed'?`<button class="btn btn-amber btn-sm" onclick="editPost('${p._id}')">Edit</button>`:''}
+      ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View</a>`:''}
+      ${p.status==='draft'?`<button class="btn btn-primary btn-sm" onclick="submitPostById('${p._id}')">Submit</button>`:''}
+    </td>
+  </tr>`).join('');
+}
+
+async function loadDrafts() {
+  const el = document.getElementById('drafts-list');
+  setInnerLoading(el,'Loading drafts...');
+  const result = await apiCall('/posts/my-posts?status=draft');
+  if (!result?.success) { el.innerHTML='Failed to load'; return; }
+  if (!result.data.length) { el.innerHTML=emptyState('💾','No drafts','Start writing and save a draft'); return; }
+  el.innerHTML = result.data.map(p=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:600;margin-bottom:3px">${p.title||'Untitled Draft'}</div>
+        <div style="font-size:12px;color:#7a9e8c">Saved ${timeAgo(p.updatedAt)}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-amber btn-sm" onclick="editPost('${p._id}')">Edit</button>
+        <button class="btn btn-primary btn-sm" onclick="submitPostById('${p._id}')">Submit</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+async function loadNotifPage() {
+  const el = document.getElementById('notif-page-list');
+  setInnerLoading(el);
+  const result = await apiCall('/notify');
+  if (!result?.success) { el.innerHTML='Failed to load'; return; }
+  if (!result.data.length) { el.innerHTML=emptyState('🔔','No notifications','You are all caught up!'); return; }
+  el.innerHTML = result.data.map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n._id}',this)" style="border-radius:9px;margin-bottom:8px">
+      <div class="notif-dot ${n.read?'read':''}"></div>
+      <div><div class="notif-item-msg">${n.message}</div><div class="notif-item-time">${formatDateTime(n.createdAt)}</div></div>
+    </div>`).join('');
+}
+
+function initCoverUpload() {
+  const zone  = document.getElementById('cover-zone');
+  const input = document.getElementById('cover-input');
+  const prev  = document.getElementById('cover-preview');
+  zone.addEventListener('click', ()=>input.click());
+  input.addEventListener('change', ()=>{
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => { prev.src=e.target.result; prev.style.display='block'; };
+    reader.readAsDataURL(file);
+  });
+}
+
+function initTagsInput() {
+  const input = document.getElementById('tags-input');
+  input.addEventListener('keydown', e=>{
+    if (e.key==='Enter'||e.key===',') {
+      e.preventDefault();
+      const val = input.value.trim().replace(/,$/, '');
+      if (val && !tagsArray.includes(val)) {
+        tagsArray.push(val);
+        renderTags();
+      }
+      input.value='';
+    }
+  });
+}
+
+function renderTags() {
+  const wrap = document.getElementById('tags-wrap');
+  const input = document.getElementById('tags-input');
+  const chips = tagsArray.map((t,i)=>`<span class="tag-chip">${t}<button type="button" onclick="removeTag(${i})">×</button></span>`).join('');
+  wrap.innerHTML = chips;
+  wrap.appendChild(input);
+  document.getElementById('post-tags').value = tagsArray.join(',');
+}
+function removeTag(i) { tagsArray.splice(i,1); renderTags(); }
+
+async function saveDraft() {
+  const data = collectFormData();
+  if (!data.title) { showToast('Enter a title to save draft','error'); return; }
+  const postId = document.getElementById('editing-post-id').value;
+  const endpoint = postId ? `/posts/${postId}` : '/posts';
+  const method   = postId ? 'PUT' : 'POST';
+  data.status = 'draft';
+  const result = await apiCall(endpoint, method, data);
+  if (result?.success) {
+    document.getElementById('editing-post-id').value = result.data._id;
+    showToast('Draft saved','success');
+  } else showToast(result?.message||'Save failed','error');
+}
+
+async function submitPost(e) {
+  e.preventDefault();
+  const data = collectFormData();
+  if (!data.title||!data.excerpt||!data.category) { showToast('Fill all required fields','error'); return; }
+  if (!currentDocxFile && !document.getElementById('post-docx-url').value) { showToast('Upload your Word document','error'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled=true; btn.textContent='Uploading...';
+
+  // Upload docx if new file selected
+  if (currentDocxFile) {
+    const fd = new FormData();
+    fd.append('docx', currentDocxFile);
+    const upResult = await apiCall('/upload/docx','POST',fd,true);
+    if (!upResult?.success) { showToast('File upload failed','error'); btn.disabled=false; btn.textContent='Submit for Review'; return; }
+    document.getElementById('post-docx-url').value = upResult.url;
+    data.docxFileUrl = upResult.url;
+    data.bodyHtml    = postDocxMeta?.html || '';
+    data.wordCount   = postDocxMeta?.wordCount || 0;
+    data.readTimeMinutes = postDocxMeta?.readTime || 1;
+  }
+
+  // Upload cover if selected
+  const coverFile = document.getElementById('cover-input').files[0];
+  if (coverFile) {
+    const fd2 = new FormData();
+    fd2.append('cover', coverFile);
+    const coverResult = await apiCall('/upload/cover','POST',fd2,true);
+    if (coverResult?.success) { data.coverImageUrl = coverResult.url; }
+  }
+
+  btn.textContent='Submitting...';
+  data.status = 'submitted';
+  const postId = document.getElementById('editing-post-id').value;
+  const endpoint = postId ? `/posts/${postId}/submit` : '/posts/submit';
+  const result   = await apiCall(endpoint, 'POST', data);
+
+  btn.disabled=false; btn.textContent='Submit for Review';
+  if (result?.success) {
+    showToast('Post submitted for editor review!','success');
+    setTimeout(()=>showTab('my-posts'),1200);
+  } else showToast(result?.message||'Submission failed','error');
+}
+
+function collectFormData() {
+  return {
+    title:       document.getElementById('post-title').value.trim(),
+    excerpt:     document.getElementById('post-excerpt').value.trim(),
+    category:    document.getElementById('post-category').value,
+    contentType: document.getElementById('post-type').value,
+    tags:        tagsArray,
+    docxFileUrl: document.getElementById('post-docx-url').value,
+    coverImageUrl: document.getElementById('post-cover-url').value,
+    wordCount:   parseInt(document.getElementById('post-word-count').value)||0,
+    readTimeMinutes: parseInt(document.getElementById('post-read-time').value)||1,
+    editorNote:  document.getElementById('post-notes').value.trim()
+  };
+}
+
+async function editPost(id) {
+  const result = await apiCall(`/posts/${id}`);
+  if (!result?.success) { showToast('Failed to load post','error'); return; }
+  const p = result.data;
+  document.getElementById('post-title').value   = p.title||'';
+  document.getElementById('post-excerpt').value = p.excerpt||'';
+  document.getElementById('post-category').value= p.category||'';
+  document.getElementById('post-type').value    = p.contentType||'article';
+  document.getElementById('post-docx-url').value= p.docxFileUrl||'';
+  document.getElementById('editing-post-id').value = p._id;
+  tagsArray = p.tags||[];
+  renderTags();
+  if (p.editorComment) {
+    document.getElementById('post-notes').value = `EDITOR FEEDBACK: ${p.editorComment}`;
+  }
+  if (p.docxFileUrl) {
+    previewDocxUrl(p.docxFileUrl, document.getElementById('docx-preview-area'));
+  }
+  showTab('new-post');
+}
+
+async function submitPostById(id) {
+  const result = await apiCall(`/posts/${id}/submit`,'POST');
+  if (result?.success) { showToast('Submitted for review!','success'); loadAllPosts(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this draft permanently?')) return;
+  const result = await apiCall(`/posts/${id}`,'DELETE');
+  if (result?.success) { showToast('Draft deleted','success'); loadDrafts(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+function fillProfileForm() {
+  const user = getUser();
+  if (!user) return;
+  document.getElementById('profile-name').value  = user.name||'';
+  document.getElementById('profile-phone').value = user.phone||'';
+  document.getElementById('profile-bio').value   = user.bio||'';
+  document.getElementById('profile-twitter').value     = user.socialLinks?.twitter||'';
+  document.getElementById('profile-linkedin').value    = user.socialLinks?.linkedin||'';
+  document.getElementById('profile-researchgate').value= user.socialLinks?.researchgate||'';
+  const av = document.getElementById('profile-av-placeholder');
+  if (av) av.textContent = initials(user.name);
+  if (user.photoUrl) {
+    document.getElementById('profile-photo-preview').src = user.photoUrl;
+    document.getElementById('profile-photo-preview').style.display='block';
+    document.getElementById('profile-av-placeholder').style.display='none';
+  }
+}
+</script>
+</body>
+</html>

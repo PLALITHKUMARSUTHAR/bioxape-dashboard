@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Editor Dashboard — BioXape</title>
+<link rel="stylesheet" href="css/dashboard.css"/>
+<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+</head>
+<body>
+
+<div class="page-loader" id="page-loader">
+  <div class="page-loader-logo">Bio<em>Xape</em></div>
+  <div class="spinner"></div>
+  <p id="loader-msg" style="font-size:13px;color:#7a9e8c">Loading editor dashboard...</p>
+</div>
+
+<div class="dash-layout" id="dash-layout" style="display:none">
+  <!-- SIDEBAR -->
+  <aside class="dash-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 3c0 0-3 4-3 8s3 8 3 8"/><path d="M12 3c0 0 3 4 3 8s-3 8-3 8"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+      </div>
+      <div class="sidebar-brand-name">Bio<em>Xape</em></div>
+    </div>
+    <span class="sidebar-role-badge role-editor" id="sidebar-role-badge">EDITOR</span>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Dashboard</div>
+      <div class="nav-item active" onclick="showTab('overview')"><span class="nav-icon">🏠</span>Overview</div>
+      <div class="nav-section-label">Review Queue</div>
+      <div class="nav-item" onclick="showTab('pending')"><span class="nav-icon">📥</span>Pending Review <span class="nav-badge" id="pending-badge">0</span></div>
+      <div class="nav-item" onclick="showTab('reviewed')"><span class="nav-icon">✅</span>Reviewed Posts</div>
+      <div class="nav-section-label">My Authors</div>
+      <div class="nav-item" onclick="showTab('authors')"><span class="nav-icon">👥</span>Assigned Authors</div>
+      <div class="nav-section-label">Account</div>
+      <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
+      <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-user-av" id="sidebar-user-av">ED</div>
+      <div>
+        <div class="sidebar-user-name" id="sidebar-user-name">Editor</div>
+        <div class="sidebar-user-email" id="sidebar-user-email">editor@bioxape.com</div>
+      </div>
+      <button class="btn-logout">↩</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div class="topbar-title" id="topbar-title">Overview</div>
+      <div class="topbar-right">
+        <a href="https://www.bioxape.com" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
+        <button class="notif-bell" id="notif-bell">🔔<span class="notif-count hidden" id="notif-count">0</span></button>
+      </div>
+    </div>
+
+    <div class="notif-dropdown" id="notif-dropdown">
+      <div class="notif-dropdown-head">Notifications<button class="notif-read-all" id="notif-read-all">Mark all read</button></div>
+      <div class="notif-list" id="notif-list"></div>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- OVERVIEW -->
+      <div id="tab-overview" class="tab-panel active">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-icon si-amber">📥</div><div><div class="stat-val" id="stat-pending">0</div><div class="stat-lab">Pending Review</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-val" id="stat-approved">0</div><div class="stat-lab">Approved This Month</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-blue">👥</div><div><div class="stat-val" id="stat-authors">0</div><div class="stat-lab">My Authors</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-purple">⏱️</div><div><div class="stat-val" id="stat-avg">—</div><div class="stat-lab">Avg Review Time</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Pending Review</div></div>
+          <div id="overview-pending-list"></div>
+        </div>
+      </div>
+
+      <!-- PENDING REVIEW -->
+      <div id="tab-pending" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Posts Awaiting Your Review</div></div>
+          <div id="pending-list"></div>
+        </div>
+      </div>
+
+      <!-- REVIEWED POSTS -->
+      <div id="tab-reviewed" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Posts I've Reviewed</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Title</th><th>Author</th><th>My Decision</th><th>Current Status</th><th>Reviewed</th></tr></thead>
+            <tbody id="reviewed-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- AUTHORS -->
+      <div id="tab-authors" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>My Assigned Authors</div></div>
+          <div id="authors-list"></div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="tab-profile" class="tab-panel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>My Profile</div></div>
+            <form id="profile-form">
+              <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="profile-name"/></div>
+              <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" id="profile-phone" placeholder="+91..."/></div>
+              <div class="form-group"><label class="form-label">Bio</label><textarea class="form-textarea" id="profile-bio" rows="3"></textarea></div>
+              <div class="form-group"><label class="form-label">Twitter / X</label><input class="form-input" type="url" id="profile-twitter"/></div>
+              <div class="form-group"><label class="form-label">LinkedIn</label><input class="form-input" type="url" id="profile-linkedin"/></div>
+              <div class="form-group"><label class="form-label">ResearchGate</label><input class="form-input" type="url" id="profile-researchgate"/></div>
+              <button type="submit" class="btn btn-primary btn-full">Save Profile</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>Change Password</div></div>
+            <form id="change-password-form">
+              <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" id="current-password"/></div>
+              <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" id="new-password"/></div>
+              <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" type="password" id="confirm-password"/></div>
+              <button type="submit" class="btn btn-primary btn-full">Change Password</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS PAGE -->
+      <div id="tab-notifications-page" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>All Notifications</div><button class="btn btn-secondary btn-sm" onclick="markAllRead()">Mark all read</button></div>
+          <div id="notif-page-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title" id="review-modal-title">Review Post</div>
+      <button class="modal-close" onclick="closeReviewModal()">✕</button>
+    </div>
+    <div id="review-preview-area" style="margin-bottom:20px"></div>
+    <div class="form-group">
+      <label class="form-label">Comment / Feedback for Author</label>
+      <textarea class="form-textarea" id="review-comment" rows="3" placeholder="Write your feedback here. If requesting changes, be specific about what needs to be revised..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="submitReview('admin_review')">✅ Approve — Send to Admin</button>
+      <button class="btn btn-amber"   onclick="submitReview('changes_needed')">🔄 Request Changes</button>
+      <button class="btn btn-danger"  onclick="submitReview('rejected')">✕ Reject</button>
+      <button class="btn btn-secondary" onclick="closeReviewModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/docx-preview.js"></script>
+<script>
+let reviewingPostId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!requireAuth()) return;
+  const user = getUser();
+  if (!['editor','admin'].includes(user.role)) { window.location.href='/index.html'; return; }
+  fillSidebarUser();
+  await loadOverview();
+  hidePageLoader();
+  document.getElementById('dash-layout').style.display='flex';
+  fillProfileForm();
+});
+
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('tab-'+name)?.classList.add('active');
+  const titles = {'overview':'Overview','pending':'Pending Review','reviewed':'Reviewed Posts','authors':'My Authors','profile':'My Profile','notifications-page':'Notifications'};
+  document.getElementById('topbar-title').textContent = titles[name]||'';
+  if(name==='pending') loadPending();
+  if(name==='reviewed') loadReviewed();
+  if(name==='authors') loadAuthors();
+  if(name==='notifications-page') loadNotifPage();
+}
+
+async function loadOverview() {
+  const result = await apiCall('/posts/editor-queue');
+  if (!result?.success) return;
+  const pending = result.data.filter(p=>p.status==='submitted');
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('pending-badge').textContent = pending.length;
+  document.getElementById('stat-approved').textContent = result.data.filter(p=>p.status==='admin_review').length;
+  const el = document.getElementById('overview-pending-list');
+  if (!pending.length) { el.innerHTML = emptyState('📥','No pending posts','All caught up! New submissions will appear here.'); return; }
+  el.innerHTML = pending.slice(0,5).map(p=>postReviewCard(p)).join('');
+
+  const authResult = await apiCall('/users/my-authors');
+  if (authResult?.success) document.getElementById('stat-authors').textContent = authResult.data.length;
+}
+
+async function loadPending() {
+  const el = document.getElementById('pending-list');
+  setInnerLoading(el,'Loading review queue...');
+  const result = await apiCall('/posts/editor-queue');
+  if (!result?.success) { el.innerHTML='Failed to load'; return; }
+  const pending = result.data.filter(p=>p.status==='submitted');
+  if (!pending.length) { el.innerHTML=emptyState('📥','All clear!','No posts waiting for review.'); return; }
+  el.innerHTML = pending.map(p=>postReviewCard(p)).join('');
+}
+
+function postReviewCard(p) {
+  return `<div style="border:1.5px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">${p.title}</div>
+        <div style="font-size:12.5px;color:#7a9e8c">By ${p.authorName} · ${p.category||'—'} · ${p.contentType||'article'} · Submitted ${timeAgo(p.submittedAt)}</div>
+        ${p.excerpt?`<div style="font-size:13px;color:#4a7060;margin-top:8px">${p.excerpt}</div>`:''}
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        ${p.docxFileUrl?`<a class="btn btn-secondary btn-sm" href="${p.docxFileUrl}" target="_blank">⬇ Download</a>`:''}
+        <button class="btn btn-primary btn-sm" onclick="openReview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}')">Review Post</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function openReview(postId, title, docxUrl) {
+  reviewingPostId = postId;
+  document.getElementById('review-modal-title').textContent = `Review: ${title}`;
+  document.getElementById('review-comment').value = '';
+  document.getElementById('review-modal').classList.add('open');
+  if (docxUrl) {
+    await previewDocxUrl(docxUrl, document.getElementById('review-preview-area'));
+  } else {
+    document.getElementById('review-preview-area').innerHTML = `<div class="alert alert-info">No document preview available. Download the file to review.</div>`;
+  }
+}
+
+function closeReviewModal() {
+  document.getElementById('review-modal').classList.remove('open');
+  reviewingPostId = null;
+}
+
+async function submitReview(decision) {
+  if (!reviewingPostId) return;
+  const comment = document.getElementById('review-comment').value.trim();
+  if ((decision==='changes_needed'||decision==='rejected') && !comment) {
+    showToast('Please provide feedback when requesting changes or rejecting','error'); return;
+  }
+  const result = await apiCall(`/posts/${reviewingPostId}/editor-review`,'PUT',{ status: decision, editorComment: comment });
+  if (result?.success) {
+    const msgs = { admin_review:'Post approved and sent to admin!', changes_needed:'Changes requested — author notified.', rejected:'Post rejected — author notified.' };
+    showToast(msgs[decision]||'Done','success');
+    closeReviewModal();
+    loadOverview();
+  } else showToast(result?.message||'Action failed','error');
+}
+
+async function loadReviewed() {
+  const tbody = document.getElementById('reviewed-tbody');
+  setInnerLoading(tbody);
+  const result = await apiCall('/posts/editor-queue');
+  if (!result?.success) { tbody.innerHTML='<tr><td colspan="5">Failed</td></tr>'; return; }
+  const reviewed = result.data.filter(p=>p.status!=='submitted');
+  if (!reviewed.length) { tbody.innerHTML=`<tr><td colspan="5">${emptyState('📋','No reviewed posts yet','')}</td></tr>`; return; }
+  tbody.innerHTML = reviewed.map(p=>`<tr>
+    <td><strong>${p.title}</strong></td>
+    <td>${p.authorName}</td>
+    <td>${p.status==='changes_needed'?'<span style="color:#d97706">Requested Changes</span>':p.status==='rejected'?'<span style="color:#dc2626">Rejected</span>':'<span style="color:#27a363">Approved</span>'}</td>
+    <td>${statusBadge(p.status)}</td>
+    <td>${formatDate(p.editorReviewedAt||p.updatedAt)}</td>
+  </tr>`).join('');
+}
+
+async function loadAuthors() {
+  const el = document.getElementById('authors-list');
+  setInnerLoading(el);
+  const result = await apiCall('/users/my-authors');
+  if (!result?.success) { el.innerHTML='Failed to load'; return; }
+  if (!result.data.length) { el.innerHTML=emptyState('👥','No authors assigned','The admin will assign authors to you.'); return; }
+  el.innerHTML = result.data.map(a=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="sidebar-user-av" style="width:40px;height:40px;font-size:14px;background:var(--accent)">${initials(a.name)}</div>
+        <div>
+          <div style="font-weight:600">${a.name}</div>
+          <div style="font-size:12px;color:#7a9e8c">${a.email} · ${a.postsPublished||0} posts published</div>
+        </div>
+      </div>
+      <div>${a.expertise?.join(', ')||'—'}</div>
+    </div>`).join('');
+}
+
+async function loadNotifPage() {
+  const el = document.getElementById('notif-page-list');
+  setInnerLoading(el);
+  const result = await apiCall('/notify');
+  if (!result?.success) { el.innerHTML='Failed'; return; }
+  if (!result.data.length) { el.innerHTML=emptyState('🔔','No notifications','You are all caught up!'); return; }
+  el.innerHTML = result.data.map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n._id}',this)" style="border-radius:9px;margin-bottom:8px">
+      <div class="notif-dot ${n.read?'read':''}"></div>
+      <div><div class="notif-item-msg">${n.message}</div><div class="notif-item-time">${formatDateTime(n.createdAt)}</div></div>
+    </div>`).join('');
+}
+
+function fillProfileForm() {
+  const user = getUser();
+  if (!user) return;
+  document.getElementById('profile-name').value  = user.name||'';
+  document.getElementById('profile-phone').value = user.phone||'';
+  document.getElementById('profile-bio').value   = user.bio||'';
+  document.getElementById('profile-twitter').value     = user.socialLinks?.twitter||'';
+  document.getElementById('profile-linkedin').value    = user.socialLinks?.linkedin||'';
+  document.getElementById('profile-researchgate').value= user.socialLinks?.researchgate||'';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Dashboard — BioXape</title>
+<link rel="stylesheet" href="css/dashboard.css"/>
+<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+</head>
+<body>
+
+<div class="page-loader" id="page-loader">
+  <div class="page-loader-logo">Bio<em>Xape</em></div>
+  <div class="spinner"></div>
+  <p id="loader-msg" style="font-size:13px;color:#7a9e8c">Loading admin dashboard...</p>
+</div>
+
+<div class="dash-layout" id="dash-layout" style="display:none">
+  <aside class="dash-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 3c0 0-3 4-3 8s3 8 3 8"/><path d="M12 3c0 0 3 4 3 8s-3 8-3 8"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+      </div>
+      <div class="sidebar-brand-name">Bio<em>Xape</em></div>
+    </div>
+    <span class="sidebar-role-badge role-admin" id="sidebar-role-badge">ADMIN</span>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Dashboard</div>
+      <div class="nav-item active" onclick="showTab('overview')"><span class="nav-icon">🏠</span>Overview</div>
+      <div class="nav-section-label">Content</div>
+      <div class="nav-item" onclick="showTab('review')"><span class="nav-icon">📋</span>Content Review <span class="nav-badge" id="review-badge">0</span></div>
+      <div class="nav-item" onclick="showTab('all-posts')"><span class="nav-icon">📝</span>All Posts</div>
+      <div class="nav-section-label">People</div>
+      <div class="nav-item" onclick="showTab('users')"><span class="nav-icon">👥</span>User Management</div>
+      <div class="nav-item" onclick="showTab('assignments')"><span class="nav-icon">🔗</span>Author Assignments</div>
+      <div class="nav-section-label">Site</div>
+      <div class="nav-item" onclick="showTab('site-builder')"><span class="nav-icon">🎨</span>Site Builder</div>
+      <div class="nav-item" onclick="showTab('categories')"><span class="nav-icon">🏷️</span>Categories</div>
+      <div class="nav-item" onclick="showTab('adsense')"><span class="nav-icon">💰</span>AdSense Slots</div>
+      <div class="nav-section-label">Monetisation</div>
+      <div class="nav-item" onclick="showTab('subscriptions')"><span class="nav-icon">💳</span>Subscriptions</div>
+      <div class="nav-item" onclick="showTab('store-orders')"><span class="nav-icon">🛒</span>Store Orders</div>
+      <div class="nav-section-label">Account</div>
+      <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
+      <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-user-av" id="sidebar-user-av">AD</div>
+      <div>
+        <div class="sidebar-user-name" id="sidebar-user-name">Admin</div>
+        <div class="sidebar-user-email" id="sidebar-user-email">admin@bioxape.com</div>
+      </div>
+      <button class="btn-logout">↩</button>
+    </div>
+  </aside>
+
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <div class="topbar-title" id="topbar-title">Overview</div>
+      <div class="topbar-right">
+        <a href="https://www.bioxape.com" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
+        <button class="notif-bell" id="notif-bell">🔔<span class="notif-count hidden" id="notif-count">0</span></button>
+      </div>
+    </div>
+    <div class="notif-dropdown" id="notif-dropdown">
+      <div class="notif-dropdown-head">Notifications<button class="notif-read-all" id="notif-read-all">Mark all read</button></div>
+      <div class="notif-list" id="notif-list"></div>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- OVERVIEW -->
+      <div id="tab-overview" class="tab-panel active">
+        <div class="stats-row" id="overview-stats">
+          <div class="stat-card"><div class="stat-icon si-amber">📋</div><div><div class="stat-val" id="stat-review">0</div><div class="stat-lab">Pending Review</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-val" id="stat-pub">0</div><div class="stat-lab">Published Posts</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-blue">👥</div><div><div class="stat-val" id="stat-users">0</div><div class="stat-lab">Total Users</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-purple">💳</div><div><div class="stat-val" id="stat-subs">0</div><div class="stat-lab">Active Subscribers</div></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:22px">
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>Awaiting Final Approval</div><button class="btn btn-primary btn-sm" onclick="showTab('review')">View All</button></div>
+            <div id="overview-review-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>Recent Activity</div></div>
+            <div id="recent-activity"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENT REVIEW -->
+      <div id="tab-review" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Posts Awaiting Admin Approval</div></div>
+          <div id="review-list"></div>
+        </div>
+      </div>
+
+      <!-- ALL POSTS -->
+      <div id="tab-all-posts" class="tab-panel">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><div class="card-line"></div>All Posts</div>
+            <div style="display:flex;gap:8px">
+              <select class="form-select" id="posts-filter" style="width:160px" onchange="loadAllPosts()">
+                <option value="">All Status</option>
+                <option value="draft">Draft</option>
+                <option value="submitted">Submitted</option>
+                <option value="editor_review">Editor Review</option>
+                <option value="admin_review">Admin Review</option>
+                <option value="published">Published</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Title</th><th>Author</th><th>Editor</th><th>Category</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="all-posts-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- USER MANAGEMENT -->
+      <div id="tab-users" class="tab-panel">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><div class="card-line"></div>User Management</div>
+            <button class="btn btn-primary btn-sm" onclick="openInviteModal()">+ Invite User</button>
+          </div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Posts</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- AUTHOR ASSIGNMENTS -->
+      <div id="tab-assignments" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Author → Editor Assignments</div></div>
+          <div id="assignments-list"></div>
+        </div>
+      </div>
+
+      <!-- SITE BUILDER -->
+      <div id="tab-site-builder" class="tab-panel">
+        <div style="margin-bottom:18px">
+          <div style="font-size:14px;color:#4a7060;background:var(--accent-l);border:1px solid var(--g200);border-radius:9px;padding:12px 16px">
+            🎨 <strong>Site Builder</strong> — Changes here update the public blog instantly. All sections pull live from the database.
+          </div>
+        </div>
+        <div id="site-builder-sections"></div>
+      </div>
+
+      <!-- CATEGORIES -->
+      <div id="tab-categories" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Category Manager</div><button class="btn btn-primary btn-sm" onclick="openAddCategoryModal()">+ Add Category</button></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Display Name</th><th>Blogger Label</th><th>Posts</th><th>Active</th><th>Order</th><th>Actions</th></tr></thead>
+            <tbody id="categories-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ADSENSE -->
+      <div id="tab-adsense" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>AdSense Slot Manager</div></div>
+          <div style="margin-bottom:16px" class="alert alert-info">Paste your AdSense code for each slot below. Toggle slots ON when AdSense is approved. The blog template reads these live from the database.</div>
+          <div id="adsense-slots"></div>
+        </div>
+      </div>
+
+      <!-- SUBSCRIPTIONS -->
+      <div id="tab-subscriptions" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Active Subscriptions</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Email</th><th>Plan</th><th>Status</th><th>Seats</th><th>Renews</th><th>Started</th></tr></thead>
+            <tbody id="subs-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- STORE ORDERS -->
+      <div id="tab-store-orders" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Store Orders</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Buyer</th><th>Product</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="orders-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="tab-profile" class="tab-panel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>Admin Profile</div></div>
+            <form id="profile-form">
+              <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="profile-name"/></div>
+              <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" id="profile-phone"/></div>
+              <div class="form-group"><label class="form-label">Bio</label><textarea class="form-textarea" id="profile-bio" rows="3"></textarea></div>
+              <div class="form-group"><label class="form-label">Twitter / X</label><input class="form-input" type="url" id="profile-twitter"/></div>
+              <div class="form-group"><label class="form-label">LinkedIn</label><input class="form-input" type="url" id="profile-linkedin"/></div>
+              <div class="form-group"><label class="form-label">ResearchGate</label><input class="form-input" type="url" id="profile-researchgate"/></div>
+              <button type="submit" class="btn btn-primary btn-full">Save Profile</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>Change Password</div></div>
+            <form id="change-password-form">
+              <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" id="current-password"/></div>
+              <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" id="new-password"/></div>
+              <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" type="password" id="confirm-password"/></div>
+              <button type="submit" class="btn btn-primary btn-full">Change Password</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS PAGE -->
+      <div id="tab-notifications-page" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>All Notifications</div><button class="btn btn-secondary btn-sm" onclick="markAllRead()">Mark all read</button></div>
+          <div id="notif-page-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- INVITE USER MODAL -->
+<div class="modal-overlay" id="invite-modal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Invite New User</div><button class="modal-close" onclick="closeModal('invite-modal')">✕</button></div>
+    <div class="form-group"><label class="form-label">Full Name <span>*</span></label><input class="form-input" type="text" id="invite-name" placeholder="Dr. Jane Smith"/></div>
+    <div class="form-group"><label class="form-label">Email Address <span>*</span></label><input class="form-input" type="email" id="invite-email" placeholder="jane@university.edu"/></div>
+    <div class="form-group"><label class="form-label">Role <span>*</span></label>
+      <select class="form-select" id="invite-role"><option value="author">Author</option><option value="editor">Editor</option></select>
+    </div>
+    <div class="form-group"><label class="form-label">Phone (for WhatsApp alerts)</label><input class="form-input" type="tel" id="invite-phone" placeholder="+919876543210"/></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('invite-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="inviteUser()">Send Invite</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN APPROVE MODAL -->
+<div class="modal-overlay" id="approve-modal">
+  <div class="modal modal-lg">
+    <div class="modal-head"><div class="modal-title" id="approve-modal-title">Final Review</div><button class="modal-close" onclick="closeModal('approve-modal')">✕</button></div>
+    <div id="approve-preview-area" style="margin-bottom:20px"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Final Categories (Blogger Labels)</label>
+        <input class="form-input" type="text" id="approve-categories" placeholder="CRISPR, Genomics, Research"/>
+        <div class="form-hint">Comma-separated. These become Blogger post labels.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Admin Note (optional)</label>
+        <textarea class="form-textarea" id="approve-note" rows="2" placeholder="Note to author/editor..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="finalApprove()">✅ Approve & Publish to Blog</button>
+      <button class="btn btn-danger"  onclick="finalReject()">✕ Reject</button>
+      <button class="btn btn-secondary" onclick="closeModal('approve-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CATEGORY MODAL -->
+<div class="modal-overlay" id="cat-modal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Add Category</div><button class="modal-close" onclick="closeModal('cat-modal')">✕</button></div>
+    <div class="form-group"><label class="form-label">Display Name <span>*</span></label><input class="form-input" id="cat-display" placeholder="CRISPR & Gene Editing"/></div>
+    <div class="form-group"><label class="form-label">Blogger Label <span>*</span></label><input class="form-input" id="cat-label" placeholder="CRISPR"/><div class="form-hint">Exact label used in Blogger posts. No spaces.</div></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="cat-desc" rows="2"></textarea></div>
+    <div class="form-group"><label class="form-label">Nav Order</label><input class="form-input" type="number" id="cat-order" value="10"/></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('cat-modal')">Cancel</button><button class="btn btn-primary" onclick="saveCategory()">Add Category</button></div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/docx-preview.js"></script>
+<script src="js/admin-sitebuilder.js"></script>
+<script>
+let approvingPostId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!requireAuth('admin')) return;
+  fillSidebarUser();
+  await loadOverview();
+  hidePageLoader();
+  document.getElementById('dash-layout').style.display='flex';
+  fillProfileForm();
+});
+
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('tab-'+name)?.classList.add('active');
+  const titles = {'overview':'Overview','review':'Content Review','all-posts':'All Posts','users':'User Management','assignments':'Author Assignments','site-builder':'Site Builder','categories':'Categories','adsense':'AdSense Slots','subscriptions':'Subscriptions','store-orders':'Store Orders','profile':'Admin Profile','notifications-page':'Notifications'};
+  document.getElementById('topbar-title').textContent = titles[name]||'';
+  if(name==='review') loadReviewQueue();
+  if(name==='all-posts') loadAllPosts();
+  if(name==='users') loadUsers();
+  if(name==='assignments') loadAssignments();
+  if(name==='site-builder') loadSiteBuilder();
+  if(name==='categories') loadCategories();
+  if(name==='adsense') loadAdSenseSlots();
+  if(name==='subscriptions') loadSubscriptions();
+  if(name==='store-orders') loadStoreOrders();
+  if(name==='notifications-page') loadNotifPage();
+}
+
+async function loadOverview() {
+  const [postsRes, usersRes, subsRes] = await Promise.all([
+    apiCall('/posts/admin-queue'),
+    apiCall('/users/all'),
+    apiCall('/subscribe/all')
+  ]);
+  const pending = postsRes?.data?.filter(p=>p.status==='admin_review')||[];
+  const published = postsRes?.data?.filter(p=>p.status==='published')||[];
+  document.getElementById('stat-review').textContent  = pending.length;
+  document.getElementById('stat-pub').textContent     = published.length;
+  document.getElementById('stat-users').textContent   = usersRes?.data?.length||0;
+  document.getElementById('stat-subs').textContent    = subsRes?.data?.filter(s=>s.status==='active').length||0;
+  document.getElementById('review-badge').textContent = pending.length;
+
+  const el = document.getElementById('overview-review-list');
+  if (!pending.length) { el.innerHTML=emptyState('✅','All clear!','No posts awaiting approval.'); }
+  else el.innerHTML = pending.slice(0,4).map(p=>adminReviewCard(p)).join('');
+
+  // Recent activity
+  const actEl = document.getElementById('recent-activity');
+  const recent = postsRes?.data?.slice(0,6)||[];
+  actEl.innerHTML = recent.map(p=>`
+    <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0"></div>
+      <div><div style="font-size:13px;font-weight:500">${p.title.slice(0,45)}${p.title.length>45?'...':''}</div>
+      <div style="font-size:11.5px;color:#7a9e8c">${statusBadge(p.status)} · ${timeAgo(p.updatedAt)}</div></div>
+    </div>`).join('');
+}
+
+function adminReviewCard(p) {
+  return `<div style="border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-weight:700;font-size:14.5px">${p.title}</div>
+        <div style="font-size:12px;color:#7a9e8c;margin-top:3px">By ${p.authorName} · Editor: ${p.editorName||'—'} ✓ · ${p.category||'—'}</div>
+        ${p.editorComment?`<div style="margin-top:6px;font-size:12.5px;color:#4a7060;background:var(--g50);padding:7px 10px;border-radius:6px">Editor note: "${p.editorComment}"</div>`:''}
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        ${p.docxFileUrl?`<a class="btn btn-secondary btn-sm" href="${p.docxFileUrl}" target="_blank">⬇</a>`:''}
+        <button class="btn btn-primary btn-sm" onclick="openApproveModal('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${(p.allCategories||[p.category]).join(',')}')">Final Review</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadReviewQueue() {
+  const el = document.getElementById('review-list');
+  setInnerLoading(el,'Loading review queue...');
+  const result = await apiCall('/posts/admin-queue');
+  if (!result?.success) { el.innerHTML='Failed to load'; return; }
+  const pending = result.data.filter(p=>p.status==='admin_review');
+  if (!pending.length) { el.innerHTML=emptyState('✅','Nothing to review','All submissions are up to date.'); return; }
+  el.innerHTML = pending.map(p=>adminReviewCard(p)).join('');
+}
+
+async function openApproveModal(postId, title, docxUrl, categories) {
+  approvingPostId = postId;
+  document.getElementById('approve-modal-title').textContent = `Final Review: ${title}`;
+  document.getElementById('approve-categories').value = categories||'';
+  document.getElementById('approve-note').value = '';
+  document.getElementById('approve-modal').classList.add('open');
+  if (docxUrl) await previewDocxUrl(docxUrl, document.getElementById('approve-preview-area'));
+  else document.getElementById('approve-preview-area').innerHTML='<div class="alert alert-info">No preview available. Download file to review.</div>';
+}
+
+async function finalApprove() {
+  if (!approvingPostId) return;
+  const categories = document.getElementById('approve-categories').value.split(',').map(c=>c.trim()).filter(Boolean);
+  const note = document.getElementById('approve-note').value.trim();
+  const result = await apiCall(`/posts/${approvingPostId}/admin-approve`,'PUT',{ allCategories: categories, adminComment: note });
+  if (result?.success) {
+    showToast('Post approved and published to blog!','success');
+    closeModal('approve-modal');
+    approvingPostId=null;
+    loadOverview();
+  } else showToast(result?.message||'Failed to publish','error');
+}
+
+async function finalReject() {
+  const note = document.getElementById('approve-note').value.trim();
+  if (!note) { showToast('Provide a reason for rejection','error'); return; }
+  const result = await apiCall(`/posts/${approvingPostId}/admin-reject`,'PUT',{ adminComment: note });
+  if (result?.success) {
+    showToast('Post rejected — author notified','success');
+    closeModal('approve-modal');
+    approvingPostId=null;
+    loadOverview();
+  } else showToast(result?.message||'Failed','error');
+}
+
+async function loadAllPosts() {
+  const tbody = document.getElementById('all-posts-tbody');
+  setInnerLoading(tbody,'Loading...');
+  const status = document.getElementById('posts-filter').value;
+  const result = await apiCall(`/posts/all${status?'?status='+status:''}`);
+  if (!result?.success) { tbody.innerHTML='<tr><td colspan="7">Failed</td></tr>'; return; }
+  if (!result.data.length) { tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;color:#7a9e8c;padding:28px">No posts found</td></tr>`; return; }
+  tbody.innerHTML = result.data.map(p=>`<tr>
+    <td><strong>${p.title.slice(0,50)}${p.title.length>50?'...':''}</strong></td>
+    <td>${p.authorName||'—'}</td>
+    <td>${p.editorName||'—'}</td>
+    <td><span style="font-size:12px">${p.category||'—'}</span></td>
+    <td>${statusBadge(p.status)}</td>
+    <td>${formatDate(p.createdAt)}</td>
+    <td style="display:flex;gap:5px;flex-wrap:wrap">
+      ${p.status==='admin_review'?`<button class="btn btn-primary btn-sm" onclick="openApproveModal('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${(p.allCategories||[]).join(',')}')">Review</button>`:''}
+      ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View</a>`:''}
+      <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Del</button>
+    </td>
+  </tr>`).join('');
+}
+
+async function loadUsers() {
+  const tbody = document.getElementById('users-tbody');
+  setInnerLoading(tbody);
+  const result = await apiCall('/users/all');
+  if (!result?.success) { tbody.innerHTML='<tr><td colspan="7">Failed</td></tr>'; return; }
+  tbody.innerHTML = result.data.map(u=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:8px"><div class="sidebar-user-av" style="width:30px;height:30px;font-size:11px;background:var(--accent);flex-shrink:0">${initials(u.name)}</div><strong>${u.name}</strong></div></td>
+    <td>${u.email}</td>
+    <td>${roleBadge(u.role)}</td>
+    <td><span class="badge badge-${u.status}">${u.status}</span></td>
+    <td>${u.postsPublished||0}</td>
+    <td>${formatDate(u.createdAt)}</td>
+    <td>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${u.role==='author'?`<button class="btn btn-secondary btn-sm" onclick="promoteUser('${u._id}','editor')">↑ Editor</button>`:''}
+        ${u.role==='editor'?`<button class="btn btn-secondary btn-sm" onclick="promoteUser('${u._id}','author')">↓ Author</button>`:''}
+        ${u.status==='active'?`<button class="btn btn-danger btn-sm" onclick="toggleUser('${u._id}','suspended')">Suspend</button>`:
+                              `<button class="btn btn-amber btn-sm" onclick="toggleUser('${u._id}','active')">Activate</button>`}
+        <button class="btn btn-danger btn-sm" onclick="deleteUser('${u._id}')">Del</button>
+      </div>
+    </td>
+  </tr>`).join('');
+}
+
+async function loadAssignments() {
+  const el = document.getElementById('assignments-list');
+  setInnerLoading(el);
+  const [edRes, auRes] = await Promise.all([apiCall('/users/editors'),apiCall('/users/authors')]);
+  if (!edRes?.success||!auRes?.success) { el.innerHTML='Failed to load'; return; }
+  const editors = edRes.data;
+  const authors = auRes.data;
+  if (!editors.length) { el.innerHTML=emptyState('👥','No editors yet','Invite editors first.'); return; }
+  el.innerHTML = editors.map(ed=>`
+    <div style="border:1.5px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+        <div style="font-weight:700;font-size:15px">${ed.name} <span class="badge badge-editor">Editor</span></div>
+        <div style="font-size:12.5px;color:#7a9e8c">Currently assigned: ${authors.filter(a=>a.assignedEditorId===ed._id).length} authors</div>
+      </div>
+      <div style="font-size:13px;color:#4a7060;margin-bottom:10px">Assigned Authors:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        ${authors.filter(a=>a.assignedEditorId===ed._id).map(a=>`
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:var(--g50);border:1px solid var(--g200);border-radius:6px;font-size:12.5px">
+            ${a.name}
+            <button style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px" onclick="reassignAuthor('${a._id}',null)">×</button>
+          </span>`).join('')||'<span style="color:#7a9e8c;font-size:12.5px">None assigned yet</span>'}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <select class="form-select" id="assign-select-${ed._id}" style="max-width:220px">
+          <option value="">Assign an author...</option>
+          ${authors.filter(a=>a.assignedEditorId!==ed._id).map(a=>`<option value="${a._id}">${a.name}</option>`).join('')}
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="assignAuthor('${ed._id}')">Assign</button>
+      </div>
+    </div>`).join('');
+}
+
+async function assignAuthor(editorId) {
+  const sel = document.getElementById(`assign-select-${editorId}`);
+  const authorId = sel.value;
+  if (!authorId) { showToast('Select an author','error'); return; }
+  const result = await apiCall(`/users/${authorId}/assign-editor`,'PUT',{ editorId });
+  if (result?.success) { showToast('Author assigned!','success'); loadAssignments(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+async function reassignAuthor(authorId, editorId) {
+  const result = await apiCall(`/users/${authorId}/assign-editor`,'PUT',{ editorId: editorId||null });
+  if (result?.success) { showToast('Assignment updated','success'); loadAssignments(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+async function promoteUser(userId, newRole) {
+  if (!confirm(`Change this user's role to ${newRole}?`)) return;
+  const result = await apiCall(`/users/${userId}/role`,'PUT',{ role: newRole });
+  if (result?.success) { showToast('Role updated','success'); loadUsers(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+async function toggleUser(userId, status) {
+  const result = await apiCall(`/users/${userId}/status`,'PUT',{ status });
+  if (result?.success) { showToast(`User ${status}`,'success'); loadUsers(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+async function deleteUser(userId) {
+  if (!confirm('Permanently delete this user?')) return;
+  const result = await apiCall(`/users/${userId}`,'DELETE');
+  if (result?.success) { showToast('User deleted','success'); loadUsers(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+async function deletePost(postId) {
+  if (!confirm('Delete this post permanently?')) return;
+  const result = await apiCall(`/posts/${postId}`,'DELETE');
+  if (result?.success) { showToast('Post deleted','success'); loadAllPosts(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+function openInviteModal() { document.getElementById('invite-modal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function inviteUser() {
+  const name  = document.getElementById('invite-name').value.trim();
+  const email = document.getElementById('invite-email').value.trim();
+  const role  = document.getElementById('invite-role').value;
+  const phone = document.getElementById('invite-phone').value.trim();
+  if (!name||!email) { showToast('Name and email are required','error'); return; }
+  const result = await apiCall('/users/invite','POST',{ name, email, role, phone });
+  if (result?.success) {
+    showToast(`Invite sent to ${email}`,'success');
+    closeModal('invite-modal');
+    document.getElementById('invite-name').value='';
+    document.getElementById('invite-email').value='';
+    loadUsers();
+  } else showToast(result?.message||'Failed to invite','error');
+}
+
+async function loadCategories() {
+  const tbody = document.getElementById('categories-tbody');
+  setInnerLoading(tbody);
+  const result = await apiCall('/site/categories');
+  if (!result?.success) { tbody.innerHTML='<tr><td colspan="6">Failed</td></tr>'; return; }
+  tbody.innerHTML = result.data.map(c=>`<tr>
+    <td><strong>${c.displayName}</strong></td>
+    <td><code style="background:var(--off);padding:2px 7px;border-radius:4px;font-size:12px">${c.bloggerLabel}</code></td>
+    <td>${c.postCount||0}</td>
+    <td><input type="checkbox" ${c.active?'checked':''} onchange="toggleCategory('${c._id}',this.checked)" style="accent-color:var(--accent)"/></td>
+    <td>${c.order}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="deleteCategory('${c._id}')">Delete</button></td>
+  </tr>`).join('');
+}
+
+function openAddCategoryModal() { document.getElementById('cat-modal').classList.add('open'); }
+
+async function saveCategory() {
+  const data = {
+    displayName:  document.getElementById('cat-display').value.trim(),
+    bloggerLabel: document.getElementById('cat-label').value.trim(),
+    description:  document.getElementById('cat-desc').value.trim(),
+    order:        parseInt(document.getElementById('cat-order').value)||10,
+    slug:         document.getElementById('cat-label').value.trim().toLowerCase().replace(/\s+/g,'-')
+  };
+  if (!data.displayName||!data.bloggerLabel) { showToast('Display name and Blogger label are required','error'); return; }
+  const result = await apiCall('/site/categories','POST',data);
+  if (result?.success) { showToast('Category added','success'); closeModal('cat-modal'); loadCategories(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+async function toggleCategory(id, active) {
+  await apiCall(`/site/categories/${id}`,'PUT',{ active });
+}
+
+async function deleteCategory(id) {
+  if (!confirm('Delete this category?')) return;
+  const result = await apiCall(`/site/categories/${id}`,'DELETE');
+  if (result?.success) { showToast('Deleted','success'); loadCategories(); }
+}
+
+async function loadAdSenseSlots() {
+  const el = document.getElementById('adsense-slots');
+  const result = await apiCall('/site/config/adsense_slots');
+  const slots = result?.data?.data || { leaderboard1:{code:'',active:false}, leaderboard2:{code:'',active:false}, sidebar_300x250:{code:'',active:false}, in_article:{code:'',active:false} };
+  const slotNames = { leaderboard1:'Leaderboard 1 (728×90) — Top of homepage', leaderboard2:'Leaderboard 2 (728×90) — Bottom of homepage', sidebar_300x250:'Sidebar (300×250) — Medium rectangle', in_article:'In-Article Ad — Between content blocks' };
+  el.innerHTML = Object.entries(slots).map(([key,slot])=>`
+    <div style="border:1.5px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-weight:600">${slotNames[key]||key}</div>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px">
+          <input type="checkbox" id="slot-active-${key}" ${slot.active?'checked':''} style="accent-color:var(--accent)"/> Active
+        </label>
+      </div>
+      <textarea class="form-textarea" id="slot-code-${key}" rows="3" placeholder="Paste your AdSense code here...">${slot.code||''}</textarea>
+      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveAdSenseSlot('${key}')">Save Slot</button>
+    </div>`).join('');
+}
+
+async function saveAdSenseSlot(key) {
+  const code   = document.getElementById(`slot-code-${key}`).value;
+  const active = document.getElementById(`slot-active-${key}`).checked;
+  const result = await apiCall('/site/adsense','PUT',{ slot: key, code, active });
+  if (result?.success) showToast('AdSense slot saved','success');
+  else showToast(result?.message||'Failed','error');
+}
+
+async function loadSubscriptions() {
+  const tbody = document.getElementById('subs-tbody');
+  setInnerLoading(tbody);
+  const result = await apiCall('/subscribe/all');
+  if (!result?.success||!result.data.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#7a9e8c;padding:28px">No subscriptions yet</td></tr>'; return; }
+  tbody.innerHTML = result.data.map(s=>`<tr>
+    <td>${s.email}</td>
+    <td><span class="badge badge-${s.plan==='pro'?'editor':'admin'}">${s.plan}</span></td>
+    <td><span class="badge badge-${s.status==='active'?'active':'suspended'}">${s.status}</span></td>
+    <td>${s.seats}</td>
+    <td>${formatDate(s.currentPeriodEnd)}</td>
+    <td>${formatDate(s.createdAt)}</td>
+  </tr>`).join('');
+}
+
+async function loadStoreOrders() {
+  const tbody = document.getElementById('orders-tbody');
+  setInnerLoading(tbody);
+  const result = await apiCall('/store/orders');
+  if (!result?.success||!result.data.length) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#7a9e8c;padding:28px">No orders yet</td></tr>'; return; }
+  tbody.innerHTML = result.data.map(o=>`<tr>
+    <td>${o.buyerName}<div style="font-size:11px;color:#7a9e8c">${o.buyerEmail}</div></td>
+    <td>${o.product}</td>
+    <td>₹${o.amount}</td>
+    <td><span class="badge badge-${o.status==='paid'?'published':'rejected'}">${o.status}</span></td>
+    <td>${formatDate(o.createdAt)}</td>
+  </tr>`).join('');
+}
+
+async function loadNotifPage() {
+  const el = document.getElementById('notif-page-list');
+  setInnerLoading(el);
+  const result = await apiCall('/notify');
+  if (!result?.success) { el.innerHTML='Failed'; return; }
+  if (!result.data.length) { el.innerHTML=emptyState('🔔','No notifications','All clear!'); return; }
+  el.innerHTML = result.data.map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n._id}',this)" style="border-radius:9px;margin-bottom:8px">
+      <div class="notif-dot ${n.read?'read':''}"></div>
+      <div><div class="notif-item-msg">${n.message}</div><div class="notif-item-time">${formatDateTime(n.createdAt)}</div></div>
+    </div>`).join('');
+}
+
+function fillProfileForm() {
+  const user = getUser();
+  if (!user) return;
+  document.getElementById('profile-name').value  = user.name||'';
+  document.getElementById('profile-phone').value = user.phone||'';
+  document.getElementById('profile-bio').value   = user.bio||'';
+  document.getElementById('profile-twitter').value     = user.socialLinks?.twitter||'';
+  document.getElementById('profile-linkedin').value    = user.socialLinks?.linkedin||'';
+  document.getElementById('profile-researchgate').value= user.socialLinks?.researchgate||'';
+}
+</script>
+</body>
+</html>
