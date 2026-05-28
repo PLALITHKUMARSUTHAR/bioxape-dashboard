@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Activate Your Account — BioXape Dashboard</title>
+<link rel="stylesheet" href="css/dashboard.css"/>
+<style>
+  .login-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+  @media(max-width:768px){.login-page{grid-template-columns:1fr}.login-left{display:none}}
+</style>
+</head>
+<body data-page="register">
+
+<div class="login-page">
+
+  <!-- LEFT PANEL -->
+  <div class="login-left">
+    <div style="position:relative;z-index:1">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px">
+        <div class="sidebar-brand-mark">
+          <svg viewBox="0 0 24 24"><path d="M12 3c0 0-3 4-3 8s3 8 3 8"/><path d="M12 3c0 0 3 4 3 8s-3 8-3 8"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+        </div>
+        <div class="login-brand-name">Bio<em>Xape</em></div>
+      </div>
+      <div style="font-size:32px;font-family:'Playfair Display',serif;color:#fff;font-weight:700;line-height:1.2;margin-bottom:14px">
+        Activate Your<br>Author/Editor<br>Workspace
+      </div>
+      <div style="font-size:15px;color:rgba(255,255,255,.7);line-height:1.65;max-width:380px">
+        Set up your secure password and join the BioXape biotechnology editorial team.
+      </div>
+      <div class="login-features">
+        <div class="login-feature"><div class="login-feature-icon">✍️</div>Submit biotech research summarized from Word</div>
+        <div class="login-feature"><div class="login-feature-icon">🔍</div>Collaborate with assigned professional editors</div>
+        <div class="login-feature"><div class="login-feature-icon">⚡</div>Auto-publish live to www.bioxape.com</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="login-right">
+    <div class="login-box" id="registration-container">
+
+      <div class="login-box-title">Complete Your Account</div>
+      <div class="login-box-sub">Enter your details to activate your BioXape credentials</div>
+
+      <!-- Registration Form -->
+      <form id="register-form" style="margin-top:20px">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Full Name</label>
+          <input class="form-input" type="text" id="reg-name" placeholder="Dr. Jane Smith" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email Address</label>
+          <input class="form-input" type="email" id="reg-email" readonly style="background:var(--off);color:#7a9e8c;cursor:not-allowed"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password</label>
+          <input class="form-input" type="password" id="reg-password" placeholder="Min. 8 characters" required minlength="8"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-confirm">Confirm Password</label>
+          <input class="form-input" type="password" id="reg-confirm" placeholder="Re-enter password" required minlength="8"/>
+        </div>
+        <button class="btn btn-primary btn-full" id="register-btn" type="submit" style="margin-top:10px">Activate & Login</button>
+      </form>
+
+      <div style="text-align:center;margin-top:22px;font-size:13px;color:#7a9e8c">
+        Already have an active account?
+        <a href="index.html" style="color:#27a363;font-weight:500">Sign In</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const email = params.get('email');
+
+    if (!token || !email) {
+      document.getElementById('registration-container').innerHTML = `
+        <div style="text-align:center;padding:20px">
+          <div style="font-size:48px;margin-bottom:18px">⚠️</div>
+          <div style="font-size:20px;font-weight:700;color:#dc2626;margin-bottom:12px">Invalid Invitation Link</div>
+          <p style="color:#7a9e8c;font-size:14px;line-height:1.6;margin-bottom:24px">
+            The account activation link is missing required secure tokens or has expired. Please contact the administrator to request a new invitation email.
+          </p>
+          <a class="btn btn-primary" href="index.html" style="display:inline-block">Go to Sign In</a>
+        </div>
+      `;
+      return;
+    }
+
+    // Prefill read-only email field
+    document.getElementById('reg-email').value = email;
+
+    // Handle Form Submission
+    const regForm = document.getElementById('register-form');
+    if (regForm) {
+      regForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('reg-name').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const confirm = document.getElementById('reg-confirm').value;
+        const btn = document.getElementById('register-btn');
+
+        if (password !== confirm) {
+          showToast('Passwords do not match', 'error');
+          return;
+        }
+        if (password.length < 8) {
+          showToast('Password must be at least 8 characters', 'error');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Activating account...';
+        showPageLoader('Activating your account...');
+
+        const result = await apiCall('/auth/register', 'POST', {
+          name,
+          email,
+          password,
+          inviteToken: token
+        });
+
+        hidePageLoader();
+        btn.disabled = false;
+        btn.textContent = 'Activate & Login';
+
+        if (!result || !result.success) {
+          showToast(result?.message || 'Activation failed', 'error');
+          return;
+        }
+
+        // Store JWT token and user info, automatically logging them in!
+        setAuth(result.token, result.user);
+        showToast('Account activated successfully! Logging you in...', 'success');
+        
+        // Redirect automatically to the dashboard tab based on role
+        setTimeout(redirectByRole, 1200);
+      });
+    }
+  });
+</script>
+</body>
+</html>
