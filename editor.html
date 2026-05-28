@@ -111,6 +111,12 @@
           <div class="card">
             <div class="card-head"><div class="card-title"><div class="card-line"></div>My Profile</div></div>
             <form id="profile-form">
+              <div style="text-align:center;margin-bottom:20px">
+                <img id="profile-photo-preview" src="" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);display:none"/>
+                <div id="profile-av-placeholder" style="width:80px;height:80px;border-radius:50%;background:var(--accent);color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto"></div>
+                <button type="button" class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="document.getElementById('profile-photo').click()">Change Photo</button>
+                <input type="file" id="profile-photo" accept="image/*" style="display:none"/>
+              </div>
               <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="profile-name"/></div>
               <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" id="profile-phone" placeholder="+91..."/></div>
               <div class="form-group"><label class="form-label">Bio</label><textarea class="form-textarea" id="profile-bio" rows="3"></textarea></div>
@@ -180,6 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadOverview();
   hidePageLoader();
   document.getElementById('dash-layout').style.display='flex';
+  initProfilePhotoUpload();
   fillProfileForm();
 });
 
@@ -316,6 +323,23 @@ async function loadNotifPage() {
     </div>`).join('');
 }
 
+function initProfilePhotoUpload() {
+  const input = document.getElementById('profile-photo');
+  const prev  = document.getElementById('profile-photo-preview');
+  const placeholder = document.getElementById('profile-av-placeholder');
+  if (!input) return;
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (prev) { prev.src = e.target.result; prev.style.display = 'block'; }
+      if (placeholder) placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function fillProfileForm() {
   const user = getUser();
   if (!user) return;
@@ -325,6 +349,13 @@ function fillProfileForm() {
   document.getElementById('profile-twitter').value     = user.socialLinks?.twitter||'';
   document.getElementById('profile-linkedin').value    = user.socialLinks?.linkedin||'';
   document.getElementById('profile-researchgate').value= user.socialLinks?.researchgate||'';
+  const av = document.getElementById('profile-av-placeholder');
+  if (av) av.textContent = initials(user.name);
+  if (user.photoUrl) {
+    document.getElementById('profile-photo-preview').src = user.photoUrl;
+    document.getElementById('profile-photo-preview').style.display='block';
+    document.getElementById('profile-av-placeholder').style.display='none';
+  }
 }
 </script>
 </body>
