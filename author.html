@@ -247,6 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   fillSidebarUser();
   hidePageLoader();
   document.getElementById('dash-layout').style.display = 'flex';
+  await populateCategoriesDropdown();
   await loadOverview();
   initUploadZone('docx-zone','docx-input','docx-preview-area',(file,meta)=>{ currentDocxFile=file; postDocxMeta=meta; });
   initCoverUpload();
@@ -255,6 +256,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   fillProfileForm();
   document.getElementById('post-form').addEventListener('submit', submitPost);
 });
+
+async function populateCategoriesDropdown() {
+  const select = document.getElementById('post-category');
+  if (!select) return;
+  const result = await apiCall('/site/categories');
+  if (result && result.success && Array.isArray(result.data)) {
+    // Save the currently selected category to restore it after loading
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">Select category...</option>';
+    const activeCategories = result.data.filter(c => c.active !== false);
+    activeCategories.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.displayName;
+      opt.textContent = c.displayName;
+      select.appendChild(opt);
+    });
+    if (currentVal) {
+      select.value = currentVal;
+    }
+  }
+}
 
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
