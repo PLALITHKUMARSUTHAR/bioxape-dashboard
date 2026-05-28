@@ -266,20 +266,29 @@ async function populateCategoriesDropdown() {
   const select = document.getElementById('post-category');
   if (!select) return;
   const result = await apiCall('/site/categories');
-  if (result && result.success && Array.isArray(result.data)) {
-    // Save the currently selected category to restore it after loading
-    const currentVal = select.value;
-    select.innerHTML = '<option value="">Select category...</option>';
+  
+  // Save the currently selected category to restore it after loading
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">Select category...</option>';
+  
+  let categoriesToUse = [];
+  if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
     const activeCategories = result.data.filter(c => c.active !== false);
-    activeCategories.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.displayName;
-      opt.textContent = c.displayName;
-      select.appendChild(opt);
-    });
-    if (currentVal) {
-      select.value = currentVal;
-    }
+    categoriesToUse = activeCategories.map(c => c.displayName);
+  } else {
+    // Fallback to default categories defined in config.js
+    categoriesToUse = typeof CATEGORIES !== 'undefined' ? CATEGORIES : [];
+  }
+  
+  categoriesToUse.forEach(catName => {
+    const opt = document.createElement('option');
+    opt.value = catName;
+    opt.textContent = catName;
+    select.appendChild(opt);
+  });
+  
+  if (currentVal) {
+    select.value = currentVal;
   }
 }
 
