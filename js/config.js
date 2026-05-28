@@ -206,7 +206,14 @@ function fillSidebarUser() {
   const nm  = document.getElementById('sidebar-user-name');
   const em  = document.getElementById('sidebar-user-email');
   const rb  = document.getElementById('sidebar-role-badge');
-  if (av) { av.textContent = initials(user.name); }
+  if (av) {
+    if (user.photoUrl) {
+      av.innerHTML = `<img src="${user.photoUrl}" alt="${user.name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`;
+      av.style.background = 'none';
+    } else {
+      av.textContent = initials(user.name);
+    }
+  }
   if (nm) nm.textContent = user.name || 'User';
   if (em) em.textContent = user.email || '';
   if (rb) {

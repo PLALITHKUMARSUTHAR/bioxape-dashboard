@@ -250,6 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadOverview();
   initUploadZone('docx-zone','docx-input','docx-preview-area',(file,meta)=>{ currentDocxFile=file; postDocxMeta=meta; });
   initCoverUpload();
+  initProfilePhotoUpload();
   initTagsInput();
   fillProfileForm();
   document.getElementById('post-form').addEventListener('submit', submitPost);
@@ -358,6 +359,23 @@ function initCoverUpload() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = e => { prev.src=e.target.result; prev.style.display='block'; };
+    reader.readAsDataURL(file);
+  });
+}
+
+function initProfilePhotoUpload() {
+  const input = document.getElementById('profile-photo');
+  const prev  = document.getElementById('profile-photo-preview');
+  const placeholder = document.getElementById('profile-av-placeholder');
+  if (!input) return;
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (prev) { prev.src = e.target.result; prev.style.display = 'block'; }
+      if (placeholder) placeholder.style.display = 'none';
+    };
     reader.readAsDataURL(file);
   });
 }
