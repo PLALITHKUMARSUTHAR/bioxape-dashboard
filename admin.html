@@ -436,7 +436,7 @@ async function loadAllPosts() {
     <td style="display:flex;gap:5px;flex-wrap:wrap">
       ${p.status==='admin_review'?`<button class="btn btn-primary btn-sm" onclick="openApproveModal('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${(p.allCategories||[]).join(',')}')">Review</button>`:''}
       ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View</a>`:''}
-      <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Del</button>
+      <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}', '${p.status}')">Del</button>
     </td>
   </tr>`).join('');
 }
@@ -539,10 +539,26 @@ async function deleteUser(userId) {
   else showToast(result?.message||'Failed','error');
 }
 
-async function deletePost(postId) {
+async function deletePost(postId, status) {
   if (!confirm('Delete this post permanently?')) return;
-  const result = await apiCall(`/posts/${postId}`,'DELETE');
-  if (result?.success) { showToast('Post deleted','success'); loadAllPosts(); }
+  
+  let reason = '';
+  if (['admin_review', 'approved', 'published'].includes(status)) {
+    reason = prompt('Please enter the reason for removing this post (notifying author):');
+    if (reason === null) return; // User cancelled
+    reason = reason.trim();
+    if (!reason) {
+      showToast('A reason is required to remove this post.','error');
+      return;
+    }
+  }
+
+  const result = await apiCall(`/posts/${postId}`, 'DELETE', reason ? { reason } : null);
+  if (result?.success) {
+    showToast('Post deleted','success');
+    loadAllPosts();
+    loadOverview();
+  }
   else showToast(result?.message||'Failed','error');
 }
 

@@ -137,6 +137,7 @@
                 <div class="upload-zone-hint">Maximum 20MB · Microsoft Word format only</div>
               </div>
               <input type="file" id="docx-input" accept=".docx" style="display:none"/>
+              <button type="button" class="btn btn-secondary btn-sm" id="remove-docx-btn" style="display:none;margin-top:8px" onclick="removeDocxFile()">✕ Remove Document</button>
             </div>
             <div id="docx-preview-area"></div>
             <div class="form-group" style="margin-top:18px">
@@ -249,7 +250,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('dash-layout').style.display = 'flex';
   await populateCategoriesDropdown();
   await loadOverview();
-  initUploadZone('docx-zone','docx-input','docx-preview-area',(file,meta)=>{ currentDocxFile=file; postDocxMeta=meta; });
+  initUploadZone('docx-zone','docx-input','docx-preview-area',(file,meta)=>{
+    currentDocxFile=file;
+    postDocxMeta=meta;
+    document.getElementById('remove-docx-btn').style.display = 'inline-block';
+  });
   initCoverUpload();
   initProfilePhotoUpload();
   initTagsInput();
@@ -334,6 +339,7 @@ async function loadAllPosts() {
       ${p.status==='draft'||p.status==='changes_needed'?`<button class="btn btn-amber btn-sm" onclick="editPost('${p._id}')">Edit</button>`:''}
       ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View</a>`:''}
       ${p.status==='draft'?`<button class="btn btn-primary btn-sm" onclick="submitPostById('${p._id}')">Submit</button>`:''}
+      ${['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Delete</button>`:''}
     </td>
   </tr>`).join('');
 }
@@ -517,6 +523,9 @@ async function editPost(id) {
   }
   if (p.docxFileUrl) {
     previewDocxUrl(p.docxFileUrl, document.getElementById('docx-preview-area'));
+    document.getElementById('remove-docx-btn').style.display = 'inline-block';
+  } else {
+    document.getElementById('remove-docx-btn').style.display = 'none';
   }
   showTab('new-post');
 }
@@ -528,10 +537,35 @@ async function submitPostById(id) {
 }
 
 async function deletePost(id) {
-  if (!confirm('Delete this draft permanently?')) return;
+  if (!confirm('Delete this post permanently?')) return;
   const result = await apiCall(`/posts/${id}`,'DELETE');
-  if (result?.success) { showToast('Draft deleted','success'); loadDrafts(); }
+  if (result?.success) {
+    showToast('Post deleted','success');
+    loadDrafts();
+    loadAllPosts();
+    loadOverview();
+  }
   else showToast(result?.message||'Failed','error');
+}
+
+function removeDocxFile() {
+  currentDocxFile = null;
+  postDocxMeta = null;
+  document.getElementById('docx-input').value = '';
+  document.getElementById('post-docx-url').value = '';
+  document.getElementById('post-word-count').value = '0';
+  document.getElementById('post-read-time').value = '1';
+  document.getElementById('docx-preview-area').innerHTML = '';
+  document.getElementById('remove-docx-btn').style.display = 'none';
+  
+  // Restore upload zone placeholder
+  const zone = document.getElementById('docx-zone');
+  if (zone) {
+    zone.innerHTML = `
+      <div class="upload-zone-icon">📄</div>
+      <div class="upload-zone-text">Drop your .docx file here or click to browse</div>
+      <div class="upload-zone-hint">Maximum 20MB · Microsoft Word format only</div>`;
+  }
 }
 
 function fillProfileForm() {
