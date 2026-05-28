@@ -605,6 +605,14 @@ tr:hover td { background: var(--g50); }
   line-height: 1.8;
   color: var(--text1);
 }
+.docx-preview-body img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 16px auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
 .docx-preview-body h1,
 .docx-preview-body h2,
 .docx-preview-body h3 {
