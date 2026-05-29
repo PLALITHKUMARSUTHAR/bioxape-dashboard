@@ -294,7 +294,7 @@ function storeRow(p, i) {
   return `<div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px" id="store-row-${i}">
     <div class="form-row">
       <div class="form-group"><label class="form-label">Product Name</label>
-        <input class="form-input" id="store-name-${i}" value="${p.name||''}" placeholder="BioXape Lab Notebook"/></div>
+        <input class="form-input" id="store-name-${i}" value="${p.name||''}" placeholder="BioXApe Lab Notebook"/></div>
       <div class="form-group"><label class="form-label">Type / Description</label>
         <input class="form-input" id="store-type-${i}" value="${p.type||''}" placeholder="Hardcover · Branded Merch"/></div>
     </div>
@@ -333,7 +333,7 @@ function footerSection(data) {
     <div class="form-group"><label class="form-label">ResearchGate</label>
       <input class="form-input" id="footer-rg" value="${s.researchgate||''}" placeholder="https://researchgate.net/profile/bioxape"/></div>
     <div class="form-group"><label class="form-label">Copyright Text</label>
-      <input class="form-input" id="footer-copyright" value="${data?.copyrightText||'2026 BioXape. All rights reserved.'}" /></div>
+      <input class="form-input" id="footer-copyright" value="${data?.copyrightText||'2026 BioXApe. All rights reserved.'}" /></div>
     <div class="modal-footer"><button class="btn btn-primary" onclick="saveFooter()">Save Footer</button></div>
   `);
 }
