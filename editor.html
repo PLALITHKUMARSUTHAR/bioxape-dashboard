@@ -33,6 +33,10 @@
       <div class="nav-item" onclick="showTab('reviewed')"><span class="nav-icon">✅</span>Reviewed Posts</div>
       <div class="nav-section-label">My Authors</div>
       <div class="nav-item" onclick="showTab('authors')"><span class="nav-icon">👥</span>Assigned Authors</div>
+      <div class="nav-section-label">My Posts</div>
+      <div class="nav-item" onclick="showTab('new-post')"><span class="nav-icon">✍️</span>Write New Post</div>
+      <div class="nav-item" onclick="showTab('my-posts')"><span class="nav-icon">📝</span>All My Posts</div>
+      <div class="nav-item" onclick="showTab('drafts')"><span class="nav-icon">💾</span>Drafts</div>
       <div class="nav-section-label">Account</div>
       <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
       <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
@@ -105,6 +109,110 @@
         </div>
       </div>
 
+      <!-- NEW POST TAB -->
+      <div id="tab-new-post" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Submit New Post</div></div>
+          <form id="post-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Post Title <span>*</span></label>
+                <input class="form-input" type="text" id="post-title" placeholder="Enter a compelling title..." required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Content Type <span>*</span></label>
+                <select class="form-select" id="post-type">
+                  <option value="article">Article / Blog Post</option>
+                  <option value="research_summary">Research Paper Summary</option>
+                  <option value="product_review">Product Review</option>
+                  <option value="interview">Expert Interview</option>
+                  <option value="news">News & Industry Update</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Primary Category <span>*</span></label>
+                <select class="form-select" id="post-category">
+                  <option value="">Select category...</option>
+                  <option>CRISPR &amp; Gene Editing</option><option>Biopharmaceuticals</option>
+                  <option>Synthetic Biology</option><option>Genomics &amp; Sequencing</option>
+                  <option>Agricultural Biotech</option><option>Bioinformatics</option>
+                  <option>Clinical Trials</option><option>Protein Engineering</option>
+                  <option>Microbiome</option><option>Lab Tools &amp; Reviews</option>
+                  <option>Regulatory</option><option>Medical Biotech</option>
+                  <option>Industry News</option><option>Interviews</option>
+                </select>
+              </div>
+              <div class="form-group" style="display:none">
+                <label class="form-label">Tags (press Enter to add)</label>
+                <div class="tags-input-wrap" id="tags-wrap">
+                  <input class="tags-input" type="text" id="tags-input" placeholder="Add tags..."/>
+                </div>
+                <input type="hidden" id="post-tags"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Excerpt / Summary <span>*</span></label>
+              <textarea class="form-textarea" id="post-excerpt" rows="2" placeholder="2-3 sentence summary shown in post cards on the blog..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Upload Word Document (.docx) <span>*</span></label>
+              <div class="upload-zone" id="docx-zone">
+                <div class="upload-zone-icon">📄</div>
+                <div class="upload-zone-text">Drop your .docx file here or click to browse</div>
+                <div class="upload-zone-hint">Maximum 20MB · Microsoft Word format only</div>
+              </div>
+              <input type="file" id="docx-input" accept=".docx" style="display:none"/>
+              <button type="button" class="btn btn-secondary btn-sm" id="remove-docx-btn" style="display:none;margin-top:8px" onclick="removeDocxFile()">✕ Remove Document</button>
+            </div>
+            <div id="docx-preview-area"></div>
+            <div class="form-group" style="margin-top:18px">
+              <label class="form-label">Cover Image</label>
+              <div class="upload-zone" id="cover-zone" style="padding:18px">
+                <div class="upload-zone-icon" style="font-size:24px">🖼️</div>
+                <div class="upload-zone-text">Upload cover image</div>
+                <div class="upload-zone-hint">JPG, PNG, WebP · Max 5MB</div>
+              </div>
+              <input type="file" id="cover-input" accept="image/*" style="display:none"/>
+              <img id="cover-preview" style="display:none;margin-top:10px;width:100%;max-height:200px;object-fit:cover;border-radius:9px;border:1.5px solid var(--border)"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes for Reviewer (optional)</label>
+              <textarea class="form-textarea" id="post-notes" rows="2" placeholder="Any context or guidance for the reviewer..."></textarea>
+            </div>
+            <input type="hidden" id="post-docx-url"/>
+            <input type="hidden" id="post-cover-url"/>
+            <input type="hidden" id="post-word-count"/>
+            <input type="hidden" id="post-read-time"/>
+            <input type="hidden" id="editing-post-id"/>
+            <div style="display:flex;gap:12px;margin-top:8px">
+              <button type="button" class="btn btn-secondary" onclick="saveDraft()">💾 Save Draft</button>
+              <button type="submit" class="btn btn-primary" id="submit-btn">🚀 Submit for Review</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ALL POSTS TAB -->
+      <div id="tab-my-posts" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>All My Posts</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Title</th><th>Type</th><th>Category</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead>
+            <tbody id="all-posts-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- DRAFTS TAB -->
+      <div id="tab-drafts" class="tab-panel">
+        <div class="card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>My Drafts</div><button class="btn btn-primary btn-sm" onclick="showTab('new-post')">+ New Post</button></div>
+          <div id="drafts-list"></div>
+        </div>
+      </div>
+
       <!-- PROFILE -->
       <div id="tab-profile" class="tab-panel">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
@@ -171,12 +279,30 @@
   </div>
 </div>
 
+<!-- PREVIEW POST MODAL -->
+<div class="modal-overlay" id="preview-modal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title" id="preview-modal-title">Post Preview</div>
+      <button class="modal-close" onclick="closeModal('preview-modal')">✕</button>
+    </div>
+    <div style="margin-bottom:15px;font-size:13px;color:#7a9e8c" id="preview-modal-meta"></div>
+    <div id="preview-preview-area" style="margin-bottom:20px;max-height:60vh;overflow-y:auto;border:1px solid var(--border);border-radius:9px;padding:16px;background:var(--off)"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('preview-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/notifications.js"></script>
 <script src="js/docx-preview.js"></script>
 <script>
 let reviewingPostId = null;
+let currentDocxFile = null;
+let postDocxMeta    = null;
+let tagsArray       = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth()) return;
@@ -188,18 +314,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('dash-layout').style.display='flex';
   initProfilePhotoUpload();
   fillProfileForm();
+
+  // Initialize post creation utilities for editors
+  await populateCategoriesDropdown();
+  initUploadZone('docx-zone','docx-input','docx-preview-area',(file,meta)=>{
+    currentDocxFile=file;
+    postDocxMeta=meta;
+    document.getElementById('remove-docx-btn').style.display = 'inline-block';
+  });
+  initCoverUpload();
+  document.getElementById('post-form').addEventListener('submit', submitPost);
 });
 
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
   document.getElementById('tab-'+name)?.classList.add('active');
-  const titles = {'overview':'Overview','pending':'Pending Review','reviewed':'Reviewed Posts','authors':'My Authors','profile':'My Profile','notifications-page':'Notifications'};
+  
+  // Highlight active nav item
+  document.querySelectorAll('.nav-item').forEach(i => {
+    if (i.getAttribute('onclick')?.includes(`'${name}'`)) i.classList.add('active');
+  });
+
+  const titles = {
+    'overview':'Overview',
+    'pending':'Pending Review',
+    'reviewed':'Reviewed Posts',
+    'authors':'My Authors',
+    'profile':'My Profile',
+    'notifications-page':'Notifications',
+    'new-post':'Write New Post',
+    'my-posts':'All My Posts',
+    'drafts':'Drafts'
+  };
   document.getElementById('topbar-title').textContent = titles[name]||'';
   if(name==='pending') loadPending();
   if(name==='reviewed') loadReviewed();
   if(name==='authors') loadAuthors();
   if(name==='notifications-page') loadNotifPage();
+  if(name==='my-posts') loadAllPosts();
+  if(name==='drafts') loadDrafts();
 }
 
 async function loadOverview() {
@@ -375,6 +529,248 @@ function fillProfileForm() {
     document.getElementById('profile-photo-preview').src = user.photoUrl;
     document.getElementById('profile-photo-preview').style.display='block';
     document.getElementById('profile-av-placeholder').style.display='none';
+  }
+}
+
+// ── Post Management Functions for Editor Authorship ──────────
+async function populateCategoriesDropdown() {
+  const select = document.getElementById('post-category');
+  if (!select) return;
+  const result = await apiCall('/site/categories');
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">Select category...</option>';
+  
+  let categoriesToUse = [];
+  if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
+    categoriesToUse = result.data.map(c => c.displayName);
+  } else {
+    categoriesToUse = typeof CATEGORIES !== 'undefined' ? CATEGORIES : [];
+  }
+  
+  categoriesToUse.forEach(catName => {
+    const opt = document.createElement('option');
+    opt.value = catName;
+    opt.textContent = catName;
+    select.appendChild(opt);
+  });
+  
+  if (currentVal) {
+    select.value = currentVal;
+  }
+}
+
+async function loadAllPosts() {
+  const tbody = document.getElementById('all-posts-tbody');
+  setInnerLoading(tbody,'Loading posts...');
+  const result = await apiCall('/posts/my-posts');
+  if (!result?.success) { tbody.innerHTML='<tr><td colspan="6">Failed to load</td></tr>'; return; }
+  if (!result.data.length) { tbody.innerHTML=`<tr><td colspan="6">${emptyState('📝','No posts yet','')}</td></tr>`; return; }
+  tbody.innerHTML = result.data.map(p=>`<tr>
+    <td>
+      ${p.status==='draft'||p.status==='changes_needed'?`
+        <a href="#" onclick="editPost('${p._id}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
+      `:`
+        <a href="#" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
+      `}
+      ${p.editorComment&&p.status==='changes_needed'?`<div style="font-size:12px;color:#d97706;margin-top:3px">Reviewer: ${p.editorComment}</div>`:''}
+    </td>
+    <td><span style="font-size:12px;color:#7a9e8c">${p.contentType||'article'}</span></td>
+    <td><span style="font-size:12px">${p.category||'—'}</span></td>
+    <td>${statusBadge(p.status)}</td>
+    <td>${formatDate(p.submittedAt||p.createdAt)}</td>
+    <td style="display:flex;gap:6px;flex-wrap:wrap">
+      ${p.status==='draft'||p.status==='changes_needed'?`<button class="btn btn-amber btn-sm" onclick="editPost('${p._id}')">Edit</button>`:''}
+      ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View</a>`:''}
+      ${p.status==='draft'?`<button class="btn btn-primary btn-sm" onclick="submitPostById('${p._id}')">Submit</button>`:''}
+      ${['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Delete</button>`:''}
+      ${!['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}')">Open</button>`:''}
+    </td>
+  </tr>`).join('');
+}
+
+async function loadDrafts() {
+  const el = document.getElementById('drafts-list');
+  setInnerLoading(el,'Loading drafts...');
+  const result = await apiCall('/posts/my-posts?status=draft');
+  if (!result?.success) { el.innerHTML='Failed to load'; return; }
+  if (!result.data.length) { el.innerHTML=emptyState('💾','No drafts','Start writing and save a draft'); return; }
+  el.innerHTML = result.data.map(p=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:600;margin-bottom:3px">${p.title||'Untitled Draft'}</div>
+        <div style="font-size:12px;color:#7a9e8c">Saved ${timeAgo(p.updatedAt)}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-amber btn-sm" onclick="editPost('${p._id}')">Edit</button>
+        <button class="btn btn-primary btn-sm" onclick="submitPostById('${p._id}')">Submit</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function initCoverUpload() {
+  const zone  = document.getElementById('cover-zone');
+  const input = document.getElementById('cover-input');
+  const prev  = document.getElementById('cover-preview');
+  zone.addEventListener('click', ()=>input.click());
+  input.addEventListener('change', ()=>{
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => { prev.src=e.target.result; prev.style.display='block'; };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function saveDraft() {
+  const data = collectFormData();
+  if (!data.title) { showToast('Enter a title to save draft','error'); return; }
+  const postId = document.getElementById('editing-post-id').value;
+  const endpoint = postId ? `/posts/${postId}` : '/posts';
+  const method   = postId ? 'PUT' : 'POST';
+  data.status = 'draft';
+  const result = await apiCall(endpoint, method, data);
+  if (result?.success) {
+    document.getElementById('editing-post-id').value = result.data._id;
+    showToast('Draft saved','success');
+  } else showToast(result?.message||'Save failed','error');
+}
+
+async function submitPost(e) {
+  e.preventDefault();
+  const data = collectFormData();
+  if (!data.title||!data.excerpt||!data.category) { showToast('Fill all required fields','error'); return; }
+  if (!currentDocxFile && !document.getElementById('post-docx-url').value) { showToast('Upload your Word document','error'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled=true; btn.textContent='Uploading...';
+
+  if (currentDocxFile) {
+    const fd = new FormData();
+    fd.append('docx', currentDocxFile);
+    const upResult = await apiCall('/upload/docx','POST',fd,true);
+    if (!upResult?.success) { showToast('File upload failed','error'); btn.disabled=false; btn.textContent='Submit for Review'; return; }
+    document.getElementById('post-docx-url').value = upResult.url;
+    data.docxFileUrl = upResult.url;
+    data.bodyHtml    = postDocxMeta?.html || '';
+    data.wordCount   = postDocxMeta?.wordCount || 0;
+    data.readTimeMinutes = postDocxMeta?.readTime || 1;
+  }
+
+  const coverFile = document.getElementById('cover-input').files[0];
+  if (coverFile) {
+    const fd2 = new FormData();
+    fd2.append('cover', coverFile);
+    const coverResult = await apiCall('/upload/cover','POST',fd2,true);
+    if (coverResult?.success) { data.coverImageUrl = coverResult.url; }
+  }
+
+  btn.textContent='Submitting...';
+  data.status = 'submitted';
+  const postId = document.getElementById('editing-post-id').value;
+  const endpoint = postId ? `/posts/${postId}/submit` : '/posts/submit';
+  const result   = await apiCall(endpoint, 'POST', data);
+
+  btn.disabled=false; btn.textContent='Submit for Review';
+  if (result?.success) {
+    showToast('Post submitted for editor review!','success');
+    setTimeout(()=>showTab('my-posts'),1200);
+  } else showToast(result?.message||'Submission failed','error');
+}
+
+function collectFormData() {
+  return {
+    title:       document.getElementById('post-title').value.trim(),
+    excerpt:     document.getElementById('post-excerpt').value.trim(),
+    category:    document.getElementById('post-category').value,
+    contentType: document.getElementById('post-type').value,
+    tags:        tagsArray,
+    docxFileUrl: document.getElementById('post-docx-url').value,
+    coverImageUrl: document.getElementById('post-cover-url').value,
+    wordCount:   parseInt(document.getElementById('post-word-count').value)||0,
+    readTimeMinutes: parseInt(document.getElementById('post-read-time').value)||1,
+    editorNote:  document.getElementById('post-notes').value.trim()
+  };
+}
+
+async function editPost(id) {
+  const result = await apiCall(`/posts/${id}`);
+  if (!result?.success) { showToast('Failed to load post','error'); return; }
+  const p = result.data;
+  document.getElementById('post-title').value   = p.title||'';
+  document.getElementById('post-excerpt').value = p.excerpt||'';
+  document.getElementById('post-category').value= p.category||'';
+  document.getElementById('post-type').value    = p.contentType||'article';
+  document.getElementById('post-docx-url').value= p.docxFileUrl||'';
+  document.getElementById('editing-post-id').value = p._id;
+  
+  if (p.editorComment) {
+    document.getElementById('post-notes').value = `REVIEWER FEEDBACK: ${p.editorComment}`;
+  }
+  if (p.docxFileUrl) {
+    previewDocxUrl(p.docxFileUrl, document.getElementById('docx-preview-area'));
+    document.getElementById('remove-docx-btn').style.display = 'inline-block';
+  } else {
+    document.getElementById('remove-docx-btn').style.display = 'none';
+  }
+  showTab('new-post');
+}
+
+async function submitPostById(id) {
+  const result = await apiCall(`/posts/${id}/submit`,'POST');
+  if (result?.success) { showToast('Submitted for review!','success'); loadAllPosts(); }
+  else showToast(result?.message||'Failed','error');
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this post permanently?')) return;
+  const result = await apiCall(`/posts/${id}`,'DELETE');
+  if (result?.success) {
+    showToast('Post deleted','success');
+    loadDrafts();
+    loadAllPosts();
+  }
+  else showToast(result?.message||'Failed','error');
+}
+
+function removeDocxFile() {
+  currentDocxFile = null;
+  postDocxMeta = null;
+  document.getElementById('docx-input').value = '';
+  document.getElementById('post-docx-url').value = '';
+  document.getElementById('post-word-count').value = '0';
+  document.getElementById('post-read-time').value = '1';
+  document.getElementById('docx-preview-area').innerHTML = '';
+  document.getElementById('remove-docx-btn').style.display = 'none';
+  
+  const zone = document.getElementById('docx-zone');
+  if (zone) {
+    zone.innerHTML = `
+      <div class="upload-zone-icon">📄</div>
+      <div class="upload-zone-text">Drop your .docx file here or click to browse</div>
+      <div class="upload-zone-hint">Maximum 20MB · Microsoft Word format only</div>`;
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+async function openPreview(postId, title, docxUrl, status, category, contentType, dateStr) {
+  document.getElementById('preview-modal-title').textContent = title;
+  document.getElementById('preview-modal-meta').innerHTML = `
+    <strong>Status:</strong> ${statusBadge(status)} &middot; 
+    <strong>Category:</strong> ${category||'—'} &middot; 
+    <strong>Type:</strong> ${contentType||'article'} &middot; 
+    <strong>Date:</strong> ${formatDate(dateStr)}
+  `;
+  document.getElementById('preview-modal').classList.add('open');
+  
+  const area = document.getElementById('preview-preview-area');
+  if (docxUrl) {
+    await previewDocxUrl(docxUrl, area);
+  } else {
+    area.innerHTML = '<div class="alert alert-info">No document preview available.</div>';
   }
 }
 </script>
