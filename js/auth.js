@@ -122,7 +122,7 @@ function showPageLoader(msg = 'Loading...') {
     el = document.createElement('div');
     el.id = 'page-loader';
     el.className = 'page-loader';
-    el.innerHTML = `<div class="page-loader-logo">Bio<em>Xape</em></div>
+    el.innerHTML = `<div class="page-loader-logo">Bio<em><span class="brand-x">X</span>Ape</em></div>
       <div class="spinner"></div>
       <p id="loader-msg" style="font-size:13px;color:#7a9e8c">${msg}</p>`;
     document.body.appendChild(el);

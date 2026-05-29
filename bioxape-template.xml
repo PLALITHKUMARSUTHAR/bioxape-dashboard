@@ -20,7 +20,7 @@
 
   <!-- Open Graph / SEO Meta -->
   <meta expr:content='data:blog.metaDescription' name='description'/>
-  <meta content='BioXape' property='og:site_name'/>
+  <meta content='BioXApe' property='og:site_name'/>
   <meta expr:content='data:blog.pageTitle' property='og:title'/>
   <meta content='website' property='og:type'/>
   <meta expr:content='data:blog.url' property='og:url'/>
@@ -36,12 +36,12 @@
   {
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": "BioXape",
+    "name": "BioXApe",
     "url": "https://www.bioxape.com",
     "description": "Premium biotechnology blog covering CRISPR, genomics, biopharmaceuticals, agricultural biotech and more.",
     "publisher": {
       "@type": "Organization",
-      "name": "BioXape",
+      "name": "BioXApe",
       "logo": {
         "@type": "ImageObject",
         "url": "https://www.bioxape.com/favicon.ico"
@@ -94,6 +94,7 @@ img{max-width:100%;height:auto;display:block}
 .bx-brand-mark svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
 .bx-brand-name{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:var(--text1)}
 .bx-brand-name em{font-style:italic;color:var(--accent)}
+.brand-x{font-size:1.45em;display:inline-block;line-height:0.8;vertical-align:-0.05em}
 .nav-links{display:flex;gap:2px}
 .nav-links a{padding:8px 12px;font-size:13px;color:var(--text3);border-radius:7px;font-weight:400;transition:all .15s}
 .nav-links a:hover{background:var(--g50);color:var(--accent)}
@@ -380,7 +381,7 @@ img{max-width:100%;height:auto;display:block}
         <div class='bx-brand-mark'>
           <svg viewBox='0 0 24 24'><path d='M12 3c0 0-3 4-3 8s3 8 3 8'/><path d='M12 3c0 0 3 4 3 8s-3 8-3 8'/><line x1='9' y1='8' x2='15' y2='8'/><line x1='9' y1='12' x2='15' y2='12'/><line x1='9' y1='16' x2='15' y2='16'/></svg>
         </div>
-        <div class='bx-brand-name'>Bio<em>Xape</em></div>
+        <div class='bx-brand-name'>Bio<em><span class='brand-x'>X</span>Ape</em></div>
       </a>
       <div class='nav-links'>
         <a href='/'>Home</a>
@@ -646,11 +647,11 @@ img{max-width:100%;height:auto;display:block}
 <section class='bx-sec'>
   <div class='bx-wrap'>
     <div class='sec-head'>
-      <div class='sec-title'><div class='sec-line'></div>The BioXape <span class='sec-title-acc'>Store</span></div>
+      <div class='sec-title'><div class='sec-line'></div>The BioXApe <span class='sec-title-acc'>Store</span></div>
       <a class='see-all' href='/p/store.html'>Visit store</a>
     </div>
     <div class='grid4' id='bx-store-grid'>
-      <div class='store-card'><div class='store-img si1'>&#128211;</div><div class='store-body'><div class='store-name'>BioXape Lab Notebook</div><div class='store-type'>Hardcover Merch</div><div class='store-price'>Rs 499</div><button class='btn-cart'>Add to Cart</button></div></div>
+      <div class='store-card'><div class='store-img si1'>&#128211;</div><div class='store-body'><div class='store-name'>BioXApe Lab Notebook</div><div class='store-type'>Hardcover Merch</div><div class='store-price'>Rs 499</div><button class='btn-cart'>Add to Cart</button></div></div>
       <div class='store-card'><div class='store-img si2'>&#128444;</div><div class='store-body'><div class='store-name'>PCR Protocol Poster</div><div class='store-type'>Digital Download</div><div class='store-price'><span class='price-old'>Rs 399</span>Rs 249</div><button class='btn-cart'>Add to Cart</button></div></div>
       <div class='store-card'><div class='store-img si3'>&#128083;</div><div class='store-body'><div class='store-name'>DNA Helix Tee</div><div class='store-type'>Unisex Merch</div><div class='store-price'>Rs 849</div><button class='btn-cart'>Add to Cart</button></div></div>
       <div class='store-card'><div class='store-img si4'>&#128230;</div><div class='store-body'><div class='store-name'>Researcher Bundle</div><div class='store-type'>4 eBooks + Poster</div><div class='store-price'><span class='price-old'>Rs 2,400</span>Rs 1,399</div><button class='btn-cart'>Add to Cart</button></div></div>
@@ -686,7 +687,7 @@ img{max-width:100%;height:auto;display:block}
   <div class='bx-wrap'>
     <div class='footer-grid'>
       <div>
-        <div class='ft-brand-name'>Bio<em>Xape</em></div>
+        <div class='ft-brand-name'>Bio<em><span class='brand-x'>X</span>Ape</em></div>
         <div class='ft-desc'>Your trusted source for biotechnology insights, peer-reviewed research summaries, and science communication. Based in India. Read worldwide.</div>
         <div class='ft-social'>
           <a class='ft-soc' href='#' id='footer-social-twitter'>X</a>
@@ -713,7 +714,7 @@ img{max-width:100%;height:auto;display:block}
       </div>
       <div>
         <div class='ft-col-h'>Company</div>
-        <a class='ft-link' href='/p/about.html'>About BioXape</a>
+        <a class='ft-link' href='/p/about.html'>About BioXApe</a>
         <a class='ft-link' href='/p/contact.html'>Contact</a>
         <a class='ft-link' href='/p/privacy-policy.html'>Privacy Policy</a>
         <a class='ft-link' href='/p/terms.html'>Terms of Use</a>
@@ -729,7 +730,7 @@ img{max-width:100%;height:auto;display:block}
       </div>
     </div>
     <div class='footer-bottom'>
-      <div class='ft-copy' id='footer-copyright'>2026 BioXape. All rights reserved. Made with dedication in India.</div>
+      <div class='ft-copy' id='footer-copyright'>2026 BioXApe. All rights reserved. Made with dedication in India.</div>
     </div>
   </div>
 </div>
@@ -899,7 +900,7 @@ async function subscribeNewsletter() {
   try {
     await fetch(CMS_API+'/auth/newsletter-subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
     emailEl.value='';
-    alert('Subscribed! Welcome to BioXape.');
+    alert('Subscribed! Welcome to BioXApe.');
   } catch(e) { alert('Please try again.'); }
 }
 
