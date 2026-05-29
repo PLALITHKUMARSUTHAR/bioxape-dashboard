@@ -545,10 +545,10 @@ async function loadAllPosts() {
     <td><span style="font-size:12px">${p.category||'—'}</span></td>
     <td>${statusBadge(p.status)}</td>
     <td>${formatDate(p.createdAt)}</td>
-    <td style="display:flex;gap:5px;flex-wrap:wrap">
+    <td style="display:flex;align-items:center;gap:6px">
       ${p.status==='admin_review'?`<button class="btn btn-primary btn-sm" onclick="openApproveModal('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${(p.allCategories||[]).join(',')}')">Review</button>`:''}
       ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View</a>`:''}
-      <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}', '${p.status}')">Del</button>
+      <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}', '${p.status}')">Delete</button>
     </td>
   </tr>`).join('');
 }
