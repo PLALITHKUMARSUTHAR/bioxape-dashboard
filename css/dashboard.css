@@ -78,14 +78,17 @@ img { max-width: 100%; display: block; }
 .sidebar-brand-name em { font-style: italic; color: #6ee7b7; }
 
 .sidebar-role-badge {
-  margin: 12px 20px;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
+  margin: 0;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 700;
   letter-spacing: .5px;
   text-transform: uppercase;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 .role-admin  { background: rgba(220,80,80,.2);  color: #fca5a5; }
 .role-editor { background: rgba(37,99,235,.2);  color: #93c5fd; }
