@@ -231,6 +231,21 @@
   </div><!-- /dash-main -->
 </div><!-- /dash-layout -->
 
+<!-- PREVIEW POST MODAL -->
+<div class="modal-overlay" id="preview-modal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title" id="preview-modal-title">Post Preview</div>
+      <button class="modal-close" onclick="closeModal('preview-modal')">✕</button>
+    </div>
+    <div style="margin-bottom:15px;font-size:13px;color:#7a9e8c" id="preview-modal-meta"></div>
+    <div id="preview-preview-area" style="margin-bottom:20px;max-height:60vh;overflow-y:auto;border:1px solid var(--border);border-radius:9px;padding:16px;background:var(--off)"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('preview-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/notifications.js"></script>
@@ -320,13 +335,27 @@ async function loadOverview() {
   if (!posts.length) { el.innerHTML = emptyState('📝','No posts yet','Submit your first post to get started','<button class="btn btn-primary" onclick="showTab(\'new-post\')">Write First Post</button>'); return; }
   el.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>Title</th><th>Status</th><th>Date</th><th>Views</th><th>Action</th></tr></thead><tbody>
     ${posts.map(p=>`<tr>
-      <td><strong>${p.title}</strong></td>
+      <td>
+        ${p.status==='draft'||p.status==='changes_needed'?`
+          <a href="#" onclick="editPost('${p._id}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
+        `:`
+          <a href="#" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
+        `}
+      </td>
       <td>${statusBadge(p.status)}</td>
       <td>${formatDate(p.createdAt)}</td>
       <td>${p.viewCount||0}</td>
-      <td>${p.status==='changes_needed'?`<button class="btn btn-amber btn-sm" onclick="editPost('${p._id}')">Revise</button>`:
-           p.status==='published'?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl||'#'}" target="_blank">View</a>`:
-           `<span style="font-size:12px;color:#7a9e8c">In review</span>`}
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        ${p.status==='draft'||p.status==='changes_needed'?`
+          <button class="btn btn-amber btn-sm" onclick="editPost('${p._id}')">${p.status==='draft'?'Edit':'Revise'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Delete</button>
+        `:''}
+        ${p.status==='published'&&p.bloggerPostUrl?`
+          <a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View Blog</a>
+        `:''}
+        ${!['draft','changes_needed'].includes(p.status)?`
+          <button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}')">Open</button>
+        `:''}
       </td>
     </tr>`).join('')}
   </tbody></table></div>`;
@@ -339,7 +368,14 @@ async function loadAllPosts() {
   if (!result?.success) { tbody.innerHTML='<tr><td colspan="6">Failed to load</td></tr>'; return; }
   if (!result.data.length) { tbody.innerHTML=`<tr><td colspan="6">${emptyState('📝','No posts yet','')}</td></tr>`; return; }
   tbody.innerHTML = result.data.map(p=>`<tr>
-    <td><strong>${p.title}</strong>${p.editorComment&&p.status==='changes_needed'?`<div style="font-size:12px;color:#d97706;margin-top:3px">Editor: ${p.editorComment}</div>`:''}</td>
+    <td>
+      ${p.status==='draft'||p.status==='changes_needed'?`
+        <a href="#" onclick="editPost('${p._id}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
+      `:`
+        <a href="#" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
+      `}
+      ${p.editorComment&&p.status==='changes_needed'?`<div style="font-size:12px;color:#d97706;margin-top:3px">Editor: ${p.editorComment}</div>`:''}
+    </td>
     <td><span style="font-size:12px;color:#7a9e8c">${p.contentType||'article'}</span></td>
     <td><span style="font-size:12px">${p.category||'—'}</span></td>
     <td>${statusBadge(p.status)}</td>
@@ -349,6 +385,7 @@ async function loadAllPosts() {
       ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View</a>`:''}
       ${p.status==='draft'?`<button class="btn btn-primary btn-sm" onclick="submitPostById('${p._id}')">Submit</button>`:''}
       ${['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Delete</button>`:''}
+      ${!['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}')">Open</button>`:''}
     </td>
   </tr>`).join('');
 }
@@ -592,6 +629,28 @@ function fillProfileForm() {
     document.getElementById('profile-photo-preview').src = user.photoUrl;
     document.getElementById('profile-photo-preview').style.display='block';
     document.getElementById('profile-av-placeholder').style.display='none';
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+async function openPreview(postId, title, docxUrl, status, category, contentType, dateStr) {
+  document.getElementById('preview-modal-title').textContent = title;
+  document.getElementById('preview-modal-meta').innerHTML = `
+    <strong>Status:</strong> ${statusBadge(status)} &middot; 
+    <strong>Category:</strong> ${category||'—'} &middot; 
+    <strong>Type:</strong> ${contentType||'article'} &middot; 
+    <strong>Date:</strong> ${formatDate(dateStr)}
+  `;
+  document.getElementById('preview-modal').classList.add('open');
+  
+  const area = document.getElementById('preview-preview-area');
+  if (docxUrl) {
+    await previewDocxUrl(docxUrl, area);
+  } else {
+    area.innerHTML = '<div class="alert alert-info">No document preview available.</div>';
   }
 }
 </script>
