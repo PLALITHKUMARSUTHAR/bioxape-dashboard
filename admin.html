@@ -43,6 +43,26 @@
       <div class="nav-section-label">Account</div>
       <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
       <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
+      
+      <div class="nav-section-label" style="margin-top: 15px;">Platform Metrics</div>
+      <div class="sidebar-stats-card" style="margin: 8px 20px 20px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 9px; font-size: 12.5px; color: #9dc9b5;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span>Total Posts:</span>
+          <strong style="color: #fff;" id="sb-stat-posts">0</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span>Total Views:</span>
+          <strong style="color: #fff;" id="sb-stat-views">0</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span>Total Users:</span>
+          <strong style="color: #fff;" id="sb-stat-users">0</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>Active Subs:</span>
+          <strong style="color: #fff;" id="sb-stat-subs">0</strong>
+        </div>
+      </div>
     </nav>
     <div class="sidebar-user">
       <div class="sidebar-user-av" id="sidebar-user-av">AD</div>
@@ -342,6 +362,17 @@ async function loadOverview() {
   document.getElementById('stat-users').textContent   = usersRes?.data?.length||0;
   document.getElementById('stat-subs').textContent    = subsRes?.data?.filter(s=>s.status==='active').length||0;
   document.getElementById('review-badge').textContent = pending.length;
+
+  // Calculate and update sidebar stats
+  const totalPostsCount = postsRes?.data?.length||0;
+  const totalViewsCount = postsRes?.data?.reduce((a,p)=>a+(p.viewCount||0),0)||0;
+  const totalUsersCount = usersRes?.data?.length||0;
+  const activeSubsCount = subsRes?.data?.filter(s=>s.status==='active').length||0;
+
+  document.getElementById('sb-stat-posts').textContent = totalPostsCount.toLocaleString();
+  document.getElementById('sb-stat-views').textContent = totalViewsCount.toLocaleString();
+  document.getElementById('sb-stat-users').textContent = totalUsersCount.toLocaleString();
+  document.getElementById('sb-stat-subs').textContent = activeSubsCount.toLocaleString();
 
   const el = document.getElementById('overview-review-list');
   if (!pending.length) { el.innerHTML=emptyState('✅','All clear!','No posts awaiting approval.'); }
