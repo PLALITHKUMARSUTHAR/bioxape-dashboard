@@ -27,6 +27,7 @@
     <nav class="sidebar-nav">
       <div class="nav-section-label">Dashboard</div>
       <div class="nav-item active" onclick="showTab('overview')"><span class="nav-icon">🏠</span>Overview</div>
+      <div class="nav-item" onclick="showTab('platform-stats')"><span class="nav-icon">📊</span>Platform Stats</div>
       <div class="nav-section-label">Content</div>
       <div class="nav-item" onclick="showTab('review')"><span class="nav-icon">📋</span>Content Review <span class="nav-badge" id="review-badge">0</span></div>
       <div class="nav-item" onclick="showTab('all-posts')"><span class="nav-icon">📝</span>All Posts</div>
@@ -43,26 +44,6 @@
       <div class="nav-section-label">Account</div>
       <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
       <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
-      
-      <div class="nav-section-label" style="margin-top: 15px;">Platform Metrics</div>
-      <div class="sidebar-stats-card" style="margin: 8px 20px 20px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 9px; font-size: 12.5px; color: #9dc9b5;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span>Total Posts:</span>
-          <strong style="color: #fff;" id="sb-stat-posts">0</strong>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span>Total Views:</span>
-          <strong style="color: #fff;" id="sb-stat-views">0</strong>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span>Total Users:</span>
-          <strong style="color: #fff;" id="sb-stat-users">0</strong>
-        </div>
-        <div style="display: flex; justify-content: space-between;">
-          <span>Active Subs:</span>
-          <strong style="color: #fff;" id="sb-stat-subs">0</strong>
-        </div>
-      </div>
     </nav>
     <div class="sidebar-user">
       <div class="sidebar-user-av" id="sidebar-user-av">AD</div>
@@ -105,6 +86,43 @@
           <div class="card">
             <div class="card-head"><div class="card-title"><div class="card-line"></div>Recent Activity</div></div>
             <div id="recent-activity"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLATFORM STATS TAB -->
+      <div id="tab-platform-stats" class="tab-panel">
+        <div class="stats-row" style="margin-bottom: 22px;">
+          <div class="stat-card"><div class="stat-icon si-green">📄</div><div><div class="stat-val" id="ps-stat-posts">0</div><div class="stat-lab">Total Posts</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-purple">👁️</div><div><div class="stat-val" id="ps-stat-views">0</div><div class="stat-lab">Total Views</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-blue">👥</div><div><div class="stat-val" id="ps-stat-users">0</div><div class="stat-lab">Total Users</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-amber">💳</div><div><div class="stat-val" id="ps-stat-subs">0</div><div class="stat-lab">Active Subscribers</div></div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>Content Breakdown</div></div>
+            <div class="tbl-wrap"><table>
+              <tbody>
+                <tr><td><strong>Published Posts</strong></td><td id="ps-detail-published">0</td></tr>
+                <tr><td><strong>Pending Admin Approval</strong></td><td id="ps-detail-admin">0</td></tr>
+                <tr><td><strong>Awaiting Editor Review</strong></td><td id="ps-detail-editor">0</td></tr>
+                <tr><td><strong>Drafts / Changes Needed</strong></td><td id="ps-detail-drafts">0</td></tr>
+                <tr><td><strong>Total Word Count</strong></td><td id="ps-detail-words">0</td></tr>
+                <tr><td><strong>Average Read Time</strong></td><td id="ps-detail-readtime">0 min</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="card-title"><div class="card-line"></div>Monetisation & User Activity</div></div>
+            <div class="tbl-wrap"><table>
+              <tbody>
+                <tr><td><strong>Active Paid Subscribers</strong></td><td id="ps-detail-active-subs">0</td></tr>
+                <tr><td><strong>Awaiting Invites (Pending)</strong></td><td id="ps-detail-pending-users">0</td></tr>
+                <tr><td><strong>Total Active Staff (Admin/Editor)</strong></td><td id="ps-detail-staff">0</td></tr>
+                <tr><td><strong>Total Registered Authors</strong></td><td id="ps-detail-authors">0</td></tr>
+              </tbody>
+            </table></div>
           </div>
         </div>
       </div>
@@ -335,9 +353,29 @@ function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
   document.getElementById('tab-'+name)?.classList.add('active');
-  const titles = {'overview':'Overview','review':'Content Review','all-posts':'All Posts','users':'User Management','assignments':'Author Assignments','site-builder':'Site Builder','categories':'Categories','adsense':'AdSense Slots','subscriptions':'Subscriptions','store-orders':'Store Orders','profile':'Admin Profile','notifications-page':'Notifications'};
+  
+  // Highlight active nav item
+  document.querySelectorAll('.nav-item').forEach(i => {
+    if (i.getAttribute('onclick')?.includes(`'${name}'`)) i.classList.add('active');
+  });
+
+  const titles = {
+    'overview':'Overview',
+    'platform-stats':'Platform Stats',
+    'review':'Content Review',
+    'all-posts':'All Posts',
+    'users':'User Management',
+    'assignments':'Reviewer Assignments',
+    'site-builder':'Site Builder',
+    'categories':'Categories',
+    'adsense':'AdSense Slots',
+    'subscriptions':'Subscriptions',
+    'store-orders':'Store Orders',
+    'profile':'Admin Profile',
+    'notifications-page':'Notifications'
+  };
   document.getElementById('topbar-title').textContent = titles[name]||'';
-  if(name==='review') loadReviewQueue();
+  if(name=== 'review') loadReviewQueue();
   if(name==='all-posts') loadAllPosts();
   if(name==='users') loadUsers();
   if(name==='assignments') loadAssignments();
@@ -347,6 +385,7 @@ function showTab(name) {
   if(name==='subscriptions') loadSubscriptions();
   if(name==='store-orders') loadStoreOrders();
   if(name==='notifications-page') loadNotifPage();
+  if(name==='platform-stats') loadPlatformStats();
 }
 
 async function loadOverview() {
@@ -363,17 +402,6 @@ async function loadOverview() {
   document.getElementById('stat-subs').textContent    = subsRes?.data?.filter(s=>s.status==='active').length||0;
   document.getElementById('review-badge').textContent = pending.length;
 
-  // Calculate and update sidebar stats
-  const totalPostsCount = postsRes?.data?.length||0;
-  const totalViewsCount = postsRes?.data?.reduce((a,p)=>a+(p.viewCount||0),0)||0;
-  const totalUsersCount = usersRes?.data?.length||0;
-  const activeSubsCount = subsRes?.data?.filter(s=>s.status==='active').length||0;
-
-  document.getElementById('sb-stat-posts').textContent = totalPostsCount.toLocaleString();
-  document.getElementById('sb-stat-views').textContent = totalViewsCount.toLocaleString();
-  document.getElementById('sb-stat-users').textContent = totalUsersCount.toLocaleString();
-  document.getElementById('sb-stat-subs').textContent = activeSubsCount.toLocaleString();
-
   const el = document.getElementById('overview-review-list');
   if (!pending.length) { el.innerHTML=emptyState('✅','All clear!','No posts awaiting approval.'); }
   else el.innerHTML = pending.slice(0,4).map(p=>adminReviewCard(p)).join('');
@@ -387,6 +415,59 @@ async function loadOverview() {
       <div><div style="font-size:13px;font-weight:500">${p.title.slice(0,45)}${p.title.length>45?'...':''}</div>
       <div style="font-size:11.5px;color:#7a9e8c">${statusBadge(p.status)} · ${timeAgo(p.updatedAt)}</div></div>
     </div>`).join('');
+}
+
+async function loadPlatformStats() {
+  const panel = document.getElementById('tab-platform-stats');
+  // Temporary loader values inside the stats counters
+  const [postsRes, usersRes, subsRes] = await Promise.all([
+    apiCall('/posts/admin-queue'),
+    apiCall('/users/all'),
+    apiCall('/subscribe/all')
+  ]);
+  if (!postsRes?.success || !usersRes?.success || !subsRes?.success) return;
+  
+  const posts = postsRes.data;
+  const users = usersRes.data;
+  const subs = subsRes.data;
+
+  // Calculation stats
+  const totalPosts = posts.length;
+  const totalViews = posts.reduce((a,p)=>a+(p.viewCount||0),0);
+  const totalUsers = users.length;
+  const activeSubs = subs.filter(s=>s.status==='active').length;
+
+  // Card elements
+  document.getElementById('ps-stat-posts').textContent = totalPosts.toLocaleString();
+  document.getElementById('ps-stat-views').textContent = totalViews.toLocaleString();
+  document.getElementById('ps-stat-users').textContent = totalUsers.toLocaleString();
+  document.getElementById('ps-stat-subs').textContent = activeSubs.toLocaleString();
+
+  // Detailed Breakdown
+  const published = posts.filter(p=>p.status==='published').length;
+  const pendingAdmin = posts.filter(p=>p.status==='admin_review').length;
+  const awaitingEditor = posts.filter(p=>p.status==='submitted').length;
+  const drafts = posts.filter(p=>['draft','changes_needed'].includes(p.status)).length;
+  const totalWords = posts.reduce((a,p)=>a+(p.wordCount||0),0);
+  const avgReadTime = totalPosts ? Math.round(posts.reduce((a,p)=>a+(p.readTimeMinutes||0),0)/totalPosts) : 0;
+
+  document.getElementById('ps-detail-published').textContent = published;
+  document.getElementById('ps-detail-admin').textContent = pendingAdmin;
+  document.getElementById('ps-detail-editor').textContent = awaitingEditor;
+  document.getElementById('ps-detail-drafts').textContent = drafts;
+  document.getElementById('ps-detail-words').textContent = totalWords.toLocaleString();
+  document.getElementById('ps-detail-readtime').textContent = `${avgReadTime} min`;
+
+  // Users details
+  const activeSubsDetail = activeSubs;
+  const pendingInvites = users.filter(u=>u.status==='pending').length;
+  const staffCount = users.filter(u=>['admin','editor'].includes(u.role)).length;
+  const authorCount = users.filter(u=>u.role==='author').length;
+
+  document.getElementById('ps-detail-active-subs').textContent = activeSubsDetail;
+  document.getElementById('ps-detail-pending-users').textContent = pendingInvites;
+  document.getElementById('ps-detail-staff').textContent = staffCount;
+  document.getElementById('ps-detail-authors').textContent = authorCount;
 }
 
 function adminReviewCard(p) {
