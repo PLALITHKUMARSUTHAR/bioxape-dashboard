@@ -208,7 +208,27 @@ async function loadOverview() {
   const pending = result.data.filter(p=>p.status==='submitted');
   document.getElementById('stat-pending').textContent = pending.length;
   document.getElementById('pending-badge').textContent = pending.length;
-  document.getElementById('stat-approved').textContent = result.data.filter(p=>p.status==='admin_review').length;
+  document.getElementById('stat-approved').textContent = result.data.filter(p=>['admin_review','approved','published'].includes(p.status)).length;
+  
+  // Calculate average review time for posts reviewed by this editor
+  const reviewed = result.data.filter(p => p.status !== 'submitted' && p.editorReviewedAt && p.submittedAt);
+  let avgText = '—';
+  if (reviewed.length > 0) {
+    let totalMs = 0;
+    reviewed.forEach(p => {
+      totalMs += new Date(p.editorReviewedAt).getTime() - new Date(p.submittedAt).getTime();
+    });
+    const avgHrs = totalMs / (1000 * 60 * 60) / reviewed.length;
+    if (avgHrs < 1) {
+      avgText = `${Math.round(avgHrs * 60)}m`;
+    } else if (avgHrs < 24) {
+      avgText = `${avgHrs.toFixed(1)}h`;
+    } else {
+      avgText = `${(avgHrs / 24).toFixed(1)}d`;
+    }
+  }
+  document.getElementById('stat-avg').textContent = avgText;
+
   const el = document.getElementById('overview-pending-list');
   if (!pending.length) { el.innerHTML = emptyState('📥','No pending posts','All caught up! New submissions will appear here.'); return; }
   el.innerHTML = pending.slice(0,5).map(p=>postReviewCard(p)).join('');
