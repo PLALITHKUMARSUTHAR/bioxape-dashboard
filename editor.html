@@ -70,11 +70,20 @@
 
       <!-- OVERVIEW -->
       <div id="tab-overview" class="tab-panel active">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text3);letter-spacing:1px;margin-bottom:10px">Editorial Operations</div>
         <div class="stats-row">
           <div class="stat-card"><div class="stat-icon si-amber">📥</div><div><div class="stat-val" id="stat-pending">0</div><div class="stat-lab">Pending Review</div></div></div>
           <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-val" id="stat-approved">0</div><div class="stat-lab">Approved This Month</div></div></div>
           <div class="stat-card"><div class="stat-icon si-blue">👥</div><div><div class="stat-val" id="stat-authors">0</div><div class="stat-lab">My Authors</div></div></div>
           <div class="stat-card"><div class="stat-icon si-purple">📋</div><div><div class="stat-val" id="stat-reviewed">0</div><div class="stat-lab">Total Reviewed</div></div></div>
+        </div>
+
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text3);letter-spacing:1px;margin-bottom:10px;margin-top:20px">My Written Posts</div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-icon si-green">📄</div><div><div class="stat-val" id="stat-my-total">0</div><div class="stat-lab">Total Posts</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-amber">⏳</div><div><div class="stat-val" id="stat-my-pending">0</div><div class="stat-lab">Under Review</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-blue">✅</div><div><div class="stat-val" id="stat-my-published">0</div><div class="stat-lab">Published</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-purple">👁️</div><div><div class="stat-val" id="stat-my-views">0</div><div class="stat-lab">Total Views</div></div></div>
         </div>
         <div class="card">
           <div class="card-head"><div class="card-title"><div class="card-line"></div>Pending Review</div></div>
@@ -374,6 +383,21 @@ async function loadOverview() {
 
   const authResult = await apiCall('/users/my-authors');
   if (authResult?.success) document.getElementById('stat-authors').textContent = authResult.data.length;
+
+  // Fetch and calculate authorship stats for the editor
+  const myPostsRes = await apiCall('/posts/my-posts');
+  if (myPostsRes?.success) {
+    const myPosts = myPostsRes.data;
+    const myTotal = myPosts.length;
+    const myPending = myPosts.filter(p=>['submitted','editor_review','admin_review'].includes(p.status)).length;
+    const myPublished = myPosts.filter(p=>p.status==='published').length;
+    const myViews = myPosts.reduce((a,p)=>a+(p.viewCount||0),0);
+
+    document.getElementById('stat-my-total').textContent = myTotal;
+    document.getElementById('stat-my-pending').textContent = myPending;
+    document.getElementById('stat-my-published').textContent = myPublished;
+    document.getElementById('stat-my-views').textContent = myViews.toLocaleString();
+  }
 }
 
 async function loadPending() {
