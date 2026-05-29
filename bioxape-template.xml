@@ -1,0 +1,911 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:version='2' class='v2' expr:dir='data:blog.languageDirection'
+  xmlns='http://www.w3.org/1999/xhtml'
+  xmlns:b='http://www.google.com/2005/gml/b'
+  xmlns:data='http://www.google.com/2005/gml/data'
+  xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta content='IE=EmulateIE7' http-equiv='X-UA-Compatible'/>
+  <b:if cond='data:blog.isMobile'>
+    <meta content='width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0' name='viewport'/>
+  <b:else/>
+    <meta content='width=device-width,initial-scale=1.0' name='viewport'/>
+  </b:if>
+  <b:include data='blog' name='all-head-content'/>
+  <title><data:blog.pageTitle/></title>
+
+  <!-- Google Fonts -->
+  <link href='https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&amp;family=Inter:wght@300;400;500;600&amp;display=swap' rel='stylesheet'/>
+
+  <!-- Open Graph / SEO Meta -->
+  <meta expr:content='data:blog.metaDescription' name='description'/>
+  <meta content='BioXape' property='og:site_name'/>
+  <meta expr:content='data:blog.pageTitle' property='og:title'/>
+  <meta content='website' property='og:type'/>
+  <meta expr:content='data:blog.url' property='og:url'/>
+  <b:if cond='data:blog.postImageThumbnailUrl'>
+    <meta expr:content='data:blog.postImageThumbnailUrl' property='og:image'/>
+  </b:if>
+
+  <!-- Canonical -->
+  <link expr:href='data:blog.url' rel='canonical'/>
+
+  <!-- Schema.org JSON-LD for Blog -->
+  <script type='application/ld+json'>
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "BioXape",
+    "url": "https://www.bioxape.com",
+    "description": "Premium biotechnology blog covering CRISPR, genomics, biopharmaceuticals, agricultural biotech and more.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "BioXape",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.bioxape.com/favicon.ico"
+      }
+    }
+  }
+  </script>
+
+  <b:skin><![CDATA[
+/* ============================================================
+   BioXape — Final Blogger Template
+   Theme: Clean White & Emerald Green
+   Version: 3.0 — CMS-synced from Render API
+   ============================================================ */
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g50:#f0faf4;--g100:#d4f0e0;--g200:#a8dfc0;--g300:#6ec49a;
+  --g400:#3db87a;--g500:#27a363;--g600:#1a8a50;--g700:#136b3d;
+  --g800:#0c4d2c;--g900:#072e1a;
+  --white:#ffffff;--off:#f8faf9;--surface:#f2f7f4;
+  --border:#e0ece5;--border2:#c8ddd2;
+  --text1:#0f1f16;--text2:#2d4a38;--text3:#4a7060;--text4:#7a9e8c;
+  --accent:#27a363;--accent-l:#e8f7ef;--accent-d:#136b3d;
+  --amber:#d97706;--amber-l:#fef3c7;
+  --red:#dc2626;--red-l:#fee2e2;
+  --blue:#2563eb;--blue-l:#dbeafe;
+  --purple:#7c3aed;--purple-l:#ede9fe;
+  --teal:#0d9488;--teal-l:#ccfbf1;
+}
+body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.7;color:var(--text1);background:var(--white)}
+a{text-decoration:none;color:var(--accent);transition:color .2s}
+a:hover{color:var(--accent-d)}
+img{max-width:100%;height:auto;display:block}
+.bx-wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+
+/* TICKER */
+#bx-ticker{background:var(--g700);color:#fff;padding:7px 0;overflow:hidden;white-space:nowrap;font-size:12px}
+#bx-ticker-inner{overflow:hidden}
+#bx-ticker-track{display:inline-block;animation:ticker-scroll 35s linear infinite}
+@keyframes ticker-scroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+#bx-ticker-track b{color:#a8dfc0;margin-right:8px}
+#bx-ticker-track span{margin-right:60px;opacity:.9}
+
+/* NAV */
+#bx-nav{background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1000}
+.nav-row{display:flex;align-items:center;justify-content:space-between;height:66px}
+.bx-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.bx-brand-mark{width:38px;height:38px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.bx-brand-mark svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.bx-brand-name{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:var(--text1)}
+.bx-brand-name em{font-style:italic;color:var(--accent)}
+.nav-links{display:flex;gap:2px}
+.nav-links a{padding:8px 12px;font-size:13px;color:var(--text3);border-radius:7px;font-weight:400;transition:all .15s}
+.nav-links a:hover{background:var(--g50);color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.btn-search{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:none;cursor:pointer;color:var(--text3);font-size:16px;display:flex;align-items:center;justify-content:center}
+.btn-dash{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text2);background:none;text-decoration:none;font-weight:500}
+.btn-sub{padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+
+/* CATEGORY NAV */
+#bx-catbar{background:var(--off);border-bottom:1px solid var(--border)}
+#bx-catbar-inner{display:flex;flex-wrap:wrap;justify-content:center;gap:0;max-width:760px;margin:0 auto;padding:4px 0}
+#bx-catbar-inner::-webkit-scrollbar{display:none}
+.cat-a{padding:11px 16px;font-size:12.5px;color:var(--text3);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent;font-weight:400;transition:all .15s;text-decoration:none;display:inline-block}
+.cat-a:hover,.cat-a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* HERO */
+#bx-hero{padding:36px 0 0;background:var(--white)}
+.hero-live-badge{display:inline-flex;align-items:center;gap:7px;background:var(--accent-l);color:var(--accent-d);font-size:11.5px;font-weight:600;padding:5px 13px;border-radius:20px;letter-spacing:.4px;text-transform:uppercase;margin-bottom:22px}
+.hero-live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:liveblink 2s infinite}
+@keyframes liveblink{0%,100%{opacity:1}50%{opacity:.25}}
+.mag-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;margin-bottom:24px}
+.hero-main-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.hero-main-card:hover{border-color:var(--accent)}
+.hero-main-img{height:300px;background:linear-gradient(145deg,var(--g800) 0%,var(--g600) 45%,var(--g400) 100%);position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:24px}
+.hero-img-over{position:absolute;inset:0;background:linear-gradient(to top,rgba(7,46,26,.75) 0%,transparent 55%)}
+.hero-main-body{padding:22px}
+.hero-main-title{font-family:'Playfair Display',serif;font-size:25px;font-weight:700;color:var(--text1);line-height:1.2;margin-bottom:10px}
+.hero-main-exc{font-size:14px;color:var(--text3);line-height:1.65;margin-bottom:16px}
+.hero-meta-row{display:flex;align-items:center;justify-content:space-between}
+.av-chip{display:flex;align-items:center;gap:9px}
+.av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.auth-name{font-size:13px;font-weight:500;color:var(--text2)}
+.auth-date{font-size:11.5px;color:var(--text4)}
+.read-badge{font-size:11.5px;color:var(--text4);background:var(--surface);padding:4px 9px;border-radius:5px}
+.hero-stack{display:flex;flex-direction:column;gap:13px}
+.stack-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;display:flex;cursor:pointer;transition:border-color .2s}
+.stack-card:hover{border-color:var(--accent)}
+.stack-thumb{width:88px;flex-shrink:0;min-height:88px;display:flex;align-items:center;justify-content:center;font-size:26px}
+.th-g{background:var(--g50)}.th-a{background:var(--amber-l)}.th-b{background:var(--blue-l)}.th-p{background:var(--purple-l)}.th-r{background:var(--red-l)}.th-t{background:var(--teal-l)}
+.stack-body{padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
+.stack-title{font-size:13.5px;font-weight:600;color:var(--text1);line-height:1.3;margin-bottom:4px}
+.stack-meta{font-size:11.5px;color:var(--text4)}
+
+/* TAGS */
+.tag{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.2px;margin-bottom:8px}
+.tg{background:var(--accent-l);color:var(--g700)}.ta{background:var(--amber-l);color:#92400e}
+.tb{background:var(--blue-l);color:#1e40af}.tp{background:var(--purple-l);color:#5b21b6}
+.tr{background:var(--red-l);color:#991b1b}.tt{background:var(--teal-l);color:#0f766e}
+
+/* AD BARS */
+.ad-bar{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--off);padding:10px 0;display:flex;align-items:center;justify-content:center;gap:12px}
+.ad-pill{font-size:10.5px;color:var(--text4);background:var(--border);padding:2px 8px;border-radius:3px;letter-spacing:.4px;text-transform:uppercase;font-weight:500}
+.ad-slot{flex:1;max-width:730px;min-height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+#adsense-leaderboard1,#adsense-leaderboard2,#adsense-sidebar_300x250,#adsense-in_article{width:100%}
+
+/* NEWS STRIP */
+#bx-newsstrip{background:var(--off);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.news-grid-inner{display:grid;grid-template-columns:110px 1fr}
+.news-label{background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:0 12px}
+.news-item{display:flex;align-items:center;gap:12px;padding:9px 18px;border-bottom:1px solid var(--border);font-size:13px}
+.news-item:last-child{border-bottom:none}
+.news-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.news-text{color:var(--text2);flex:1}
+.news-time{font-size:11px;color:var(--text4);white-space:nowrap}
+
+/* SECTIONS */
+.bx-sec{padding:48px 0}
+.bx-sec-alt{padding:48px 0;background:var(--off)}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;border-bottom:2px solid var(--border);padding-bottom:13px}
+.sec-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:10px}
+.sec-line{width:30px;height:3px;background:var(--accent);border-radius:2px;flex-shrink:0}
+.sec-title-acc{color:var(--accent)}
+.see-all{font-size:13px;color:var(--accent);cursor:pointer;font-weight:500}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+
+/* ARTICLE CARDS */
+.art-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s}
+.art-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.art-img{height:155px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.ai1{background:linear-gradient(135deg,var(--g50),var(--g100))}.ai2{background:linear-gradient(135deg,var(--amber-l),#fde68a)}
+.ai3{background:linear-gradient(135deg,var(--blue-l),#bfdbfe)}.ai4{background:linear-gradient(135deg,var(--purple-l),#ddd6fe)}
+.ai5{background:linear-gradient(135deg,var(--red-l),#fecaca)}.ai6{background:linear-gradient(135deg,var(--teal-l),#99f6e4)}
+.art-body{padding:16px}
+.art-title{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:600;color:var(--text1);margin-bottom:7px;line-height:1.32}
+.art-exc{font-size:12.5px;color:var(--text3);line-height:1.6;margin-bottom:12px}
+.art-meta{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--text4)}
+.art-meta-left{display:flex;align-items:center;gap:7px}
+
+/* BLOGGER POST WIDGET */
+.blog-posts-widget .post-outer{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;padding:18px;transition:all .2s;margin-bottom:0}
+.blog-posts-widget .post-outer:hover{border-color:var(--accent);transform:translateY(-2px)}
+.blog-posts-widget .post-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;margin-bottom:8px}
+.blog-posts-widget .post-title a{color:var(--text1)}
+.blog-posts-widget .post-title a:hover{color:var(--accent)}
+.blog-posts-widget .post-body{font-size:13px;color:var(--text3);line-height:1.6}
+.date-header{font-size:11.5px;color:var(--accent);font-weight:600;margin-bottom:6px}
+.post-thumbnail-container img{width:100%;height:150px;object-fit:cover;border-radius:8px;margin-bottom:12px}
+.post-labels a{font-size:11px;padding:2px 8px;background:var(--accent-l);color:var(--g700);border-radius:4px;font-weight:600;margin-right:5px}
+
+/* SIDEBAR */
+.with-sidebar{display:grid;grid-template-columns:1fr 302px;gap:32px}
+.sidebar{display:flex;flex-direction:column;gap:22px}
+.widget{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px}
+.widget-head{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.widget-head-line{width:18px;height:2.5px;background:var(--accent);border-radius:2px}
+.nl-desc{font-size:13px;color:var(--text3);line-height:1.55;margin-bottom:14px}
+.nl-inp{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text1);background:var(--off);margin-bottom:8px;font-family:'Inter',sans-serif}
+.nl-inp:focus{outline:none;border-color:var(--accent)}
+.nl-btn{width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.nl-note{font-size:11px;color:var(--text4);margin-top:8px;text-align:center}
+.trend-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.trend-item:last-child{border-bottom:none;padding-bottom:0}
+.trend-num{font-family:'Playfair Display',serif;font-size:20px;color:var(--g200);font-weight:700;line-height:1;min-width:22px}
+.trend-title{font-size:13px;color:var(--text1);font-weight:500;line-height:1.35;cursor:pointer;margin-bottom:3px}
+.trend-title:hover{color:var(--accent)}
+.trend-meta{font-size:11px;color:var(--text4)}
+.tags-cloud{display:flex;flex-wrap:wrap;gap:7px}
+
+/* RESEARCH */
+.research-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.res-hero{grid-column:1/-1;background:linear-gradient(135deg,var(--g50),var(--white));border:1.5px solid var(--g200);border-radius:16px;padding:26px;display:grid;grid-template-columns:1fr 260px;gap:26px;align-items:center}
+.res-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:22px}
+.journal-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.jdot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.journal-name{font-size:11.5px;color:var(--text4);font-weight:500}
+.res-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--text1);line-height:1.28;margin-bottom:10px}
+.res-hero .res-title{font-size:22px}
+.res-exc{font-size:13px;color:var(--text3);line-height:1.65}
+.res-foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:10px}
+.if-badge{font-size:11.5px;color:var(--text3);display:flex;align-items:center;gap:5px}
+.if-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.btn-paper{padding:7px 14px;border:1.5px solid var(--border2);border-radius:7px;font-size:12.5px;color:var(--accent);background:none;cursor:pointer;font-weight:500;font-family:'Inter',sans-serif}
+.btn-paper:hover{background:var(--accent-l)}
+.res-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.res-stat{background:var(--white);border-radius:10px;padding:14px;border:1px solid var(--border)}
+.res-stat-val{font-family:'Playfair Display',serif;font-size:22px;color:var(--accent);font-weight:700}
+.res-stat-lab{font-size:11px;color:var(--text4);margin-top:2px}
+
+/* INTERVIEWS */
+.interview-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;display:grid;grid-template-columns:190px 1fr;cursor:pointer;transition:all .2s}
+.interview-card:hover{border-color:var(--accent)}
+.int-photo{display:flex;align-items:center;justify-content:center;font-size:48px}
+.int1{background:linear-gradient(145deg,var(--g50),var(--g100))}.int2{background:linear-gradient(145deg,var(--blue-l),#bfdbfe)}
+.int-body{padding:22px;border-left:1px solid var(--border)}
+.int-eyebrow{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:7px}
+.int-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--text1);margin-bottom:9px;line-height:1.3}
+.int-exc{font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:13px}
+.int-meta{font-size:12px;color:var(--text4)}
+
+/* PLANS */
+#bx-plans-section{background:linear-gradient(170deg,var(--g50),var(--white));padding:56px 0}
+.plans-eye{text-align:center;font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-bottom:10px}
+.plans-h{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;text-align:center;color:var(--text1);margin-bottom:8px}
+.plans-sub{text-align:center;font-size:15px;color:var(--text3);margin-bottom:38px}
+#bx-plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.plan{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:28px}
+.plan.star{border-color:var(--accent);border-width:2px;position:relative}
+.plan-crown{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:11.5px;font-weight:600;padding:4px 16px;border-radius:20px;white-space:nowrap}
+.plan-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.pi-f{background:var(--surface)}.pi-p{background:var(--accent-l)}.pi-i{background:var(--blue-l)}
+.plan-name{font-size:16px;font-weight:700;color:var(--text1);margin-bottom:4px}
+.plan-price{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--accent);line-height:1}
+.plan-price sup{font-size:18px;color:var(--text3)}.plan-price sub{font-size:14px;color:var(--text3)}
+.plan-desc{font-size:13px;color:var(--text3);margin:8px 0 20px}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
+.pf{font-size:13px;color:var(--text2);display:flex;align-items:flex-start;gap:8px}
+.pf::before{content:'checkmark';color:var(--accent);font-weight:700;font-size:13px;flex-shrink:0}
+.pf.no{color:var(--text4)}.pf.no::before{content:'endash';color:var(--border2)}
+.btn-plan{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:var(--surface);border:1.5px solid var(--border);color:var(--text1);font-family:'Inter',sans-serif}
+.plan.star .btn-plan{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* COURSES */
+.course-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;display:flex;cursor:pointer;transition:all .2s}
+.course-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.course-icon{width:88px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px}
+.ci1{background:var(--g50)}.ci2{background:var(--blue-l)}.ci3{background:var(--amber-l)}.ci4{background:var(--purple-l)}
+.course-body{padding:15px 17px}
+.course-level{font-size:11px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;font-weight:500}
+.course-title{font-family:'Playfair Display',serif;font-size:15px;color:var(--text1);font-weight:600;margin-bottom:5px;line-height:1.3}
+.course-meta{font-size:12px;color:var(--text3);margin-bottom:10px}
+.course-foot{display:flex;align-items:center;justify-content:space-between}
+.course-price{font-family:'Playfair Display',serif;font-size:18px;color:var(--amber);font-weight:700}
+.price-old{font-size:13px;color:var(--text4);text-decoration:line-through;margin-right:5px;font-family:'Inter',sans-serif;font-weight:400}
+.btn-enroll{padding:7px 13px;background:var(--accent-l);color:var(--accent-d);border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-enroll:hover{background:var(--accent);color:#fff}
+
+/* STORE */
+.store-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s}
+.store-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.store-img{height:128px;display:flex;align-items:center;justify-content:center;font-size:34px}
+.si1{background:linear-gradient(135deg,var(--g50),var(--g100))}.si2{background:linear-gradient(135deg,var(--amber-l),#fde68a)}
+.si3{background:linear-gradient(135deg,var(--blue-l),#bfdbfe)}.si4{background:linear-gradient(135deg,var(--purple-l),#ddd6fe)}
+.store-body{padding:13px}
+.store-name{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:3px}
+.store-type{font-size:11.5px;color:var(--text4);margin-bottom:8px}
+.store-price{font-family:'Playfair Display',serif;font-size:18px;color:var(--amber);font-weight:700}
+.btn-cart{display:block;width:100%;text-align:center;padding:8px;margin-top:8px;background:var(--g50);border:1.5px solid var(--g200);color:var(--g700);border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-cart:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* AUTHORS */
+.authors-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.author-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;transition:all .2s}
+.author-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.author-av{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;color:#fff;margin:0 auto 12px}
+.author-name{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:2px}
+.author-role{font-size:11.5px;color:var(--text3);margin-bottom:2px}
+.author-org{font-size:11px;color:var(--text4);margin-bottom:11px}
+.author-tags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:11px}
+.author-stats{display:flex;justify-content:center;gap:16px;margin-bottom:13px}
+.as-val{font-size:15px;font-weight:700;color:var(--text1);text-align:center}
+.as-lab{font-size:10.5px;color:var(--text4);text-align:center}
+.author-social{display:flex;justify-content:center;gap:7px}
+.soc-btn{width:28px;height:28px;border-radius:6px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;color:var(--text3);text-decoration:none}
+.soc-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* FOOTER */
+#bx-footer{background:var(--g800);color:#e8f5ef;padding:52px 0 24px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.3fr;gap:34px;margin-bottom:38px}
+.ft-brand-name{font-family:'Playfair Display',serif;font-size:22px;color:#fff;margin-bottom:11px;font-weight:700}
+.ft-brand-name em{font-style:italic;color:#6ee7b7}
+.ft-desc{font-size:13px;color:#9dc9b5;line-height:1.65;margin-bottom:17px}
+.ft-social{display:flex;gap:8px}
+.ft-soc{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;color:#9dc9b5;text-decoration:none}
+.ft-soc:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.ft-col-h{font-size:12.5px;font-weight:700;color:#d1ede3;text-transform:uppercase;letter-spacing:.6px;margin-bottom:13px}
+.ft-link{display:block;font-size:13px;color:#7aaa94;padding:4px 0;cursor:pointer;transition:color .15s;text-decoration:none}
+.ft-link:hover{color:#6ee7b7}
+.ft-nl{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:17px}
+.ft-nl-h{font-size:14px;font-weight:600;color:#e8f5ef;margin-bottom:10px}
+.ft-nl-inp{width:100%;padding:9px 12px;border:1px solid rgba(255,255,255,.15);border-radius:7px;background:rgba(255,255,255,.07);color:#e8f5ef;font-size:12.5px;margin-bottom:8px;font-family:'Inter',sans-serif}
+.ft-nl-btn{width:100%;padding:9px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.ft-copy{font-size:12px;color:#5a8a72}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .mag-grid,.with-sidebar,.footer-grid{grid-template-columns:1fr}
+  .hero-stack{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .sidebar{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .authors-grid,.grid4{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  #bx-plans-grid{grid-template-columns:1fr 1fr}
+  .research-grid,.res-hero{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .bx-wrap{padding:0 16px}
+  .nav-row{flex-wrap:wrap;height:auto;padding:12px 0;gap:8px}
+  .nav-links{flex-wrap:wrap;justify-content:center}
+  .nav-right{width:100%;justify-content:center}
+  .grid3,.grid2,.grid4,#bx-plans-grid{grid-template-columns:1fr}
+  .interview-card{grid-template-columns:1fr}
+  .int-photo{height:120px}
+  .authors-grid{grid-template-columns:1fr 1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+  .mag-grid,.hero-stack,.sidebar{grid-template-columns:1fr}
+  .course-card{flex-direction:column}
+  .course-icon{height:80px;width:100%}
+}
+  ]]></b:skin>
+</head>
+
+<body>
+
+<!-- TICKER -->
+<div id='bx-ticker'>
+  <div class='bx-wrap' style='overflow:hidden'>
+    <div id='bx-ticker-track'>
+      <b>BREAKING</b><span>FDA approves first CRISPR-based therapy for sickle cell disease</span>
+      <b>RESEARCH</b><span>AlphaFold 3 predicts protein-ligand interactions with 91% accuracy</span>
+      <b>INDUSTRY</b><span>Biocon reports 34% YoY growth in biosimilar exports</span>
+      <b>FUNDING</b><span>DBT allocates Rs 1,200 Cr for synthetic biology hubs across IITs</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div id='bx-nav'>
+  <div class='bx-wrap'>
+    <div class='nav-row'>
+      <a class='bx-brand' href='/'>
+        <div class='bx-brand-mark'>
+          <svg viewBox='0 0 24 24'><path d='M12 3c0 0-3 4-3 8s3 8 3 8'/><path d='M12 3c0 0 3 4 3 8s-3 8-3 8'/><line x1='9' y1='8' x2='15' y2='8'/><line x1='9' y1='12' x2='15' y2='12'/><line x1='9' y1='16' x2='15' y2='16'/></svg>
+        </div>
+        <div class='bx-brand-name'>Bio<em>Xape</em></div>
+      </a>
+      <div class='nav-links'>
+        <a href='/'>Home</a>
+        <a href='/search/label/Research'>Research</a>
+        <a href='/search/label/Medical'>Medical</a>
+        <a href='/search/label/AgriTech'>AgriTech</a>
+        <a href='/search/label/Industry'>Industry</a>
+        <a href='/search/label/Interviews'>Interviews</a>
+        <a href='/p/courses.html'>Courses</a>
+        <a href='/p/store.html'>Store</a>
+      </div>
+      <div class='nav-right'>
+        <a class='btn-dash' href='https://dashboard.bioxape.com'>Dashboard</a>
+        <a class='btn-sub' href='/p/subscribe.html'>Subscribe ✦</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORY NAV -->
+<div id='bx-catbar'>
+  <div class='bx-wrap'>
+    <div id='bx-catbar-inner'>
+      <a class='cat-a active' href='/'>All Topics</a>
+      <a class='cat-a' href='/search/label/CRISPR'>CRISPR &amp; Gene Editing</a>
+      <a class='cat-a' href='/search/label/Biopharmaceuticals'>Biopharmaceuticals</a>
+      <a class='cat-a' href='/search/label/SyntheticBiology'>Synthetic Biology</a>
+      <a class='cat-a' href='/search/label/Genomics'>Genomics</a>
+      <a class='cat-a' href='/search/label/AgriTech'>Agricultural Biotech</a>
+      <a class='cat-a' href='/search/label/Bioinformatics'>Bioinformatics</a>
+      <a class='cat-a' href='/search/label/ClinicalTrials'>Clinical Trials</a>
+      <a class='cat-a' href='/search/label/Microbiome'>Microbiome</a>
+      <a class='cat-a' href='/search/label/Regulatory'>Regulatory</a>
+    </div>
+  </div>
+</div>
+
+<!-- HERO MAGAZINE GRID -->
+<section id='bx-hero'>
+  <div class='bx-wrap'>
+    <div class='hero-live-badge'>Live from the lab bench</div>
+    <div class='mag-grid'>
+      <div class='hero-main-card'>
+        <div class='hero-main-img'>
+          <div class='hero-img-over'></div>
+          <svg style='position:absolute;top:22px;right:22px;opacity:.18;width:65px;height:130px' viewBox='0 0 65 130' fill='none'>
+            <path d='M12 6 Q54 26 12 53 Q54 80 12 107 Q54 127 12 145' stroke='white' stroke-width='2.5' fill='none'/>
+            <path d='M53 6 Q11 26 53 53 Q11 80 53 107 Q11 127 53 145' stroke='#6ee7b7' stroke-width='2.5' fill='none'/>
+            <line x1='12' y1='26' x2='53' y2='26' stroke='white' stroke-width='1.5' opacity='.5'/>
+            <line x1='53' y1='53' x2='12' y2='53' stroke='white' stroke-width='1.5' opacity='.5'/>
+            <line x1='12' y1='80' x2='53' y2='80' stroke='white' stroke-width='1.5' opacity='.5'/>
+          </svg>
+          <div style='position:relative;z-index:1'><span class='tag tg' style='background:rgba(163,230,53,.2);color:#bbf7d0' id='bx-hero-category'>Featured</span></div>
+        </div>
+        <div class='hero-main-body'>
+          <span class='tag tg'>Research</span>
+          <div class='hero-main-title' id='bx-hero-title'>CRISPR Prime Editing Achieves 94% Precision</div>
+          <div class='hero-main-exc' id='bx-hero-excerpt'>A landmark multi-institutional study demonstrates that next-generation base editors can near-eliminate unintended genomic changes.</div>
+          <div class='hero-meta-row'>
+            <div class='av-chip'>
+              <div class='av'>DR</div>
+              <div><div class='auth-name' id='bx-hero-author'>Dr. Deepa Rao</div><div class='auth-date' id='bx-hero-date'>May 2026</div></div>
+            </div>
+            <span class='read-badge'>9 min read</span>
+          </div>
+        </div>
+      </div>
+      <div class='hero-stack'>
+        <div class='stack-card' id='bx-stack-0'><div class='stack-thumb th-a'>&#129514;</div><div class='stack-body'><span class='tag ta'>Industry</span><div class='stack-title'>Biocon mRNA Plant Goes Live</div><div class='stack-meta'>May 6 - 5 min read</div></div></div>
+        <div class='stack-card' id='bx-stack-1'><div class='stack-thumb th-b'>&#128300;</div><div class='stack-body'><span class='tag tb'>Research</span><div class='stack-title'>AlphaFold 3 vs RoseTTAFold Benchmark</div><div class='stack-meta'>May 5 - 7 min read</div></div></div>
+        <div class='stack-card' id='bx-stack-2'><div class='stack-thumb th-p'>&#127807;</div><div class='stack-body'><span class='tag tp'>AgriTech</span><div class='stack-title'>GM Mustard Gets Final Approval</div><div class='stack-meta'>May 4 - 4 min read</div></div></div>
+        <div class='stack-card' id='bx-stack-3'><div class='stack-thumb th-r'>&#128138;</div><div class='stack-body'><span class='tag tr'>Medical</span><div class='stack-title'>CAR-T Therapy Succeeds in Autoimmune Conditions</div><div class='stack-meta'>May 3 - 6 min read</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADSENSE LEADERBOARD 1 -->
+<div class='ad-bar'>
+  <span class='ad-pill'>Ad</span>
+  <div class='ad-slot'><div id='adsense-leaderboard1'></div></div>
+  <span class='ad-pill'>Ad</span>
+</div>
+
+<!-- NEWS STRIP -->
+<div id='bx-newsstrip'>
+  <div class='bx-wrap'>
+    <div class='news-grid-inner'>
+      <div class='news-label'>Latest News</div>
+      <div id='bx-news-items'>
+        <div class='news-item'><div class='news-dot'></div><div class='news-text'>WHO publishes updated Global Biosafety Framework</div><span class='tag tr' style='font-size:10px;padding:2px 7px;margin:0'>Regulatory</span><span class='news-time'>2h ago</span></div>
+        <div class='news-item'><div class='news-dot'></div><div class='news-text'>DBT allocates Rs 1,200 Cr for synthetic biology hubs</div><span class='tag tg' style='font-size:10px;padding:2px 7px;margin:0'>Funding</span><span class='news-time'>5h ago</span></div>
+        <div class='news-item'><div class='news-dot'></div><div class='news-text'>Moderna mRNA cancer vaccine shows 50% reduction in recurrence</div><span class='tag tb' style='font-size:10px;padding:2px 7px;margin:0'>Clinical</span><span class='news-time'>8h ago</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT + SIDEBAR -->
+<section class='bx-sec'>
+  <div class='bx-wrap'>
+    <div class='with-sidebar'>
+      <div>
+        <div class='sec-head'>
+          <div class='sec-title'><div class='sec-line'></div>Latest <span class='sec-title-acc'>Articles</span></div>
+          <a class='see-all' href='/'>View all</a>
+        </div>
+
+        <!-- BLOGGER POSTS WIDGET — renders your actual blog posts -->
+        <div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px'>
+          <b:section class='blog-posts-widget' id='main' showaddelement='yes'/>
+        </div>
+
+        <!-- IN-CONTENT AD -->
+        <div style='margin:28px 0'>
+          <div id='adsense-in_article'></div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class='sidebar'>
+        <div class='widget' style='background:linear-gradient(145deg,var(--g50),var(--white));border-color:var(--g200)'>
+          <div class='widget-head'><div class='widget-head-line'></div>Join 14,000+ Scientists</div>
+          <div class='nl-desc'>Weekly digest of the most important biotech research, curated by our editorial team.</div>
+          <input class='nl-inp' type='email' id='nl-email' placeholder='your@email.com'/>
+          <button class='nl-btn' onclick='subscribeNewsletter()'>Subscribe Free</button>
+          <div class='nl-note'>GDPR compliant - Unsubscribe anytime</div>
+        </div>
+        <div class='widget'>
+          <div class='widget-head'><div class='widget-head-line'></div>Trending This Week</div>
+          <div id='bx-trending-list'>
+            <div class='trend-item'><div class='trend-num'>01</div><div><div class='trend-title'>CRISPR in Human Embryos: Where Science Meets Ethics</div><div class='trend-meta'>6.2K reads - 3 days ago</div></div></div>
+            <div class='trend-item'><div class='trend-num'>02</div><div><div class='trend-title'>India Biotech Policy 2026: Complete Breakdown</div><div class='trend-meta'>4.8K reads - 5 days ago</div></div></div>
+            <div class='trend-item'><div class='trend-num'>03</div><div><div class='trend-title'>AlphaFold 3 vs RoseTTAFold: Full Benchmark</div><div class='trend-meta'>3.9K reads - 5 days ago</div></div></div>
+            <div class='trend-item'><div class='trend-num'>04</div><div><div class='trend-title'>5 Free Bioinformatics Tools Every Researcher Needs</div><div class='trend-meta'>2.7K reads - 1 week ago</div></div></div>
+          </div>
+        </div>
+        <div style='width:100%;min-height:250px;background:var(--g50);border:1.5px dashed var(--border2);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px'>
+          <div id='adsense-sidebar_300x250'></div>
+        </div>
+        <div class='widget'>
+          <div class='widget-head'><div class='widget-head-line'></div>Browse Topics</div>
+          <div class='tags-cloud'>
+            <a class='tag tg' href='/search/label/CRISPR'>CRISPR</a>
+            <a class='tag ta' href='/search/label/mRNA'>mRNA</a>
+            <a class='tag tb' href='/search/label/Bioinformatics'>Bioinformatics</a>
+            <a class='tag tp' href='/search/label/ProteinDesign'>Protein Design</a>
+            <a class='tag tr' href='/search/label/ClinicalTrials'>Clinical Trials</a>
+            <a class='tag tt' href='/search/label/SyntheticBiology'>Synthetic Bio</a>
+            <a class='tag tg' href='/search/label/AgriTech'>AgriTech</a>
+            <a class='tag ta' href='/search/label/AI'>AI + Drug Discovery</a>
+            <a class='tag tb' href='/search/label/Microbiome'>Microbiome</a>
+            <a class='tag tp' href='/search/label/GeneTherapy'>Gene Therapy</a>
+            <a class='tag tr' href='/search/label/Regulatory'>Regulatory</a>
+            <a class='tag tt' href='/search/label/Biosimilars'>Biosimilars</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH SPOTLIGHT -->
+<section class='bx-sec-alt'>
+  <div class='bx-wrap'>
+    <div class='sec-head'>
+      <div class='sec-title'><div class='sec-line'></div>Research <span class='sec-title-acc'>Spotlight</span></div>
+      <a class='see-all' href='/search/label/Research'>All summaries</a>
+    </div>
+    <div class='research-grid'>
+      <div class='res-hero'>
+        <div>
+          <div class='journal-row'><span class='jdot'></span><span class='journal-name' id='bx-res-hero-journal'>Nature Biotechnology - May 2026</span></div>
+          <div class='res-title' id='bx-res-hero-title'>Lipid Nanoparticle Optimisation Achieves 8x Therapeutic Window for mRNA Delivery</div>
+          <div class='res-exc' id='bx-res-hero-excerpt'>IIT Bombay and MIT researchers develop novel ionisable lipid formulation reducing off-target accumulation by 82%.</div>
+          <div class='res-foot'>
+            <div class='if-badge'><span class='if-dot'></span><span id='bx-res-hero-if'>IF: 54.9</span></div>
+            <button class='btn-paper'>Read Summary</button>
+          </div>
+        </div>
+        <div class='res-stats'>
+          <div class='res-stat'><div class='res-stat-val' id='bx-res-stat-val-0'>8x</div><div class='res-stat-lab' id='bx-res-stat-lab-0'>Therapeutic window</div></div>
+          <div class='res-stat'><div class='res-stat-val' id='bx-res-stat-val-1'>82%</div><div class='res-stat-lab' id='bx-res-stat-lab-1'>Off-target reduction</div></div>
+          <div class='res-stat'><div class='res-stat-val' id='bx-res-stat-val-2'>54.9</div><div class='res-stat-lab' id='bx-res-stat-lab-2'>Impact Factor</div></div>
+          <div class='res-stat'><div class='res-stat-val' id='bx-res-stat-val-3'>Q3 26</div><div class='res-stat-lab' id='bx-res-stat-lab-3'>Phase I target</div></div>
+        </div>
+      </div>
+      <div class='res-card'>
+        <div class='journal-row'><span class='jdot'></span><span class='journal-name' id='bx-res-card-journal-0'>Science - April 2026</span></div>
+        <div class='res-title' id='bx-res-card-title-0'>CAR-T Constructs Eliminate Solid Tumours in 97% of Murine Models</div>
+        <div class='res-exc' id='bx-res-card-excerpt-0'>Stanford team engineers next-gen synthetic antigen receptors with built-in safety switches.</div>
+        <div class='res-foot'><div class='if-badge'><span class='if-dot'></span>IF: 63.7</div><button class='btn-paper'>Read Summary</button></div>
+      </div>
+      <div class='res-card'>
+        <div class='journal-row'><span class='jdot'></span><span class='journal-name' id='bx-res-card-journal-1'>Cell - April 2026</span></div>
+        <div class='res-title' id='bx-res-card-title-1'>Gut Microbiome Signature Predicts Immunotherapy Response in NSCLC</div>
+        <div class='res-exc' id='bx-res-card-excerpt-1'>1,800-patient multicentre study identifies three metabolites as biomarkers for checkpoint inhibitor outcomes.</div>
+        <div class='res-foot'><div class='if-badge'><span class='if-dot'></span>IF: 66.8</div><button class='btn-paper'>Read Summary</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERT INTERVIEWS -->
+<section class='bx-sec'>
+  <div class='bx-wrap'>
+    <div class='sec-head'>
+      <div class='sec-title'><div class='sec-line'></div>Expert <span class='sec-title-acc'>Interviews</span></div>
+      <a class='see-all' href='/search/label/Interviews'>All interviews</a>
+    </div>
+    <div class='grid2'>
+      <div class='interview-card' id='bx-interview-0'>
+        <div class='int-photo int1' style='font-size:52px'>&#128105;&#8205;&#128300;</div>
+        <div class='int-body'>
+          <div class='int-eyebrow'>Featured Interview</div>
+          <div class='int-title'>"CRISPR Will Cure 10,000 Diseases in Our Lifetime"</div>
+          <div class='int-exc'>The Nobel laureate discusses base editing, germline ethics, and the next decade of gene medicine...</div>
+          <div class='int-meta'>Dr. Jennifer Doudna - UC Berkeley - 14 min read - May 2026</div>
+        </div>
+      </div>
+      <div class='interview-card' id='bx-interview-1'>
+        <div class='int-photo int2' style='font-size:52px'>&#128084;</div>
+        <div class='int-body'>
+          <div class='int-eyebrow'>Industry Spotlight</div>
+          <div class='int-title'>Kiran Mazumdar-Shaw on Building Biocon Into a Global Biosimilars Powerhouse</div>
+          <div class='int-exc'>India's biotech pioneer shares her vision for affordable biologics and AI-assisted drug development...</div>
+          <div class='int-meta'>Kiran Mazumdar-Shaw - Biocon Ltd. - 11 min read - April 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBSCRIPTION PLANS -->
+<div id='bx-plans-section'>
+  <div class='bx-wrap'>
+    <div class='plans-eye'>Premium Membership</div>
+    <div class='plans-h'>Science Without Limits</div>
+    <div class='plans-sub'>Choose the tier that matches your curiosity and career</div>
+    <div id='bx-plans-grid'>
+      <div class='plan'><div class='plan-icon pi-f'>&#127807;</div><div class='plan-name'>Free</div><div class='plan-price'><sup>Rs</sup>0<sub>/month</sub></div><div class='plan-desc'>For curious minds getting started</div><ul class='plan-feats'><li class='pf'>5 articles per month</li><li class='pf'>Weekly newsletter</li><li class='pf'>News feed</li><li class='pf no'>Research summaries</li><li class='pf no'>Ad-free</li></ul><button class='btn-plan' onclick="window.location.href='/'">Get Started Free</button></div>
+      <div class='plan star'><div class='plan-crown'>Most Popular</div><div class='plan-icon pi-p'>&#128300;</div><div class='plan-name'>Pro Researcher</div><div class='plan-price'><sup>Rs</sup>349<sub>/month</sub></div><div class='plan-desc'>For scientists and professionals</div><ul class='plan-feats'><li class='pf'>Unlimited articles</li><li class='pf'>All research summaries</li><li class='pf'>Ad-free reading</li><li class='pf'>PDF downloads</li><li class='pf'>25% off courses</li></ul><button class='btn-plan' onclick="startSubscription('pro','',349)">Subscribe Now</button></div>
+      <div class='plan'><div class='plan-icon pi-i'>&#127963;</div><div class='plan-name'>Institutional</div><div class='plan-price'><sup>Rs</sup>1,199<sub>/month</sub></div><div class='plan-desc'>For labs and universities</div><ul class='plan-feats'><li class='pf'>15 user seats</li><li class='pf'>All Pro features</li><li class='pf'>Team dashboard</li><li class='pf'>API access</li><li class='pf'>Priority support</li></ul><button class='btn-plan' onclick="window.location.href='/p/contact.html'">Contact Us</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- COURSES -->
+<section class='bx-sec-alt'>
+  <div class='bx-wrap'>
+    <div class='sec-head'>
+      <div class='sec-title'><div class='sec-line'></div>Courses &amp; <span class='sec-title-acc'>Digital Downloads</span></div>
+      <a class='see-all' href='/p/courses.html'>Browse all</a>
+    </div>
+    <div class='grid2' id='bx-courses-grid'>
+      <div class='course-card'><div class='course-icon ci1'>&#129514;</div><div class='course-body'><div class='course-level'>Intermediate - Self-Paced</div><div class='course-title'>CRISPR: Fundamentals to Clinical Applications</div><div class='course-meta'>8 modules - 6 hours - Certificate</div><div class='course-foot'><div class='course-price'>Rs 1,499</div><button class='btn-enroll'>Enroll Now</button></div></div></div>
+      <div class='course-card'><div class='course-icon ci2'>&#128187;</div><div class='course-body'><div class='course-level'>Beginner - Self-Paced</div><div class='course-title'>Bioinformatics with Python: Sequence to Structure</div><div class='course-meta'>12 modules - 10 hours - Certificate</div><div class='course-foot'><div class='course-price'>Rs 1,999</div><button class='btn-enroll'>Enroll Now</button></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STORE -->
+<section class='bx-sec'>
+  <div class='bx-wrap'>
+    <div class='sec-head'>
+      <div class='sec-title'><div class='sec-line'></div>The BioXape <span class='sec-title-acc'>Store</span></div>
+      <a class='see-all' href='/p/store.html'>Visit store</a>
+    </div>
+    <div class='grid4' id='bx-store-grid'>
+      <div class='store-card'><div class='store-img si1'>&#128211;</div><div class='store-body'><div class='store-name'>BioXape Lab Notebook</div><div class='store-type'>Hardcover Merch</div><div class='store-price'>Rs 499</div><button class='btn-cart'>Add to Cart</button></div></div>
+      <div class='store-card'><div class='store-img si2'>&#128444;</div><div class='store-body'><div class='store-name'>PCR Protocol Poster</div><div class='store-type'>Digital Download</div><div class='store-price'><span class='price-old'>Rs 399</span>Rs 249</div><button class='btn-cart'>Add to Cart</button></div></div>
+      <div class='store-card'><div class='store-img si3'>&#128083;</div><div class='store-body'><div class='store-name'>DNA Helix Tee</div><div class='store-type'>Unisex Merch</div><div class='store-price'>Rs 849</div><button class='btn-cart'>Add to Cart</button></div></div>
+      <div class='store-card'><div class='store-img si4'>&#128230;</div><div class='store-body'><div class='store-name'>Researcher Bundle</div><div class='store-type'>4 eBooks + Poster</div><div class='store-price'><span class='price-old'>Rs 2,400</span>Rs 1,399</div><button class='btn-cart'>Add to Cart</button></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- AUTHORS -->
+<section class='bx-sec-alt'>
+  <div class='bx-wrap'>
+    <div class='sec-head'>
+      <div class='sec-title'><div class='sec-line'></div>Meet Our <span class='sec-title-acc'>Authors</span></div>
+      <a class='see-all' href='/p/about.html'>All contributors</a>
+    </div>
+    <div class='authors-grid' id='bx-authors-grid'>
+      <div class='author-card'><div class='author-av' style='background:var(--accent)'>DR</div><div class='author-name'>Dr. Deepa Rao</div><div class='author-role'>Senior Science Editor</div><div class='author-org'>Ph.D. Genomics - IISc</div><div class='author-tags'><span class='tag tg'>CRISPR</span></div><div class='author-stats'><div><div class='as-val'>48</div><div class='as-lab'>Articles</div></div><div><div class='as-val'>12K</div><div class='as-lab'>Reads</div></div></div></div>
+      <div class='author-card'><div class='author-av' style='background:#2563eb'>SJ</div><div class='author-name'>Siddharth Joshi</div><div class='author-role'>Bioinformatics Writer</div><div class='author-org'>M.Sc. Bioinformatics - IIT</div><div class='author-tags'><span class='tag tb'>Bioinformatics</span></div><div class='author-stats'><div><div class='as-val'>34</div><div class='as-lab'>Articles</div></div><div><div class='as-val'>8.4K</div><div class='as-lab'>Reads</div></div></div></div>
+      <div class='author-card'><div class='author-av' style='background:#d97706'>PK</div><div class='author-name'>Priya Krishnan</div><div class='author-role'>Industry Analyst</div><div class='author-org'>MBA Biotech - BITS Pilani</div><div class='author-tags'><span class='tag ta'>Industry</span></div><div class='author-stats'><div><div class='as-val'>29</div><div class='as-lab'>Articles</div></div><div><div class='as-val'>7.1K</div><div class='as-lab'>Reads</div></div></div></div>
+      <div class='author-card'><div class='author-av' style='background:#7c3aed'>AM</div><div class='author-name'>Dr. Ananya Mehta</div><div class='author-role'>AgriTech Correspondent</div><div class='author-org'>Ph.D. Plant Biotech - IARI</div><div class='author-tags'><span class='tag tp'>AgriTech</span></div><div class='author-stats'><div><div class='as-val'>22</div><div class='as-lab'>Articles</div></div><div><div class='as-val'>5.2K</div><div class='as-lab'>Reads</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ADSENSE LEADERBOARD 2 -->
+<div class='ad-bar'>
+  <span class='ad-pill'>Ad</span>
+  <div class='ad-slot'><div id='adsense-leaderboard2'></div></div>
+  <span class='ad-pill'>Ad</span>
+</div>
+
+<!-- FOOTER -->
+<div id='bx-footer'>
+  <div class='bx-wrap'>
+    <div class='footer-grid'>
+      <div>
+        <div class='ft-brand-name'>Bio<em>Xape</em></div>
+        <div class='ft-desc'>Your trusted source for biotechnology insights, peer-reviewed research summaries, and science communication. Based in India. Read worldwide.</div>
+        <div class='ft-social'>
+          <a class='ft-soc' href='#' id='footer-social-twitter'>X</a>
+          <a class='ft-soc' href='#' id='footer-social-linkedin'>in</a>
+          <a class='ft-soc' href='#' id='footer-social-youtube'>Yt</a>
+          <a class='ft-soc' href='#' id='footer-social-instagram'>Ig</a>
+        </div>
+      </div>
+      <div>
+        <div class='ft-col-h'>Content</div>
+        <a class='ft-link' href='/'>Latest Articles</a>
+        <a class='ft-link' href='/search/label/Research'>Research Summaries</a>
+        <a class='ft-link' href='/search/label/Interviews'>Expert Interviews</a>
+        <a class='ft-link' href='/search/label/News'>Industry News</a>
+        <a class='ft-link' href='/search/label/Reviews'>Product Reviews</a>
+      </div>
+      <div>
+        <div class='ft-col-h'>Membership</div>
+        <a class='ft-link' href='/p/subscribe.html'>Subscribe</a>
+        <a class='ft-link' href='/p/courses.html'>Courses</a>
+        <a class='ft-link' href='/p/store.html'>Store</a>
+        <a class='ft-link' href='/p/advertise.html'>Advertise</a>
+        <a class='ft-link' href='/p/write-for-us.html'>Write for Us</a>
+      </div>
+      <div>
+        <div class='ft-col-h'>Company</div>
+        <a class='ft-link' href='/p/about.html'>About BioXape</a>
+        <a class='ft-link' href='/p/contact.html'>Contact</a>
+        <a class='ft-link' href='/p/privacy-policy.html'>Privacy Policy</a>
+        <a class='ft-link' href='/p/terms.html'>Terms of Use</a>
+        <a class='ft-link' href='https://dashboard.bioxape.com'>Dashboard</a>
+      </div>
+      <div>
+        <div class='ft-col-h'>Newsletter</div>
+        <div class='ft-nl'>
+          <div class='ft-nl-h'>Weekly Science Digest</div>
+          <input class='ft-nl-inp' type='email' id='ft-nl-email' placeholder='your@email.com'/>
+          <button class='ft-nl-btn' onclick='subscribeNewsletter()'>Subscribe</button>
+        </div>
+      </div>
+    </div>
+    <div class='footer-bottom'>
+      <div class='ft-copy' id='footer-copyright'>2026 BioXape. All rights reserved. Made with dedication in India.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CMS SYNC — fetches live data from Render API -->
+<script>
+//<![CDATA[
+const CMS_API = 'https://bioxape-backend.onrender.com/api';
+
+async function fetchSiteConfig() {
+  try {
+    const res  = await fetch(CMS_API + '/site/all');
+    const data = await res.json();
+    if (!data.success) return;
+    const cfg = data.data;
+    if (cfg.ticker)               renderTicker(cfg.ticker);
+    if (cfg.category_nav)         renderCategoryNav(cfg.category_nav);
+    if (cfg.hero_featured||cfg.hero_stack) renderHero(cfg.hero_featured, cfg.hero_stack);
+    if (cfg.news_strip)           renderNewsStrip(cfg.news_strip);
+    if (cfg.trending)             renderTrending(cfg.trending);
+    if (cfg.research_spotlight)   renderResearch(cfg.research_spotlight);
+    if (cfg.interviews)           renderInterviews(cfg.interviews);
+    if (cfg.subscription_plans)   renderPlans(cfg.subscription_plans);
+    if (cfg.courses)              renderCourses(cfg.courses);
+    if (cfg.store)                renderStore(cfg.store);
+    if (cfg.footer)               renderFooter(cfg.footer);
+    if (cfg.adsense_slots)        renderAdSense(cfg.adsense_slots);
+    renderAuthors();
+  } catch(e) { console.warn('CMS sync failed - using static fallback', e.message); }
+}
+
+function renderTicker(data) {
+  const el = document.getElementById('bx-ticker-track');
+  if (!el || !data.items) return;
+  el.innerHTML = data.items.filter(i=>i.active!==false).map(i=>'<b>'+i.label+'</b><span>'+i.text+'</span>').join('');
+}
+function renderCategoryNav(data) {
+  const el = document.getElementById('bx-catbar-inner');
+  if (!el || !data.items) return;
+  el.innerHTML = [...data.items].sort((a,b)=>a.order-b.order).filter(i=>i.active!==false).map((i,idx)=>
+    '<a class="cat-a '+(idx===0?'active':'')+'" href="'+(i.bloggerLabel?'/search/label/'+i.bloggerLabel:'/')+'">'+i.label+'</a>').join('');
+}
+function renderHero(hero, stack) {
+  if (hero) {
+    ['title','excerpt','author','date','category'].forEach(k=>{
+      const el=document.getElementById('bx-hero-'+k);
+      if(el) el.textContent = hero[k==='author'?'authorName':k]||'';
+    });
+  }
+  if (stack && stack.items) stack.items.forEach((item,i)=>{
+    const card=document.getElementById('bx-stack-'+i);
+    if(!card) return;
+    const t=card.querySelector('.stack-title'),m=card.querySelector('.stack-meta'),tag=card.querySelector('.tag'),thumb=card.querySelector('.stack-thumb');
+    if(t) t.textContent=item.title||'';
+    if(m) m.textContent=item.meta||'';
+    if(tag) tag.textContent=item.tagText||'';
+    if(thumb&&item.emoji) thumb.textContent=item.emoji;
+    if(thumb&&item.themeClass) thumb.className='stack-thumb '+item.themeClass;
+  });
+}
+function renderNewsStrip(data) {
+  const el=document.getElementById('bx-news-items');
+  if(!el||!data.items) return;
+  el.innerHTML=data.items.filter(i=>i.active!==false).map(i=>
+    '<div class="news-item"><div class="news-dot"></div><div class="news-text">'+i.text+'</div><span class="tag tr" style="font-size:10px;padding:2px 7px;margin:0">'+i.tagText+'</span><span class="news-time">'+i.timeAgo+'</span></div>').join('');
+}
+function renderTrending(data) {
+  const el=document.getElementById('bx-trending-list');
+  if(!el||!data.items) return;
+  el.innerHTML=data.items.map((item,i)=>
+    '<div class="trend-item"><div class="trend-num">0'+(i+1)+'</div><div><div class="trend-title">'+item.title+'</div><div class="trend-meta">'+(item.reads||'')+(item.timeAgo?' - '+item.timeAgo:'')+'</div></div></div>').join('');
+}
+function renderResearch(data) {
+  if(!data) return;
+  if(data.hero){
+    const m={title:'bx-res-hero-title',excerpt:'bx-res-hero-excerpt',journal:'bx-res-hero-journal',ifScore:'bx-res-hero-if'};
+    Object.entries(m).forEach(([k,id])=>{ const el=document.getElementById(id); if(el) el.textContent=data.hero[k]||''; });
+    if(data.hero.stats) data.hero.stats.forEach((s,i)=>{
+      const v=document.getElementById('bx-res-stat-val-'+i),l=document.getElementById('bx-res-stat-lab-'+i);
+      if(v) v.textContent=s.value||''; if(l) l.textContent=s.label||'';
+    });
+  }
+  if(data.cards) data.cards.forEach((c,i)=>{
+    const t=document.getElementById('bx-res-card-title-'+i),e=document.getElementById('bx-res-card-excerpt-'+i),j=document.getElementById('bx-res-card-journal-'+i);
+    if(t) t.textContent=c.title||''; if(e) e.textContent=c.excerpt||''; if(j) j.textContent=c.journal||'';
+  });
+}
+function renderInterviews(data) {
+  if(!data||!data.items) return;
+  data.items.forEach((item,i)=>{
+    const el=document.getElementById('bx-interview-'+i);
+    if(!el) return;
+    const fields={'.int-title':'title','.int-exc':'excerpt','.int-eyebrow':'eyebrow','.int-meta':'meta'};
+    Object.entries(fields).forEach(([sel,key])=>{ const e=el.querySelector(sel); if(e) e.textContent=item[key]||''; });
+    const p=el.querySelector('.int-photo'); if(p&&item.emoji) p.textContent=item.emoji;
+  });
+}
+function renderPlans(data) {
+  const el=document.getElementById('bx-plans-grid');
+  if(!el||!data.plans) return;
+  el.innerHTML=data.plans.map(plan=>'<div class="plan '+(plan.isFeatured?'star':'')+'">'+
+    (plan.isFeatured?'<div class="plan-crown">Most Popular</div>':'')+
+    '<div class="plan-icon pi-'+(plan.id==='free'?'f':plan.id==='pro'?'p':'i')+'">'+plan.icon+'</div>'+
+    '<div class="plan-name">'+plan.name+'</div>'+
+    '<div class="plan-price"><sup>Rs</sup>'+plan.price+'<sub>/month</sub></div>'+
+    '<div class="plan-desc">'+plan.desc+'</div>'+
+    '<ul class="plan-feats">'+( plan.features||[]).map(f=>'<li class="pf '+(f.included?'':'no')+'">'+f.text+'</li>').join('')+'</ul>'+
+    '<button class="btn-plan" onclick="startSubscription(\''+plan.id+'\',\''+plan.razorpayPlanId+'\','+plan.price+')">'+plan.buttonText+'</button>'+
+    '</div>').join('');
+}
+function renderCourses(data) {
+  const el=document.getElementById('bx-courses-grid');
+  if(!el||!data.items) return;
+  const icons=['ci1','ci2','ci3','ci4'];
+  el.innerHTML=data.items.map((c,i)=>'<div class="course-card"><div class="course-icon '+icons[i%4]+'">'+(c.icon||'🔬')+'</div><div class="course-body"><div class="course-level">'+c.level+'</div><div class="course-title">'+c.title+'</div><div class="course-meta">'+c.meta+'</div><div class="course-foot"><div class="course-price">'+(c.oldPrice?'<span class="price-old">Rs '+c.oldPrice+'</span>':'')+'Rs '+c.price+'</div><button class="btn-enroll" onclick="window.open(\''+(c.enrollUrl||'#')+'\',\'_blank\')">Enroll Now</button></div></div></div>').join('');
+}
+function renderStore(data) {
+  const el=document.getElementById('bx-store-grid');
+  if(!el||!data.items) return;
+  const themes=['si1','si2','si3','si4'];
+  el.innerHTML=data.items.map((p,i)=>'<div class="store-card"><div class="store-img '+themes[i%4]+'">'+(p.emoji||'📦')+'</div><div class="store-body"><div class="store-name">'+p.name+'</div><div class="store-type">'+p.type+'</div><div class="store-price">'+(p.oldPrice?'<span class="price-old">Rs '+p.oldPrice+'</span>':'')+'Rs '+p.price+'</div><button class="btn-cart" onclick="window.open(\''+(p.cartUrl||'#')+'\',\'_blank\')">Add to Cart</button></div></div>').join('');
+}
+function renderAuthors() {
+  const el=document.getElementById('bx-authors-grid');
+  if(!el) return;
+  fetch(CMS_API+'/users/authors-public').then(r=>r.json()).then(res=>{
+    if(!res.success||!res.data.length) return;
+    const colors=['#27a363','#2563eb','#d97706','#7c3aed','#dc2626','#0d9488'];
+    el.innerHTML=res.data.map((a,i)=>'<div class="author-card">'+
+      (a.photoUrl?'<img src="'+a.photoUrl+'" class="author-av" style="object-fit:cover" alt="'+a.name+'"/>':
+        '<div class="author-av" style="background:'+colors[i%colors.length]+'">'+(a.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)+'</div>')+
+      '<div class="author-name">'+a.name+'</div>'+
+      '<div class="author-role">'+(a.role||'Author')+'</div>'+
+      '<div class="author-org">'+(a.bio||'').slice(0,55)+'</div>'+
+      '<div class="author-tags">'+(a.expertise||[]).slice(0,2).map(e=>'<span class="tag tg">'+e+'</span>').join('')+'</div>'+
+      '<div class="author-stats"><div><div class="as-val">'+(a.postsPublished||0)+'</div><div class="as-lab">Articles</div></div><div><div class="as-val">'+(a.totalReads>=1000?Math.round(a.totalReads/100)/10+'K':a.totalReads||0)+'</div><div class="as-lab">Reads</div></div></div>'+
+      '<div class="author-social">'+(a.socialLinks&&a.socialLinks.twitter?'<a class="soc-btn" href="'+a.socialLinks.twitter+'" target="_blank">X</a>':'')+
+      (a.socialLinks&&a.socialLinks.linkedin?'<a class="soc-btn" href="'+a.socialLinks.linkedin+'" target="_blank">in</a>':'')+
+      '</div></div>').join('');
+  }).catch(()=>{});
+}
+function renderFooter(data) {
+  if(!data) return;
+  const s=data.socialLinks||{};
+  if(s.twitter)  { const e=document.getElementById('footer-social-twitter');  if(e) e.href=s.twitter; }
+  if(s.linkedin) { const e=document.getElementById('footer-social-linkedin'); if(e) e.href=s.linkedin; }
+  if(s.youtube)  { const e=document.getElementById('footer-social-youtube');  if(e) e.href=s.youtube; }
+  if(s.instagram){ const e=document.getElementById('footer-social-instagram');if(e) e.href=s.instagram; }
+  if(data.copyrightText){ const e=document.getElementById('footer-copyright'); if(e) e.textContent=data.copyrightText; }
+}
+function renderAdSense(data) {
+  if(!data) return;
+  Object.entries(data).forEach(([key,slot])=>{
+    if(!slot.active||!slot.code) return;
+    const el=document.getElementById('adsense-'+key);
+    if(el) el.innerHTML=slot.code;
+  });
+}
+function startSubscription(planId, razorpayPlanId, amount) {
+  window.location.href='/p/subscribe.html?plan='+planId;
+}
+async function subscribeNewsletter() {
+  const emailEl = document.getElementById('nl-email')||document.getElementById('ft-nl-email');
+  if(!emailEl||!emailEl.value) { alert('Please enter your email'); return; }
+  const email = emailEl.value.trim();
+  if(!email.includes('@')) { alert('Please enter a valid email'); return; }
+  try {
+    await fetch(CMS_API+'/auth/newsletter-subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+    emailEl.value='';
+    alert('Subscribed! Welcome to BioXape.');
+  } catch(e) { alert('Please try again.'); }
+}
+
+document.addEventListener('DOMContentLoaded', fetchSiteConfig);
+//]]>
+</script>
+
+</body>
+</html>
