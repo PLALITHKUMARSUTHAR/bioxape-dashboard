@@ -75,6 +75,8 @@ function toggleNotifDropdown() {
   if (isOpen) {
     fetchNotifications();
     fetchUnreadCount();
+  } else {
+    markAllRead();
   }
 }
 
@@ -106,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         !dropdown.contains(e.target) &&
         !bell?.contains(e.target)) {
       dropdown.classList.remove('open');
+      markAllRead();
     }
   });
 
