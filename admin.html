@@ -566,12 +566,12 @@ async function loadUsers() {
     <td>${u.postsPublished||0}</td>
     <td>${formatDate(u.createdAt)}</td>
     <td>
-      <div style="display:flex;gap:5px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px">
         ${u.role==='author'?`<button class="btn btn-secondary btn-sm" onclick="promoteUser('${u._id}','editor')">↑ Editor</button>`:''}
         ${u.role==='editor'?`<button class="btn btn-secondary btn-sm" onclick="promoteUser('${u._id}','author')">↓ Author</button>`:''}
         ${u.status==='active'?`<button class="btn btn-danger btn-sm" onclick="toggleUser('${u._id}','suspended')">Suspend</button>`:
                               `<button class="btn btn-amber btn-sm" onclick="toggleUser('${u._id}','active')">Activate</button>`}
-        <button class="btn btn-danger btn-sm" onclick="deleteUser('${u._id}')">Del</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteUser('${u._id}')">Delete</button>
       </div>
     </td>
   </tr>`).join('');
