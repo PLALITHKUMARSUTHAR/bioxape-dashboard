@@ -143,6 +143,40 @@ img { max-width: 100%; display: block; }
   text-align: center;
 }
 
+/* Sidebar Nav Dropdown */
+.nav-dropdown-wrapper {
+  margin-bottom: 4px;
+}
+.nav-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+  padding-right: 20px;
+}
+.nav-dropdown-toggle:hover {
+  color: #6ee7b7;
+}
+.dropdown-chevron {
+  font-size: 8px;
+  transition: transform 0.25s ease;
+  margin-left: auto;
+  color: #5a8a72;
+}
+.nav-dropdown-items {
+  max-height: 200px;
+  overflow: hidden;
+  transition: max-height 0.25s cubic-bezier(0, 1, 0, 1);
+}
+.nav-dropdown-items.collapsed {
+  max-height: 0;
+}
+.nav-dropdown-wrapper.open .dropdown-chevron {
+  transform: rotate(-180deg);
+}
+
 .sidebar-user {
   padding: 16px 20px;
   border-top: 1px solid rgba(255,255,255,.1);
@@ -383,7 +417,7 @@ tr:hover td { background: var(--g50); }
 .badge-changes-needed { background: var(--amber-l); color: #92400e; }
 .badge-admin-review   { background: #fef3c7;   color: #92400e; }
 .badge-approved { background: var(--accent-l); color: var(--g700); }
-.badge-published{ background: var(--g700);     color: #fff; }
+.badge-published{ background: #ccfbf1;     color: #0f766e; }
 .badge-rejected { background: var(--red-l);    color: #991b1b; }
 
 /* ── PIPELINE TRACKER ────────────────────────────────────── */
@@ -707,6 +741,7 @@ tr:hover td { background: var(--g50); }
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
 }
 .builder-section-head:hover { background: var(--g50); }

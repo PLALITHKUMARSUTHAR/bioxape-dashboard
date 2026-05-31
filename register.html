@@ -8,6 +8,22 @@
 <style>
   .login-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
   @media(max-width:768px){.login-page{grid-template-columns:1fr}.login-left{display:none}}
+
+  /* Utility classes to eliminate inline styles */
+  .relative-z1 { position: relative; z-index: 1; }
+  .flex-align-center-gap-10-mb-32 { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+  .login-heading { font-size: 32px; font-family: 'Playfair Display', serif; color: #fff; font-weight: 700; line-height: 1.2; margin-bottom: 14px; }
+  .login-subheading { font-size: 15px; color: rgba(255, 255, 255, 0.7); line-height: 1.65; max-width: 380px; }
+  .mt-20 { margin-top: 20px; }
+  .mt-10 { margin-top: 10px; }
+  .register-email-style { background: var(--off); color: #7a9e8c; cursor: not-allowed; }
+  .register-text { text-align: center; margin-top: 22px; font-size: 13px; color: #7a9e8c; }
+  .register-link { color: #27a363; font-weight: 500; }
+  .err-container { text-align: center; padding: 20px; }
+  .err-emoji { font-size: 48px; margin-bottom: 18px; }
+  .err-title { font-size: 20px; font-weight: 700; color: #dc2626; margin-bottom: 12px; }
+  .err-desc { color: #7a9e8c; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+  .d-inline-block { display: inline-block; }
 </style>
 </head>
 <body data-page="register">
@@ -16,17 +32,17 @@
 
   <!-- LEFT PANEL -->
   <div class="login-left">
-    <div style="position:relative;z-index:1">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px">
+    <div class="relative-z1">
+      <div class="flex-align-center-gap-10-mb-32">
         <div class="sidebar-brand-mark">
           <svg viewBox="0 0 24 24"><path d="M12 3c0 0-3 4-3 8s3 8 3 8"/><path d="M12 3c0 0 3 4 3 8s-3 8-3 8"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
         </div>
         <div class="login-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
       </div>
-      <div style="font-size:32px;font-family:'Playfair Display',serif;color:#fff;font-weight:700;line-height:1.2;margin-bottom:14px">
+      <div class="login-heading">
         Activate Your<br>Author/Editor<br>Workspace
       </div>
-      <div style="font-size:15px;color:rgba(255,255,255,.7);line-height:1.65;max-width:380px">
+      <div class="login-subheading">
         Set up your secure password and join the BioXApe biotechnology editorial team.
       </div>
       <div class="login-features">
@@ -45,14 +61,14 @@
       <div class="login-box-sub">Enter your details to activate your BioXApe credentials</div>
 
       <!-- Registration Form -->
-      <form id="register-form" style="margin-top:20px">
+      <form id="register-form" class="mt-20">
         <div class="form-group">
           <label class="form-label" for="reg-name">Full Name</label>
           <input class="form-input" type="text" id="reg-name" placeholder="Dr. Jane Smith" required/>
         </div>
         <div class="form-group">
           <label class="form-label" for="reg-email">Email Address</label>
-          <input class="form-input" type="email" id="reg-email" readonly style="background:var(--off);color:#7a9e8c;cursor:not-allowed"/>
+          <input class="form-input register-email-style" type="email" id="reg-email" readonly/>
         </div>
         <div class="form-group">
           <label class="form-label" for="reg-password">Password</label>
@@ -62,12 +78,12 @@
           <label class="form-label" for="reg-confirm">Confirm Password</label>
           <input class="form-input" type="password" id="reg-confirm" placeholder="Re-enter password" required minlength="8"/>
         </div>
-        <button class="btn btn-primary btn-full" id="register-btn" type="submit" style="margin-top:10px">Activate & Login</button>
+        <button class="btn btn-primary btn-full mt-10" id="register-btn" type="submit">Activate & Login</button>
       </form>
 
-      <div style="text-align:center;margin-top:22px;font-size:13px;color:#7a9e8c">
+      <div class="register-text">
         Already have an active account?
-        <a href="index.html" style="color:#27a363;font-weight:500">Sign In</a>
+        <a href="index.html" class="register-link">Sign In</a>
       </div>
 
     </div>
@@ -84,13 +100,13 @@
 
     if (!token || !email) {
       document.getElementById('registration-container').innerHTML = `
-        <div style="text-align:center;padding:20px">
-          <div style="font-size:48px;margin-bottom:18px">⚠️</div>
-          <div style="font-size:20px;font-weight:700;color:#dc2626;margin-bottom:12px">Invalid Invitation Link</div>
-          <p style="color:#7a9e8c;font-size:14px;line-height:1.6;margin-bottom:24px">
+        <div class="err-container">
+          <div class="err-emoji">⚠️</div>
+          <div class="err-title">Invalid Invitation Link</div>
+          <p class="err-desc">
             The account activation link is missing required secure tokens or has expired. Please contact the administrator to request a new invitation email.
           </p>
-          <a class="btn btn-primary" href="index.html" style="display:inline-block">Go to Sign In</a>
+          <a class="btn btn-primary d-inline-block" href="index.html">Go to Sign In</a>
         </div>
       `;
       return;

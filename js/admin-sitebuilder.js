@@ -13,6 +13,7 @@ async function loadSiteBuilder() {
   el.innerHTML = `
     ${tickerSection(cfg.ticker)}
     ${heroSection(cfg.hero_featured, cfg.hero_stack)}
+    ${latestArticlesSection(cfg.latest_articles)}
     ${newsStripSection(cfg.news_strip)}
     ${trendingSection(cfg.trending)}
     ${researchSection(cfg.research_spotlight)}
@@ -113,6 +114,37 @@ function heroSection(hero, stack) {
       </div>`).join('')}
     <div class="modal-footer"><button class="btn btn-primary" onclick="saveHero()">Save Hero Section</button></div>
   `);
+}
+
+function latestArticlesSection(data) {
+  return builderSection('latest-articles', '📰 Latest Articles Section', `
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Section Title</label>
+        <input class="form-input" id="la-title" value="${data?.title||'Latest Articles'}" placeholder="Latest Articles"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Number of Articles to Show</label>
+        <input class="form-input" type="number" id="la-limit" value="${data?.limit||6}"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+        <input type="checkbox" id="la-show-cover" ${data?.showCoverImage!==false?'checked':''} style="accent-color:var(--accent)"/> Show Cover Image
+      </label>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="saveLatestArticles()">Save Latest Articles</button></div>
+  `);
+}
+
+async function saveLatestArticles() {
+  const data = {
+    title: document.getElementById('la-title')?.value||'Latest Articles',
+    limit: parseInt(document.getElementById('la-limit')?.value)||6,
+    showCoverImage: document.getElementById('la-show-cover')?.checked ?? true
+  };
+  const result = await apiCall('/site/config/latest_articles','PUT',{ data });
+  result?.success ? showToast('Latest articles config saved!','success') : showToast('Save failed','error');
 }
 
 function newsStripSection(data) {

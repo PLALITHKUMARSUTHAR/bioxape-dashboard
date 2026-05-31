@@ -6,16 +6,43 @@
 <title>Admin Dashboard — BioXApe</title>
 <link rel="stylesheet" href="css/dashboard.css"/>
 <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+<style>
+  /* Clean utility styles to eliminate inline styles */
+  .d-none { display: none !important; }
+  .w-160 { width: 160px !important; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; }
+  .grid-1-1 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .flex-gap-8 { display: flex; gap: 8px; }
+  .flex-wrap-gap-10 { display: flex; gap: 10px; flex-wrap: wrap; }
+  .mb-22 { margin-bottom: 22px; }
+  .mb-20 { margin-bottom: 20px; }
+  .mb-18 { margin-bottom: 18px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-15 { margin-bottom: 15px; }
+  .mt-20 { margin-top: 20px; }
+  .mt-10 { margin-top: 10px; }
+  .fs-13-color-mint { font-size: 13px; color: #7a9e8c; }
+  .fs-14-color-mint-bg { font-size: 14px; color: #4a7060; background: var(--accent-l); border: 1px solid var(--g200); border-radius: 9px; padding: 12px 16px; }
+  .txt-center-mb-20 { text-align: center; margin-bottom: 20px; }
+  .profile-photo-preview-style { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border); }
+  .profile-av-placeholder-style { width: 80px; height: 80px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+  .approve-cover-container { margin-bottom: 20px; text-align: center; }
+  .display-block-align-left { text-align: left; display: block; }
+  .cover-preview-style { width: 100%; max-height: 240px; object-fit: cover; border-radius: 9px; border: 1.5px solid var(--border); }
+  .preview-meta-style { margin-bottom: 15px; font-size: 13px; color: #7a9e8c; }
+  .preview-cover-container-style { margin-bottom: 15px; text-align: center; }
+  .preview-body-style { margin-bottom: 20px; max-height: 60vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 9px; padding: 16px; background: var(--off); }
+</style>
 </head>
 <body>
 
 <div class="page-loader" id="page-loader">
   <div class="page-loader-logo">Bio<em><span class="brand-x">X</span>Ape</em></div>
   <div class="spinner"></div>
-  <p id="loader-msg" style="font-size:13px;color:#7a9e8c">Loading admin dashboard...</p>
+  <p id="loader-msg" class="fs-13-color-mint">Loading admin dashboard...</p>
 </div>
 
-<div class="dash-layout" id="dash-layout" style="display:none">
+<div class="dash-layout d-none" id="dash-layout">
   <aside class="dash-sidebar">
     <div class="sidebar-brand">
       <div class="sidebar-brand-mark">
@@ -41,9 +68,15 @@
       <div class="nav-section-label">Monetisation</div>
       <div class="nav-item" onclick="showTab('subscriptions')"><span class="nav-icon">💳</span>Subscriptions</div>
       <div class="nav-item" onclick="showTab('store-orders')"><span class="nav-icon">🛒</span>Store Orders</div>
-      <div class="nav-section-label">Account</div>
-      <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
-      <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
+      <div class="nav-dropdown-wrapper">
+        <div class="nav-section-label nav-dropdown-toggle" id="account-dropdown" onclick="toggleNavDropdown(this)">
+          Account <span class="dropdown-chevron">▼</span>
+        </div>
+        <div class="nav-dropdown-items collapsed" id="account-dropdown-items">
+          <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
+          <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
+        </div>
+      </div>
     </nav>
     <div class="sidebar-user">
       <div class="sidebar-user-av" id="sidebar-user-av">AD</div>
@@ -59,7 +92,7 @@
     <div class="dash-topbar">
       <div class="topbar-title" id="topbar-title">Overview</div>
       <div class="topbar-right">
-        <a href="https://www.bioxape.com" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
+        <a href="../index.html" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
         <button class="notif-bell" id="notif-bell">🔔<span class="notif-count hidden" id="notif-count">0</span></button>
       </div>
     </div>
@@ -78,10 +111,16 @@
           <div class="stat-card"><div class="stat-icon si-blue">👥</div><div><div class="stat-val" id="stat-users">0</div><div class="stat-lab">Total Users</div></div></div>
           <div class="stat-card"><div class="stat-icon si-purple">💳</div><div><div class="stat-val" id="stat-subs">0</div><div class="stat-lab">Active Subscribers</div></div></div>
         </div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:22px">
-          <div class="card">
-            <div class="card-head"><div class="card-title"><div class="card-line"></div>Awaiting Final Approval</div><button class="btn btn-primary btn-sm" onclick="showTab('review')">View All</button></div>
-            <div id="overview-review-list"></div>
+        <div class="grid-2-1">
+          <div>
+            <div class="card">
+              <div class="card-head"><div class="card-title"><div class="card-line"></div>Awaiting Final Approval</div><button class="btn btn-primary btn-sm" onclick="showTab('review')">View All</button></div>
+              <div id="overview-review-list"></div>
+            </div>
+            <div class="card d-none mt-20" id="overview-recent-reviews-card">
+              <div class="card-head"><div class="card-title"><div class="card-line"></div>Recently Actioned</div></div>
+              <div id="overview-recent-reviews-list"></div>
+            </div>
           </div>
           <div class="card">
             <div class="card-head"><div class="card-title"><div class="card-line"></div>Recent Activity</div></div>
@@ -92,14 +131,14 @@
 
       <!-- PLATFORM STATS TAB -->
       <div id="tab-platform-stats" class="tab-panel">
-        <div class="stats-row" style="margin-bottom: 22px;">
+        <div class="stats-row mb-22">
           <div class="stat-card"><div class="stat-icon si-green">📄</div><div><div class="stat-val" id="ps-stat-posts">0</div><div class="stat-lab">Total Posts</div></div></div>
           <div class="stat-card"><div class="stat-icon si-purple">👁️</div><div><div class="stat-val" id="ps-stat-views">0</div><div class="stat-lab">Total Views</div></div></div>
           <div class="stat-card"><div class="stat-icon si-blue">👥</div><div><div class="stat-val" id="ps-stat-users">0</div><div class="stat-lab">Total Users</div></div></div>
           <div class="stat-card"><div class="stat-icon si-amber">💳</div><div><div class="stat-val" id="ps-stat-subs">0</div><div class="stat-lab">Active Subscribers</div></div></div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+        <div class="grid-1-1">
           <div class="card">
             <div class="card-head"><div class="card-title"><div class="card-line"></div>Content Breakdown</div></div>
             <div class="tbl-wrap"><table>
@@ -133,6 +172,10 @@
           <div class="card-head"><div class="card-title"><div class="card-line"></div>Posts Awaiting Admin Approval</div></div>
           <div id="review-list"></div>
         </div>
+        <div class="card d-none mt-20" id="review-recent-reviews-card">
+          <div class="card-head"><div class="card-title"><div class="card-line"></div>Recently Actioned</div></div>
+          <div id="review-recent-reviews-list"></div>
+        </div>
       </div>
 
       <!-- ALL POSTS -->
@@ -140,8 +183,8 @@
         <div class="card">
           <div class="card-head">
             <div class="card-title"><div class="card-line"></div>All Posts</div>
-            <div style="display:flex;gap:8px">
-              <select class="form-select" id="posts-filter" style="width:160px" onchange="loadAllPosts()">
+            <div class="flex-gap-8">
+              <select class="form-select w-160" id="posts-filter" onchange="loadAllPosts()">
                 <option value="">All Status</option>
                 <option value="draft">Draft</option>
                 <option value="submitted">Submitted</option>
@@ -183,8 +226,8 @@
 
       <!-- SITE BUILDER -->
       <div id="tab-site-builder" class="tab-panel">
-        <div style="margin-bottom:18px">
-          <div style="font-size:14px;color:#4a7060;background:var(--accent-l);border:1px solid var(--g200);border-radius:9px;padding:12px 16px">
+        <div class="mb-18">
+          <div class="fs-14-color-mint-bg">
             🎨 <strong>Site Builder</strong> — Changes here update the public blog instantly. All sections pull live from the database.
           </div>
         </div>
@@ -206,7 +249,7 @@
       <div id="tab-adsense" class="tab-panel">
         <div class="card">
           <div class="card-head"><div class="card-title"><div class="card-line"></div>AdSense Slot Manager</div></div>
-          <div style="margin-bottom:16px" class="alert alert-info">Paste your AdSense code for each slot below. Toggle slots ON when AdSense is approved. The blog template reads these live from the database.</div>
+          <div class="alert alert-info mb-16">Paste your AdSense code for each slot below. Toggle slots ON when AdSense is approved. The blog template reads these live from the database.</div>
           <div id="adsense-slots"></div>
         </div>
       </div>
@@ -235,15 +278,15 @@
 
       <!-- PROFILE -->
       <div id="tab-profile" class="tab-panel">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+        <div class="grid-1-1">
           <div class="card">
             <div class="card-head"><div class="card-title"><div class="card-line"></div>Admin Profile</div></div>
             <form id="profile-form">
-              <div style="text-align:center;margin-bottom:20px">
-                <img id="profile-photo-preview" src="" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);display:none"/>
-                <div id="profile-av-placeholder" style="width:80px;height:80px;border-radius:50%;background:var(--accent);color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto"></div>
-                <button type="button" class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="document.getElementById('profile-photo').click()">Change Photo</button>
-                <input type="file" id="profile-photo" accept="image/*" style="display:none"/>
+              <div class="txt-center-mb-20">
+                <img id="profile-photo-preview" class="profile-photo-preview-style d-none" src="" alt=""/>
+                <div id="profile-av-placeholder" class="profile-av-placeholder-style"></div>
+                <button type="button" class="btn btn-secondary btn-sm mt-10" onclick="document.getElementById('profile-photo').click()">Change Photo</button>
+                <input type="file" id="profile-photo" class="d-none" accept="image/*"/>
               </div>
               <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="profile-name"/></div>
               <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" id="profile-phone"/></div>
@@ -284,8 +327,8 @@
     <div class="modal-head"><div class="modal-title">Invite New User</div><button class="modal-close" onclick="closeModal('invite-modal')">✕</button></div>
     <div class="form-group"><label class="form-label">Full Name <span>*</span></label><input class="form-input" type="text" id="invite-name" placeholder="Dr. Jane Smith"/></div>
     <div class="form-group"><label class="form-label">Email Address <span>*</span></label><input class="form-input" type="email" id="invite-email" placeholder="jane@university.edu"/></div>
-    <div class="form-group"><label class="form-label">Role <span>*</span></label>
-      <select class="form-select" id="invite-role"><option value="author">Author</option><option value="editor">Editor</option></select>
+    <div class="form-group"><label class="form-label" for="invite-role">Role <span>*</span></label>
+      <select class="form-select" id="invite-role" title="Role selection"><option value="author">Author</option><option value="editor">Editor</option></select>
     </div>
     <div class="form-group"><label class="form-label">Phone (for WhatsApp alerts)</label><input class="form-input" type="tel" id="invite-phone" placeholder="+919876543210"/></div>
     <div class="modal-footer">
@@ -299,7 +342,11 @@
 <div class="modal-overlay" id="approve-modal">
   <div class="modal modal-lg">
     <div class="modal-head"><div class="modal-title" id="approve-modal-title">Final Review</div><button class="modal-close" onclick="closeModal('approve-modal')">✕</button></div>
-    <div id="approve-preview-area" style="margin-bottom:20px"></div>
+    <div id="approve-cover-container" class="approve-cover-container d-none">
+      <label class="form-label display-block-align-left">Cover Image</label>
+      <img id="approve-cover-preview" src="" alt="Cover Image" class="cover-preview-style"/>
+    </div>
+    <div id="approve-preview-area" class="mb-20"></div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Final Categories (Blogger Labels)</label>
@@ -311,10 +358,30 @@
         <textarea class="form-textarea" id="approve-note" rows="2" placeholder="Note to author/editor..."></textarea>
       </div>
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <div class="flex-wrap-gap-10">
       <button class="btn btn-primary" onclick="finalApprove()">✅ Approve & Publish to Blog</button>
+      <button class="btn btn-amber"   onclick="finalRequestChanges()">🔄 Request Changes</button>
       <button class="btn btn-danger"  onclick="finalReject()">✕ Reject</button>
       <button class="btn btn-secondary" onclick="closeModal('approve-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW POST MODAL -->
+<div class="modal-overlay" id="preview-modal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title" id="preview-modal-title">Post Preview</div>
+      <button class="modal-close" onclick="closeModal('preview-modal')">✕</button>
+    </div>
+    <div class="preview-meta-style" id="preview-modal-meta"></div>
+    <div id="preview-cover-container" class="preview-cover-container-style d-none">
+      <img id="preview-cover-preview" src="" alt="Cover Image" class="cover-preview-style"/>
+    </div>
+    <div id="preview-comments-area" class="mb-15 d-none"></div>
+    <div id="preview-preview-area" class="preview-body-style"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('preview-modal')">Close</button>
     </div>
   </div>
 </div>
@@ -323,10 +390,10 @@
 <div class="modal-overlay" id="cat-modal">
   <div class="modal">
     <div class="modal-head"><div class="modal-title">Add Category</div><button class="modal-close" onclick="closeModal('cat-modal')">✕</button></div>
-    <div class="form-group"><label class="form-label">Display Name <span>*</span></label><input class="form-input" id="cat-display" placeholder="CRISPR & Gene Editing"/></div>
-    <div class="form-group"><label class="form-label">Blogger Label <span>*</span></label><input class="form-input" id="cat-label" placeholder="CRISPR"/><div class="form-hint">Exact label used in Blogger posts. No spaces.</div></div>
-    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="cat-desc" rows="2"></textarea></div>
-    <div class="form-group"><label class="form-label">Nav Order</label><input class="form-input" type="number" id="cat-order" value="10"/></div>
+    <div class="form-group"><label class="form-label" for="cat-display">Display Name <span>*</span></label><input class="form-input" id="cat-display" placeholder="CRISPR & Gene Editing"/></div>
+    <div class="form-group"><label class="form-label" for="cat-label">Blogger Label <span>*</span></label><input class="form-input" id="cat-label" placeholder="CRISPR"/><div class="form-hint">Exact label used in Blogger posts. No spaces.</div></div>
+    <div class="form-group"><label class="form-label" for="cat-desc">Description</label><textarea class="form-textarea" id="cat-desc" placeholder="Brief category description..." rows="2"></textarea></div>
+    <div class="form-group"><label class="form-label" for="cat-order">Nav Order</label><input class="form-input" type="number" id="cat-order" placeholder="e.g. 10" title="Navigation order value" value="10"/></div>
     <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('cat-modal')">Cancel</button><button class="btn btn-primary" onclick="saveCategory()">Add Category</button></div>
   </div>
 </div>
@@ -349,6 +416,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   fillProfileForm();
 });
 
+function toggleNavDropdown(el) {
+  const wrapper = el.closest('.nav-dropdown-wrapper');
+  const items = wrapper.querySelector('.nav-dropdown-items');
+  wrapper.classList.toggle('open');
+  items.classList.toggle('collapsed');
+}
+
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
@@ -358,6 +432,16 @@ function showTab(name) {
   document.querySelectorAll('.nav-item').forEach(i => {
     if (i.getAttribute('onclick')?.includes(`'${name}'`)) i.classList.add('active');
   });
+
+  // Auto-expand Account dropdown if active item is inside it
+  if (['profile', 'notifications-page'].includes(name)) {
+    const dropdown = document.getElementById('account-dropdown');
+    const items = document.getElementById('account-dropdown-items');
+    if (dropdown && items) {
+      dropdown.classList.add('open');
+      items.classList.remove('collapsed');
+    }
+  }
 
   const titles = {
     'overview':'Overview',
@@ -395,7 +479,7 @@ async function loadOverview() {
     apiCall('/subscribe/all')
   ]);
   const pending = postsRes?.data?.filter(p=>p.status==='admin_review')||[];
-  const published = postsRes?.data?.filter(p=>p.status==='published')||[];
+  const published = postsRes?.data?.filter(p=>['published', 'approved'].includes(p.status))||[];
   document.getElementById('stat-review').textContent  = pending.length;
   document.getElementById('stat-pub').textContent     = published.length;
   document.getElementById('stat-users').textContent   = usersRes?.data?.length||0;
@@ -405,6 +489,9 @@ async function loadOverview() {
   const el = document.getElementById('overview-review-list');
   if (!pending.length) { el.innerHTML=emptyState('✅','All clear!','No posts awaiting approval.'); }
   else el.innerHTML = pending.slice(0,4).map(p=>adminReviewCard(p)).join('');
+
+  // Render recent reviews
+  renderRecentReviews(postsRes?.data||[]);
 
   // Recent activity
   const actEl = document.getElementById('recent-activity');
@@ -471,16 +558,22 @@ async function loadPlatformStats() {
 }
 
 function adminReviewCard(p) {
+  const coverHtml = p.coverImageUrl 
+    ? `<div style="width:120px;height:80px;flex-shrink:0;border-radius:8px;overflow:hidden;border:1px solid var(--border)"><img src="${p.coverImageUrl}" style="width:100%;height:100%;object-fit:cover"/></div>`
+    : '';
   return `<div style="border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
-      <div>
-        <div style="font-weight:700;font-size:14.5px">${p.title}</div>
-        <div style="font-size:12px;color:#7a9e8c;margin-top:3px">By ${p.authorName} · Editor: ${p.editorName||'—'} ✓ · ${p.category||'—'}</div>
-        ${p.editorComment?`<div style="margin-top:6px;font-size:12.5px;color:#4a7060;background:var(--g50);padding:7px 10px;border-radius:6px">Editor note: "${p.editorComment}"</div>`:''}
-      </div>
-      <div style="display:flex;gap:8px;flex-shrink:0">
-        ${p.docxFileUrl?`<a class="btn btn-secondary btn-sm" href="${p.docxFileUrl}" target="_blank">⬇</a>`:''}
-        <button class="btn btn-primary btn-sm" onclick="openApproveModal('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${(p.allCategories||[p.category]).join(',')}')">Final Review</button>
+    <div style="display:flex;gap:16px;align-items:flex-start">
+      ${coverHtml}
+      <div style="flex-grow:1;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:700;font-size:14.5px">${p.title}</div>
+          <div style="font-size:12px;color:#7a9e8c;margin-top:3px">By ${p.authorName} · Editor: ${p.editorName||'—'} ✓ · ${p.category||'—'}</div>
+          ${p.editorComment?`<div style="margin-top:6px;font-size:12.5px;color:#4a7060;background:var(--g50);padding:7px 10px;border-radius:6px">Editor note: "${p.editorComment}"</div>`:''}
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          ${p.docxFileUrl?`<a class="btn btn-secondary btn-sm" href="${p.docxFileUrl}" target="_blank">⬇</a>`:''}
+          <button class="btn btn-primary btn-sm" onclick="openApproveModal('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${(p.allCategories||[p.category]).join(',')}','${(p.coverImageUrl||'').replace(/'/g,"\\'")}')">Final Review</button>
+        </div>
       </div>
     </div>
   </div>`;
@@ -492,16 +585,28 @@ async function loadReviewQueue() {
   const result = await apiCall('/posts/admin-queue');
   if (!result?.success) { el.innerHTML='Failed to load'; return; }
   const pending = result.data.filter(p=>p.status==='admin_review');
-  if (!pending.length) { el.innerHTML=emptyState('✅','Nothing to review','All submissions are up to date.'); return; }
-  el.innerHTML = pending.map(p=>adminReviewCard(p)).join('');
+  if (!pending.length) { el.innerHTML=emptyState('✅','Nothing to review','All submissions are up to date.'); }
+  else { el.innerHTML = pending.map(p=>adminReviewCard(p)).join(''); }
+
+  renderRecentReviews(result.data);
 }
 
-async function openApproveModal(postId, title, docxUrl, categories) {
+async function openApproveModal(postId, title, docxUrl, categories, coverImageUrl) {
   approvingPostId = postId;
   document.getElementById('approve-modal-title').textContent = `Final Review: ${title}`;
   document.getElementById('approve-categories').value = categories||'';
   document.getElementById('approve-note').value = '';
   document.getElementById('approve-modal').classList.add('open');
+  
+  const coverContainer = document.getElementById('approve-cover-container');
+  const coverPreview = document.getElementById('approve-cover-preview');
+  if (coverImageUrl) {
+    coverPreview.src = coverImageUrl;
+    coverContainer.style.display = 'block';
+  } else {
+    coverContainer.style.display = 'none';
+  }
+
   if (docxUrl) await previewDocxUrl(docxUrl, document.getElementById('approve-preview-area'));
   else document.getElementById('approve-preview-area').innerHTML='<div class="alert alert-info">No preview available. Download file to review.</div>';
 }
@@ -516,7 +621,26 @@ async function finalApprove() {
     closeModal('approve-modal');
     approvingPostId=null;
     loadOverview();
+    if (document.getElementById('tab-review').classList.contains('active')) {
+      loadReviewQueue();
+    }
   } else showToast(result?.message||'Failed to publish','error');
+}
+
+async function finalRequestChanges() {
+  if (!approvingPostId) return;
+  const note = document.getElementById('approve-note').value.trim();
+  if (!note) { showToast('Provide a reason/feedback for requesting changes','error'); return; }
+  const result = await apiCall(`/posts/${approvingPostId}/admin-request-changes`,'PUT',{ adminComment: note });
+  if (result?.success) {
+    showToast('Changes requested — author notified','success');
+    closeModal('approve-modal');
+    approvingPostId=null;
+    loadOverview();
+    if (document.getElementById('tab-review').classList.contains('active')) {
+      loadReviewQueue();
+    }
+  } else showToast(result?.message||'Failed to request changes','error');
 }
 
 async function finalReject() {
@@ -528,6 +652,9 @@ async function finalReject() {
     closeModal('approve-modal');
     approvingPostId=null;
     loadOverview();
+    if (document.getElementById('tab-review').classList.contains('active')) {
+      loadReviewQueue();
+    }
   } else showToast(result?.message||'Failed','error');
 }
 
@@ -546,8 +673,9 @@ async function loadAllPosts() {
     <td>${statusBadge(p.status)}</td>
     <td>${formatDate(p.createdAt)}</td>
     <td style="display:flex;align-items:center;gap:6px">
-      ${p.status==='admin_review'?`<button class="btn btn-primary btn-sm" onclick="openApproveModal('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${(p.allCategories||[]).join(',')}')">Review</button>`:''}
-      ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View</a>`:''}
+      ${p.status==='admin_review'?`<button class="btn btn-primary btn-sm" onclick="openApproveModal('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${(p.allCategories||[]).join(',')}','${(p.coverImageUrl||'').replace(/'/g,"\\'")}')">Review</button>`:''}
+      ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl.startsWith('/')?'..'+p.bloggerPostUrl:p.bloggerPostUrl}" target="_blank">View Blog</a>`:''}
+      ${p.status!=='admin_review'?`<button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}','${p.coverImageUrl||''}','${p.editorComment||''}','${p.adminComment||''}')">Open</button>`:''}
       <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}', '${p.status}')">Delete</button>
     </td>
   </tr>`).join('');
@@ -834,6 +962,125 @@ function fillProfileForm() {
     document.getElementById('profile-photo-preview').src = user.photoUrl;
     document.getElementById('profile-photo-preview').style.display='block';
     document.getElementById('profile-av-placeholder').style.display='none';
+  }
+}
+
+function initials(name) {
+  return name ? name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : '';
+}
+
+async function openPreview(postId, title, docxUrl, status, category, contentType, dateStr, coverImageUrl, editorComment, adminComment) {
+  document.getElementById('preview-modal-title').textContent = title;
+  document.getElementById('preview-modal-meta').innerHTML = `
+    <strong>Status:</strong> ${statusBadge(status)} &middot; 
+    <strong>Category:</strong> ${category||'—'} &middot; 
+    <strong>Type:</strong> ${contentType||'article'} &middot; 
+    <strong>Date:</strong> ${formatDate(dateStr)}
+  `;
+  
+  // Cover Image
+  const coverContainer = document.getElementById('preview-cover-container');
+  const coverPreview = document.getElementById('preview-cover-preview');
+  if (coverImageUrl) {
+    coverPreview.src = coverImageUrl;
+    coverContainer.style.display = 'block';
+  } else {
+    coverContainer.style.display = 'none';
+  }
+
+  // Comments / Feedback
+  const commentsArea = document.getElementById('preview-comments-area');
+  let commentsHtml = '';
+  if (editorComment) {
+    commentsHtml += `<div style="background:#fef3c7;border:1px solid #fcd34d;padding:10px 14px;border-radius:8px;font-size:13px;color:#d97706;margin-bottom:8px">
+      <strong>Editor Feedback:</strong> "${editorComment}"
+    </div>`;
+  }
+  if (adminComment) {
+    commentsHtml += `<div style="background:#fee2e2;border:1px solid #fca5a5;padding:10px 14px;border-radius:8px;font-size:13px;color:#dc2626;">
+      <strong>Admin Feedback:</strong> "${adminComment}"
+    </div>`;
+  }
+  if (commentsHtml) {
+    commentsArea.innerHTML = commentsHtml;
+    commentsArea.style.display = 'block';
+  } else {
+    commentsArea.style.display = 'none';
+  }
+
+  document.getElementById('preview-modal').classList.add('open');
+  
+  const area = document.getElementById('preview-preview-area');
+  if (docxUrl) {
+    await previewDocxUrl(docxUrl, area);
+  } else {
+    area.innerHTML = '<div class="alert alert-info">No document preview available.</div>';
+  }
+}
+
+function postRecentReviewCard(p) {
+  let decisionBadge = '';
+  if (['approved', 'published'].includes(p.status)) {
+    decisionBadge = `<span class="badge badge-published">✅ Published</span>`;
+  } else if (p.status === 'changes_needed') {
+    decisionBadge = `<span class="badge badge-changes-needed">🔄 Changes Requested</span>`;
+  } else if (p.status === 'rejected') {
+    decisionBadge = `<span class="badge badge-rejected">✕ Rejected</span>`;
+  } else {
+    decisionBadge = `<span class="badge badge-submitted">${p.status}</span>`;
+  }
+
+  const coverHtml = p.coverImageUrl 
+    ? `<div style="width:70px;height:50px;flex-shrink:0;border-radius:6px;overflow:hidden;border:1px solid var(--border)"><img src="${p.coverImageUrl}" style="width:100%;height:100%;object-fit:cover"/></div>`
+    : '';
+
+  return `<div style="border:1.5px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:10px;background:var(--off)">
+    <div style="display:flex;gap:12px;align-items:center">
+      ${coverHtml}
+      <div style="flex-grow:1;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:600;font-size:14px;color:var(--text1)">${p.title}</div>
+          <div style="font-size:11.5px;color:#7a9e8c;margin-top:2px">By ${p.authorName} · Actioned ${timeAgo(p.adminReviewedAt || p.updatedAt)}</div>
+          ${p.adminComment ? `<div style="font-size:12px;color:#4a7060;margin-top:4px;font-style:italic">Note: "${p.adminComment}"</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          ${decisionBadge}
+          <button class="btn btn-secondary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}', '${p.coverImageUrl||''}', '${p.editorComment||''}', '${p.adminComment||''}')">View</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderRecentReviews(posts) {
+  const reviewed = posts.filter(p => ['approved', 'published', 'rejected'].includes(p.status) || (p.status === 'changes_needed' && p.adminReviewedAt));
+  // Sort by adminReviewedAt desc, fallback to updatedAt
+  reviewed.sort((a, b) => new Date(b.adminReviewedAt || b.updatedAt) - new Date(a.adminReviewedAt || a.updatedAt));
+  
+  const count = reviewed.length;
+  
+  // Render Overview recent reviews
+  const overCard = document.getElementById('overview-recent-reviews-card');
+  const overList = document.getElementById('overview-recent-reviews-list');
+  if (overCard && overList) {
+    if (count > 0) {
+      overCard.style.display = 'block';
+      overList.innerHTML = reviewed.slice(0, 5).map(p => postRecentReviewCard(p)).join('');
+    } else {
+      overCard.style.display = 'none';
+    }
+  }
+
+  // Render Content Review recent reviews
+  const reviewCard = document.getElementById('review-recent-reviews-card');
+  const reviewList = document.getElementById('review-recent-reviews-list');
+  if (reviewCard && reviewList) {
+    if (count > 0) {
+      reviewCard.style.display = 'block';
+      reviewList.innerHTML = reviewed.slice(0, 5).map(p => postRecentReviewCard(p)).join('');
+    } else {
+      reviewCard.style.display = 'none';
+    }
   }
 }
 </script>

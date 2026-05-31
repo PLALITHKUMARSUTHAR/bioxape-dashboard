@@ -490,6 +490,9 @@ img{max-width:100%;height:auto;display:block}
           <a class='see-all' href='/'>View all</a>
         </div>
 
+        <!-- DYNAMIC LATEST ARTICLES CONTAINER -->
+        <div id='bx-latest-articles-grid' class='grid3' style='display:none;margin-bottom:28px'></div>
+
         <!-- BLOGGER POSTS WIDGET — renders your actual blog posts -->
         <div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px'>
           <b:section class='blog-posts-widget' id='main' showaddelement='yes'/>
@@ -749,6 +752,8 @@ async function fetchSiteConfig() {
     if (cfg.ticker)               renderTicker(cfg.ticker);
     if (cfg.category_nav)         renderCategoryNav(cfg.category_nav);
     if (cfg.hero_featured||cfg.hero_stack) renderHero(cfg.hero_featured, cfg.hero_stack);
+    if (cfg.latest_articles)      renderLatestArticlesConfig(cfg.latest_articles);
+    fetchLatestArticles(cfg.latest_articles?.limit || 6, cfg.latest_articles?.title || 'Latest Articles', cfg.latest_articles?.showCoverImage !== false);
     if (cfg.news_strip)           renderNewsStrip(cfg.news_strip);
     if (cfg.trending)             renderTrending(cfg.trending);
     if (cfg.research_spotlight)   renderResearch(cfg.research_spotlight);
@@ -760,6 +765,58 @@ async function fetchSiteConfig() {
     if (cfg.adsense_slots)        renderAdSense(cfg.adsense_slots);
     renderAuthors();
   } catch(e) { console.warn('CMS sync failed - using static fallback', e.message); }
+}
+
+function renderLatestArticlesConfig(data) {
+  const titleEl = document.querySelector('.sec-title');
+  if (titleEl && data.title) {
+    titleEl.innerHTML = `<div class='sec-line'></div>${data.title.replace('Articles', `<span class='sec-title-acc'>Articles</span>`)}`;
+  }
+}
+
+async function fetchLatestArticles(limit, title, showCover) {
+  try {
+    const res = await fetch(CMS_API + '/posts/public/feed?limit=' + limit);
+    const data = await res.json();
+    if (!data.success || !data.posts || data.posts.length === 0) return;
+    
+    const gridEl = document.getElementById('bx-latest-articles-grid');
+    if (!gridEl) return;
+    
+    gridEl.innerHTML = data.posts.map(p => {
+      let thumbHtml = '';
+      if (showCover && p.coverImageUrl) {
+        thumbHtml = `<div style="height:155px;overflow:hidden;border-bottom:1.5px solid var(--border)"><img src="${p.coverImageUrl}" style="width:100%;height:100%;object-fit:cover"/></div>`;
+      } else {
+        thumbHtml = `<div class="art-img ai1">🔬</div>`;
+      }
+      
+      return `
+        <div class="art-card" onclick="window.location.open ? window.open('${p.bloggerPostUrl || '#'}', '_blank') : window.location.href='${p.bloggerPostUrl || '#'}'">
+          ${thumbHtml}
+          <div class="art-body">
+            <span class="tag tg">${p.category || 'Science'}</span>
+            <div class="art-title">${p.title}</div>
+            <div class="art-exc">${p.excerpt || ''}</div>
+            <div class="art-meta">
+              <div class="art-meta-left">
+                <div class="av">${p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU'}</div>
+                <span>${p.authorName || 'Author'}</span>
+              </div>
+              <span>${p.readTimeMinutes || 1} min read</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    gridEl.style.display = 'grid';
+    
+    const bloggerPosts = document.querySelector('.blog-posts-widget');
+    if (bloggerPosts) bloggerPosts.style.display = 'none';
+  } catch(e) {
+    console.warn('Failed to fetch dynamic articles:', e.message);
+  }
 }
 
 function renderTicker(data) {

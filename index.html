@@ -9,6 +9,21 @@
 <style>
   .login-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
   @media(max-width:768px){.login-page{grid-template-columns:1fr}.login-left{display:none}}
+
+  /* Class replacements for inline styles */
+  .relative-z1 { position: relative; z-index: 1; }
+  .flex-align-center-gap-10-mb-32 { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+  .login-heading { font-size: 32px; font-family: 'Playfair Display', serif; color: #fff; font-weight: 700; line-height: 1.2; margin-bottom: 14px; }
+  .login-subheading { font-size: 15px; color: rgba(255, 255, 255, 0.7); line-height: 1.65; max-width: 380px; }
+  .flex-between-mb-20 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .remember-label { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #4a7060; cursor: pointer; }
+  .remember-checkbox { accent-color: #27a363; }
+  .forgot-link { font-size: 13px; color: #27a363; }
+  .register-text { text-align: center; margin-top: 22px; font-size: 13px; color: #7a9e8c; }
+  .register-link { color: #27a363; font-weight: 500; }
+  .modal-width-400 { max-width: 400px !important; }
+  .modal-width-420 { max-width: 420px !important; }
+  .modal-desc { font-size: 13.5px; color: #4a7060; margin-bottom: 18px; }
 </style>
 </head>
 <body data-page="login">
@@ -17,17 +32,17 @@
 
   <!-- LEFT PANEL -->
   <div class="login-left">
-    <div style="position:relative;z-index:1">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px">
+    <div class="relative-z1">
+      <div class="flex-align-center-gap-10-mb-32">
         <div class="sidebar-brand-mark">
           <svg viewBox="0 0 24 24"><path d="M12 3c0 0-3 4-3 8s3 8 3 8"/><path d="M12 3c0 0 3 4 3 8s-3 8-3 8"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
         </div>
         <div class="login-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
       </div>
-      <div style="font-size:32px;font-family:'Playfair Display',serif;color:#fff;font-weight:700;line-height:1.2;margin-bottom:14px">
+      <div class="login-heading">
         The World's Best<br>Biotech Publishing<br>Platform
       </div>
-      <div style="font-size:15px;color:rgba(255,255,255,.7);line-height:1.65;max-width:380px">
+      <div class="login-subheading">
         A complete ecosystem for biotech content — from author submission to editorial review to global publishing.
       </div>
       <div class="login-features">
@@ -61,28 +76,28 @@
           <label class="form-label" for="login-password">Password</label>
           <input class="form-input" type="password" id="login-password" placeholder="Enter your password" required/>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-          <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:#4a7060;cursor:pointer">
-            <input type="checkbox" style="accent-color:#27a363"/> Remember me
+        <div class="flex-between-mb-20">
+          <label class="remember-label">
+            <input type="checkbox" class="remember-checkbox"/> Remember me
           </label>
-          <a href="#" style="font-size:13px;color:#27a363" onclick="showForgotPassword()">Forgot password?</a>
+          <a href="#" class="forgot-link" onclick="showForgotPassword()">Forgot password?</a>
         </div>
         <button class="btn btn-primary btn-full" id="login-btn" type="submit">Sign In</button>
       </form>
 
-      <div style="text-align:center;margin-top:22px;font-size:13px;color:#7a9e8c">
+      <div class="register-text">
         Don't have an account?
-        <a href="#" style="color:#27a363;font-weight:500" onclick="showRequestAccess()">Request Access</a>
+        <a href="#" class="register-link" onclick="showRequestAccess()">Request Access</a>
       </div>
 
       <!-- Forgot Password Modal -->
       <div id="forgot-modal" class="modal-overlay">
-        <div class="modal" style="max-width:400px">
+        <div class="modal modal-width-400">
           <div class="modal-head">
             <div class="modal-title">Reset Password</div>
             <button class="modal-close" onclick="document.getElementById('forgot-modal').classList.remove('open')">✕</button>
           </div>
-          <p style="font-size:13.5px;color:#4a7060;margin-bottom:18px">Enter your email and we will send you a reset link.</p>
+          <p class="modal-desc">Enter your email and we will send you a reset link.</p>
           <div class="form-group">
             <label class="form-label">Email Address</label>
             <input class="form-input" type="email" id="forgot-email" placeholder="you@example.com"/>
@@ -93,12 +108,12 @@
 
       <!-- Request Access Modal -->
       <div id="access-modal" class="modal-overlay">
-        <div class="modal" style="max-width:420px">
+        <div class="modal modal-width-420">
           <div class="modal-head">
             <div class="modal-title">Request Author Access</div>
             <button class="modal-close" onclick="document.getElementById('access-modal').classList.remove('open')">✕</button>
           </div>
-          <p style="font-size:13.5px;color:#4a7060;margin-bottom:18px">
+          <p class="modal-desc">
             Author accounts are invitation-only. Fill this form and the admin will review your request.
           </p>
           <div class="form-group">

@@ -6,16 +6,37 @@
 <title>Author Dashboard — BioXApe</title>
 <link rel="stylesheet" href="css/dashboard.css"/>
 <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+<style>
+  /* Clean utility styles to eliminate inline styles */
+  .d-none { display: none !important; }
+  .grid-1-1 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .flex-gap-12 { display: flex; gap: 12px; }
+  .mb-15 { margin-bottom: 15px; }
+  .mb-20 { margin-bottom: 20px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-10 { margin-top: 10px; }
+  .mt-18 { margin-top: 18px; }
+  .p-18 { padding: 18px; }
+  .fs-24 { font-size: 24px; }
+  .fs-13-color-mint { font-size: 13px; color: #7a9e8c; }
+  .tab-eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text3); letter-spacing: 1px; margin-bottom: 10px; }
+  .txt-center-mb-20 { text-align: center; margin-bottom: 20px; }
+  .profile-photo-preview-style { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border); }
+  .profile-av-placeholder-style { width: 80px; height: 80px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+  .cover-preview-sm { margin-top: 10px; width: 100%; max-height: 200px; object-fit: cover; border-radius: 9px; border: 1.5px solid var(--border); }
+  .preview-meta-style { margin-bottom: 15px; font-size: 13px; color: #7a9e8c; }
+  .preview-body-style { margin-bottom: 20px; max-height: 60vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 9px; padding: 16px; background: var(--off); }
+</style>
 </head>
 <body>
 
 <div class="page-loader" id="page-loader">
   <div class="page-loader-logo">Bio<em><span class="brand-x">X</span>Ape</em></div>
   <div class="spinner"></div>
-  <p id="loader-msg" style="font-size:13px;color:#7a9e8c">Loading your dashboard...</p>
+  <p id="loader-msg" class="fs-13-color-mint">Loading your dashboard...</p>
 </div>
 
-<div class="dash-layout" id="dash-layout" style="display:none">
+<div class="dash-layout d-none" id="dash-layout">
 
   <!-- SIDEBAR -->
   <aside class="dash-sidebar">
@@ -33,9 +54,15 @@
       <div class="nav-item" onclick="showTab('new-post')"><span class="nav-icon">✍️</span>Write New Post</div>
       <div class="nav-item" onclick="showTab('my-posts')"><span class="nav-icon">📝</span>All My Posts</div>
       <div class="nav-item" onclick="showTab('drafts')"><span class="nav-icon">💾</span>Drafts</div>
-      <div class="nav-section-label">Account</div>
-      <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
-      <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
+      <div class="nav-dropdown-wrapper">
+        <div class="nav-section-label nav-dropdown-toggle" id="account-dropdown" onclick="toggleNavDropdown(this)">
+          Account <span class="dropdown-chevron">▼</span>
+        </div>
+        <div class="nav-dropdown-items collapsed" id="account-dropdown-items">
+          <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>My Profile</div>
+          <div class="nav-item" onclick="showTab('notifications-page')"><span class="nav-icon">🔔</span>Notifications</div>
+        </div>
+      </div>
     </nav>
     <div class="sidebar-user">
       <div class="sidebar-user-av" id="sidebar-user-av">AU</div>
@@ -52,7 +79,7 @@
     <div class="dash-topbar">
       <div class="topbar-title" id="topbar-title">Overview</div>
       <div class="topbar-right">
-        <a href="https://www.bioxape.com" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
+        <a href="../index.html" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
         <button class="notif-bell" id="notif-bell">🔔<span class="notif-count hidden" id="notif-count">0</span></button>
       </div>
     </div>
@@ -70,7 +97,7 @@
 
       <!-- OVERVIEW TAB -->
       <div id="tab-overview" class="tab-panel active">
-        <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text3);letter-spacing:1px;margin-bottom:10px">My Written Posts</div>
+        <div class="tab-eyebrow">My Written Posts</div>
         <div class="stats-row">
           <div class="stat-card"><div class="stat-icon si-green">📄</div><div><div class="stat-val" id="stat-total">0</div><div class="stat-lab">Total Posts</div></div></div>
           <div class="stat-card"><div class="stat-icon si-amber">⏳</div><div><div class="stat-val" id="stat-pending">0</div><div class="stat-lab">Under Review</div></div></div>
@@ -118,7 +145,7 @@
                   <option>Industry News</option><option>Interviews</option>
                 </select>
               </div>
-              <div class="form-group" style="display:none">
+              <div class="form-group d-none">
                 <label class="form-label">Tags (press Enter to add)</label>
                 <div class="tags-input-wrap" id="tags-wrap">
                   <input class="tags-input" type="text" id="tags-input" placeholder="Add tags..."/>
@@ -137,19 +164,19 @@
                 <div class="upload-zone-text">Drop your .docx file here or click to browse</div>
                 <div class="upload-zone-hint">Maximum 20MB · Microsoft Word format only</div>
               </div>
-              <input type="file" id="docx-input" accept=".docx" style="display:none"/>
-              <button type="button" class="btn btn-secondary btn-sm" id="remove-docx-btn" style="display:none;margin-top:8px" onclick="removeDocxFile()">✕ Remove Document</button>
+              <input type="file" id="docx-input" class="d-none" accept=".docx"/>
+              <button type="button" class="btn btn-secondary btn-sm d-none mt-8" id="remove-docx-btn" onclick="removeDocxFile()">✕ Remove Document</button>
             </div>
             <div id="docx-preview-area"></div>
-            <div class="form-group" style="margin-top:18px">
+            <div class="form-group mt-18">
               <label class="form-label">Cover Image</label>
-              <div class="upload-zone" id="cover-zone" style="padding:18px">
-                <div class="upload-zone-icon" style="font-size:24px">🖼️</div>
+              <div class="upload-zone p-18" id="cover-zone">
+                <div class="upload-zone-icon fs-24">🖼️</div>
                 <div class="upload-zone-text">Upload cover image</div>
                 <div class="upload-zone-hint">JPG, PNG, WebP · Max 5MB</div>
               </div>
-              <input type="file" id="cover-input" accept="image/*" style="display:none"/>
-              <img id="cover-preview" style="display:none;margin-top:10px;width:100%;max-height:200px;object-fit:cover;border-radius:9px;border:1.5px solid var(--border)"/>
+              <input type="file" id="cover-input" class="d-none" accept="image/*"/>
+              <img id="cover-preview" class="d-none cover-preview-sm" alt="Cover preview"/>
             </div>
             <div class="form-group">
               <label class="form-label">Notes for Editor (optional)</label>
@@ -160,7 +187,7 @@
             <input type="hidden" id="post-word-count"/>
             <input type="hidden" id="post-read-time"/>
             <input type="hidden" id="editing-post-id"/>
-            <div style="display:flex;gap:12px;margin-top:8px">
+            <div class="flex-gap-12 mt-8">
               <button type="button" class="btn btn-secondary" onclick="saveDraft()">💾 Save Draft</button>
               <button type="submit" class="btn btn-primary" id="submit-btn">🚀 Submit for Review</button>
             </div>
@@ -189,15 +216,15 @@
 
       <!-- PROFILE TAB -->
       <div id="tab-profile" class="tab-panel">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+        <div class="grid-1-1">
           <div class="card">
             <div class="card-head"><div class="card-title"><div class="card-line"></div>My Profile</div></div>
             <form id="profile-form">
-              <div style="text-align:center;margin-bottom:20px">
-                <img id="profile-photo-preview" src="" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);display:none"/>
-                <div id="profile-av-placeholder" style="width:80px;height:80px;border-radius:50%;background:var(--accent);color:#fff;font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto"></div>
-                <button type="button" class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="document.getElementById('profile-photo').click()">Change Photo</button>
-                <input type="file" id="profile-photo" accept="image/*" style="display:none"/>
+              <div class="txt-center-mb-20">
+                <img id="profile-photo-preview" class="profile-photo-preview-style d-none" src="" alt=""/>
+                <div id="profile-av-placeholder" class="profile-av-placeholder-style"></div>
+                <button type="button" class="btn btn-secondary btn-sm mt-10" onclick="document.getElementById('profile-photo').click()">Change Photo</button>
+                <input type="file" id="profile-photo" class="d-none" accept="image/*"/>
               </div>
               <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="profile-name"/></div>
               <div class="form-group"><label class="form-label">Phone (for WhatsApp alerts)</label><input class="form-input" type="tel" id="profile-phone" placeholder="+919876543210"/></div>
@@ -239,8 +266,8 @@
       <div class="modal-title" id="preview-modal-title">Post Preview</div>
       <button class="modal-close" onclick="closeModal('preview-modal')">✕</button>
     </div>
-    <div style="margin-bottom:15px;font-size:13px;color:#7a9e8c" id="preview-modal-meta"></div>
-    <div id="preview-preview-area" style="margin-bottom:20px;max-height:60vh;overflow-y:auto;border:1px solid var(--border);border-radius:9px;padding:16px;background:var(--off)"></div>
+    <div class="preview-meta-style" id="preview-modal-meta"></div>
+    <div id="preview-preview-area" class="preview-body-style"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('preview-modal')">Close</button>
     </div>
@@ -307,11 +334,29 @@ async function populateCategoriesDropdown() {
   }
 }
 
+function toggleNavDropdown(el) {
+  const wrapper = el.closest('.nav-dropdown-wrapper');
+  const items = wrapper.querySelector('.nav-dropdown-items');
+  wrapper.classList.toggle('open');
+  items.classList.toggle('collapsed');
+}
+
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
   document.getElementById('tab-'+name)?.classList.add('active');
   document.querySelectorAll(`.nav-item`).forEach(i=>{ if(i.textContent.toLowerCase().includes(name.replace('-',' '))) i.classList.add('active'); });
+  
+  // Auto-expand Account dropdown if active item is inside it
+  if (['profile', 'notifications-page'].includes(name)) {
+    const dropdown = document.getElementById('account-dropdown');
+    const items = document.getElementById('account-dropdown-items');
+    if (dropdown && items) {
+      dropdown.classList.add('open');
+      items.classList.remove('collapsed');
+    }
+  }
+
   const titles = {'overview':'Overview','new-post':'Write New Post','my-posts':'All My Posts','drafts':'Drafts','profile':'My Profile','notifications-page':'Notifications'};
   document.getElementById('topbar-title').textContent = titles[name] || '';
   if (name==='my-posts') loadAllPosts();
@@ -351,7 +396,7 @@ async function loadOverview() {
           <button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Delete</button>
         `:''}
         ${p.status==='published'&&p.bloggerPostUrl?`
-          <a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View Blog</a>
+          <a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl.startsWith('/')?'..'+p.bloggerPostUrl:p.bloggerPostUrl}" target="_blank">View Blog</a>
         `:''}
         ${!['draft','changes_needed'].includes(p.status)?`
           <button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}')">Open</button>
@@ -382,7 +427,7 @@ async function loadAllPosts() {
     <td>${formatDate(p.submittedAt||p.createdAt)}</td>
     <td style="display:flex;gap:6px;flex-wrap:wrap">
       ${p.status==='draft'||p.status==='changes_needed'?`<button class="btn btn-amber btn-sm" onclick="editPost('${p._id}')">Edit</button>`:''}
-      ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl}" target="_blank">View</a>`:''}
+      ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl.startsWith('/')?'..'+p.bloggerPostUrl:p.bloggerPostUrl}" target="_blank">View</a>`:''}
       ${p.status==='draft'?`<button class="btn btn-primary btn-sm" onclick="submitPostById('${p._id}')">Submit</button>`:''}
       ${['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Delete</button>`:''}
       ${!['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}')">Open</button>`:''}

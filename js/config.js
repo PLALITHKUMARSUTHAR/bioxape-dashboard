@@ -5,9 +5,13 @@
 // ============================================================
 
 const CONFIG = {
-  API_BASE:      'https://bioxape-backend.onrender.com/api',
-  BLOG_URL:      'https://www.bioxape.com',
-  DASHBOARD_URL: 'https://dashboard.bioxape.com',
+  API_BASE:      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:5000/api' 
+    : 'https://bioxape-backend.onrender.com/api',
+  BLOG_URL:      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? '../index.html'
+    : 'https://www.bioxape.com',
+  DASHBOARD_URL: window.location.origin,
   GOOGLE_CLIENT_ID: '775909460532-rnu253qk8csj4kjfmeb95ghf3cfhjje0.apps.googleusercontent.com',
   RAZORPAY_KEY:  '',   // filled in by backend /api/subscribe/create response
   TOKEN_KEY:     'bioxape_token',
