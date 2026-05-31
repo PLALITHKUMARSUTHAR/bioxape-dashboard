@@ -1,7 +1,7 @@
 // ============================================================
-//  BioXape Dashboard — Config & Constants
+//  BioXape Dashboard — Unified Core Controller
 //  FILE: js/config.js
-//  Edit API_BASE to match your Render backend URL
+//  Contains: Constants, API helpers, Auth, Notifications, & Docx Previews
 // ============================================================
 
 const CONFIG = {
@@ -98,6 +98,7 @@ async function apiCall(endpoint, method = 'GET', body = null, isFormData = false
 // ── Auth Helpers ─────────────────────────────────────────────
 
 function getToken()    { return localStorage.getItem(CONFIG.TOKEN_KEY); }
+
 function getUser()     {
   try {
     const u = localStorage.getItem(CONFIG.USER_KEY);
@@ -108,14 +109,17 @@ function getUser()     {
     return null;
   }
 }
+
 function setAuth(token, user) {
   localStorage.setItem(CONFIG.TOKEN_KEY, token);
   localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(user));
 }
+
 function clearAuth() {
   localStorage.removeItem(CONFIG.TOKEN_KEY);
   localStorage.removeItem(CONFIG.USER_KEY);
 }
+
 function isLoggedIn()  { return !!getToken() && !!getUser(); }
 function getUserRole() { const u = getUser(); return u ? u.role : null; }
 
@@ -259,3 +263,396 @@ toastStyle.textContent = `
   @keyframes slideOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(20px); } }
 `;
 document.head.appendChild(toastStyle);
+
+
+// ============================================================
+//  ── Authentication & Profile Handlers (Legacy auth.js) ──
+// ============================================================
+
+function initGoogleAuth() {
+  if (!window.google) return;
+  google.accounts.id.initialize({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    callback: handleGoogleResponse,
+    auto_select: false,
+    cancel_on_tap_outside: true
+  });
+  const btnEl = document.getElementById('google-signin-btn');
+  if (btnEl) {
+    google.accounts.id.renderButton(btnEl, {
+      theme: 'outline', size: 'large', width: 400,
+      text: 'signin_with', shape: 'rectangular'
+    });
+  }
+}
+
+async function handleGoogleResponse(response) {
+  showPageLoader('Signing you in...');
+  const result = await apiCall('/auth/google', 'POST', { credential: response.credential });
+  hidePageLoader();
+  if (!result || !result.success) {
+    showToast(result?.message || 'Google sign-in failed', 'error');
+    return;
+  }
+  setAuth(result.token, result.user);
+  showToast(`Welcome, ${result.user.name}!`, 'success');
+  setTimeout(redirectByRole, 800);
+}
+
+async function handleEmailLogin(e) {
+  e.preventDefault();
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn      = document.getElementById('login-btn');
+
+  if (!email || !password) { showToast('Please enter email and password', 'error'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  const result = await apiCall('/auth/login', 'POST', { email, password });
+
+  btn.disabled = false;
+  btn.textContent = 'Sign In';
+
+  if (!result || !result.success) {
+    showToast(result?.message || 'Login failed', 'error');
+    return;
+  }
+  setAuth(result.token, result.user);
+  showToast(`Welcome back, ${result.user.name}!`, 'success');
+  setTimeout(redirectByRole, 800);
+}
+
+async function logout() {
+  await apiCall('/auth/logout', 'POST');
+  clearAuth();
+  window.location.href = '/index.html';
+}
+
+async function handleChangePassword(e) {
+  e.preventDefault();
+  const current  = document.getElementById('current-password').value;
+  const newPass  = document.getElementById('new-password').value;
+  const confirm  = document.getElementById('confirm-password').value;
+
+  if (newPass !== confirm) { showToast('Passwords do not match', 'error'); return; }
+  if (newPass.length < 8)  { showToast('Password must be at least 8 characters', 'error'); return; }
+
+  const result = await apiCall('/auth/change-password', 'PUT', { currentPassword: current, newPassword: newPass });
+  if (result?.success) {
+    showToast('Password changed successfully', 'success');
+    e.target.reset();
+  } else {
+    showToast(result?.message || 'Failed to change password', 'error');
+  }
+}
+
+async function handleUpdateProfile(e) {
+  e.preventDefault();
+  const formData = new FormData();
+  formData.append('name',  document.getElementById('profile-name').value);
+  formData.append('phone', document.getElementById('profile-phone').value);
+  formData.append('bio',   document.getElementById('profile-bio').value);
+
+  const twitterVal     = document.getElementById('profile-twitter');
+  const linkedinVal    = document.getElementById('profile-linkedin');
+  const researchgateVal= document.getElementById('profile-researchgate');
+
+  if (twitterVal)      formData.append('twitter',      twitterVal.value);
+  if (linkedinVal)     formData.append('linkedin',     linkedinVal.value);
+  if (researchgateVal) formData.append('researchgate', researchgateVal.value);
+
+  const photoFile = document.getElementById('profile-photo')?.files[0];
+  if (photoFile) formData.append('photo', photoFile);
+
+  const result = await apiCall('/auth/update-profile', 'PUT', formData, true);
+  if (result?.success) {
+    setAuth(getToken(), result.user);
+    showToast('Profile updated successfully', 'success');
+    fillSidebarUser();
+  } else {
+    showToast(result?.message || 'Failed to update profile', 'error');
+  }
+}
+
+function showPageLoader(msg = 'Loading...') {
+  let el = document.getElementById('page-loader');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'page-loader';
+    el.className = 'page-loader';
+    el.innerHTML = `<div class="page-loader-logo">Bio<em><span class="brand-x">X</span>Ape</em></div>
+      <div class="spinner"></div>
+      <p id="loader-msg" style="font-size:13px;color:#7a9e8c">${msg}</p>`;
+    document.body.appendChild(el);
+  } else {
+    document.getElementById('loader-msg').textContent = msg;
+    el.style.display = 'flex';
+  }
+}
+
+function hidePageLoader() {
+  const el = document.getElementById('page-loader');
+  if (el) el.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm   = document.getElementById('login-form');
+  const profileForm = document.getElementById('profile-form');
+  const passForm    = document.getElementById('change-password-form');
+  const logoutBtns  = document.querySelectorAll('.btn-logout');
+
+  if (loginForm)   loginForm.addEventListener('submit', handleEmailLogin);
+  if (profileForm) profileForm.addEventListener('submit', handleUpdateProfile);
+  if (passForm)    passForm.addEventListener('submit', handleChangePassword);
+  logoutBtns.forEach(btn => btn.addEventListener('click', logout));
+
+  // Init Google auth if on login page
+  if (document.getElementById('google-signin-btn')) {
+    if (window.google) initGoogleAuth();
+    else window.addEventListener('load', initGoogleAuth);
+  }
+
+  // Redirect if already logged in and on login page
+  if (document.body.dataset.page === 'login' && isLoggedIn()) redirectByRole();
+});
+
+
+// ============================================================
+//  ── Real-Time Notifications & Polling (Legacy notifications.js) ──
+// ============================================================
+
+let notifPollTimer = null;
+
+async function fetchUnreadCount() {
+  const result = await apiCall('/notify/unread-count');
+  if (!result?.success) return;
+  const badge = document.getElementById('notif-count');
+  if (!badge) return;
+  if (result.count > 0) {
+    badge.textContent = result.count > 99 ? '99+' : result.count;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+async function fetchNotifications() {
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+  list.innerHTML = `<div class="notif-empty"><div class="spinner" style="margin:0 auto"></div></div>`;
+
+  const result = await apiCall('/notify');
+  if (!result?.success) {
+    list.innerHTML = `<div class="notif-empty">Failed to load notifications</div>`;
+    return;
+  }
+
+  if (!result.data.length) {
+    list.innerHTML = `<div class="notif-empty">🔔 No notifications yet</div>`;
+    return;
+  }
+
+  list.innerHTML = result.data.map(n => `
+    <div class="notif-item ${n.read ? '' : 'unread'}"
+         onclick="markRead('${n._id}', this)"
+         data-post="${n.postId || ''}">
+      <div class="notif-dot ${n.read ? 'read' : ''}"></div>
+      <div>
+        <div class="notif-item-msg">${n.message}</div>
+        <div class="notif-item-time">${timeAgo(n.createdAt)}</div>
+      </div>
+    </div>`).join('');
+}
+
+async function markRead(id, el) {
+  await apiCall(`/notify/${id}/read`, 'PUT');
+  el.classList.remove('unread');
+  el.querySelector('.notif-dot')?.classList.add('read');
+  fetchUnreadCount();
+}
+
+async function markAllRead() {
+  await apiCall('/notify/read-all', 'PUT');
+  document.querySelectorAll('.notif-item').forEach(el => {
+    el.classList.remove('unread');
+    el.querySelector('.notif-dot')?.classList.add('read');
+  });
+  const badge = document.getElementById('notif-count');
+  if (badge) badge.classList.add('hidden');
+}
+
+function toggleNotifDropdown() {
+  const dropdown = document.getElementById('notif-dropdown');
+  if (!dropdown) return;
+  const isOpen = dropdown.classList.toggle('open');
+  if (isOpen) {
+    fetchNotifications();
+    fetchUnreadCount();
+  } else {
+    markAllRead();
+  }
+}
+
+function startNotifPolling() {
+  fetchUnreadCount();
+  notifPollTimer = setInterval(fetchUnreadCount, CONFIG.POLL_INTERVAL);
+}
+
+function stopNotifPolling() {
+  if (notifPollTimer) clearInterval(notifPollTimer);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!isLoggedIn()) return;
+
+  const bell = document.getElementById('notif-bell');
+  if (bell) bell.addEventListener('click', toggleNotifDropdown);
+
+  const readAllBtn = document.getElementById('notif-read-all');
+  if (readAllBtn) readAllBtn.addEventListener('click', markAllRead);
+
+  // Close dropdown on outside click
+  document.addEventListener('click', e => {
+    const dropdown = document.getElementById('notif-dropdown');
+    const bell = document.getElementById('notif-bell');
+    if (dropdown?.classList.contains('open') &&
+        !dropdown.contains(e.target) &&
+        !bell?.contains(e.target)) {
+      dropdown.classList.remove('open');
+      markAllRead();
+    }
+  });
+
+  startNotifPolling();
+});
+
+
+// ============================================================
+//  ── Mammoth.js .docx Conversion Engine (Legacy docx-preview.js) ──
+// ============================================================
+
+async function previewDocxFile(file, targetEl) {
+  if (!file || !targetEl) return;
+  if (!file.name.endsWith('.docx')) {
+    targetEl.innerHTML = `<div class="alert alert-error">Only .docx files are supported.</div>`;
+    return;
+  }
+
+  targetEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:24px;color:#7a9e8c;">
+    <div class="spinner"></div><span>Converting document...</span></div>`;
+
+  try {
+    if (typeof mammoth === 'undefined') {
+      throw new Error('Mammoth.js library is not loaded. Please verify your internet connection or check if CDN is blocked.');
+    }
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.convertToHtml({ arrayBuffer });
+
+    if (result.messages.length) {
+      console.warn('Mammoth warnings:', result.messages);
+    }
+
+    const wordCount = (result.value.replace(/<[^>]+>/g, ' ').match(/\S+/g) || []).length;
+    const readTime  = Math.max(1, Math.ceil(wordCount / 200));
+
+    targetEl.innerHTML = `
+      <div class="docx-preview-wrap">
+        <div class="docx-preview-toolbar">
+          <span>📄 ${file.name}</span>
+          <span>${wordCount.toLocaleString()} words · ~${readTime} min read</span>
+        </div>
+        <div class="docx-preview-body">${result.value}</div>
+      </div>`;
+
+    return { html: result.value, wordCount, readTime };
+  } catch (err) {
+    console.error('Mammoth error:', err);
+    targetEl.innerHTML = `<div class="alert alert-error">
+      Failed to preview document: ${err.message}. 
+      Please make sure this is a valid .docx file.</div>`;
+    return null;
+  }
+}
+
+async function previewDocxUrl(url, targetEl) {
+  if (!url || !targetEl) return;
+  targetEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:24px;color:#7a9e8c;">
+    <div class="spinner"></div><span>Loading document preview...</span></div>`;
+  try {
+    if (typeof mammoth === 'undefined') {
+      throw new Error('Mammoth.js library is not loaded. Please verify your internet connection or check if CDN is blocked.');
+    }
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const result = await mammoth.convertToHtml({ arrayBuffer });
+
+    const wordCount = (result.value.replace(/<[^>]+>/g, ' ').match(/\S+/g) || []).length;
+    const readTime  = Math.max(1, Math.ceil(wordCount / 200));
+
+    targetEl.innerHTML = `
+      <div class="docx-preview-wrap">
+        <div class="docx-preview-toolbar">
+          <span>📄 Document Preview</span>
+          <span>${wordCount.toLocaleString()} words · ~${readTime} min read</span>
+        </div>
+        <div class="docx-preview-body">${result.value}</div>
+      </div>`;
+
+    return { html: result.value, wordCount, readTime };
+  } catch (err) {
+    targetEl.innerHTML = `<div class="alert alert-error">
+      Could not load document preview. <a href="${url}" target="_blank">Download file instead</a></div>`;
+    return null;
+  }
+}
+
+function initUploadZone(zoneId, inputId, previewId, onFileSelected) {
+  const zone    = document.getElementById(zoneId);
+  const input   = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  if (!zone || !input) return;
+
+  zone.addEventListener('click', () => input.click());
+
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    zone.classList.add('dragover');
+  });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileSelected(file, zone, preview, onFileSelected);
+  });
+
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (file) handleFileSelected(file, zone, preview, onFileSelected);
+  });
+}
+
+async function handleFileSelected(file, zone, previewEl, callback) {
+  if (!file.name.endsWith('.docx')) {
+    showToast('Please upload a .docx file only', 'error');
+    return;
+  }
+  if (file.size > 20 * 1024 * 1024) {
+    showToast('File size must be under 20MB', 'error');
+    return;
+  }
+
+  zone.innerHTML = `
+    <div class="upload-zone-icon">📄</div>
+    <div class="upload-zone-text" style="font-weight:600;color:#27a363">${file.name}</div>
+    <div class="upload-zone-hint">${(file.size / 1024 / 1024).toFixed(2)} MB · Click to change</div>`;
+
+  if (previewEl) {
+    const meta = await previewDocxFile(file, previewEl);
+    if (callback) callback(file, meta);
+  } else {
+    if (callback) callback(file, null);
+  }
+}
