@@ -1,9 +1,9 @@
 // ============================================================
-//  BioXape Dashboard — Unified Core Controller
-//  FILE: js/config.js
-//  Contains: Constants, API helpers, Auth, Notifications, & Docx Previews
+//  BioXape Dashboard — Central Core Script (dashboard-core.js)
+//  Integrates: config.js, auth.js, notifications.js, and docx-preview.js
 // ============================================================
 
+// ── 1. CONFIG & CONSTANTS ────────────────────────────────────
 const CONFIG = {
   API_BASE:      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
     ? 'http://localhost:5000/api' 
@@ -68,8 +68,7 @@ const CATEGORIES = [
   'Interviews'
 ];
 
-// ── API Helpers ──────────────────────────────────────────────
-
+// ── 2. API & AUTH HELPERS ────────────────────────────────────
 async function apiCall(endpoint, method = 'GET', body = null, isFormData = false) {
   const token = localStorage.getItem(CONFIG.TOKEN_KEY);
   const headers = {};
@@ -95,10 +94,7 @@ async function apiCall(endpoint, method = 'GET', body = null, isFormData = false
   }
 }
 
-// ── Auth Helpers ─────────────────────────────────────────────
-
 function getToken()    { return localStorage.getItem(CONFIG.TOKEN_KEY); }
-
 function getUser()     {
   try {
     const u = localStorage.getItem(CONFIG.USER_KEY);
@@ -109,17 +105,14 @@ function getUser()     {
     return null;
   }
 }
-
 function setAuth(token, user) {
   localStorage.setItem(CONFIG.TOKEN_KEY, token);
   localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(user));
 }
-
 function clearAuth() {
   localStorage.removeItem(CONFIG.TOKEN_KEY);
   localStorage.removeItem(CONFIG.USER_KEY);
 }
-
 function isLoggedIn()  { return !!getToken() && !!getUser(); }
 function getUserRole() { const u = getUser(); return u ? u.role : null; }
 
@@ -155,120 +148,7 @@ function redirectByRole() {
   }
 }
 
-// ── UI Helpers ───────────────────────────────────────────────
-
-function showToast(message, type = 'success', duration = 3500) {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;';
-    document.body.appendChild(container);
-  }
-  const colors = {
-    success: '#27a363', error: '#dc2626', info: '#2563eb', warning: '#d97706'
-  };
-  const icons = { success: '✓', error: '✕', info: 'ℹ', warning: '⚠' };
-  const toast = document.createElement('div');
-  toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 18px;
-    background:${colors[type]};color:#fff;border-radius:10px;font-size:13.5px;
-    font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.15);
-    animation:slideIn .25s ease;max-width:340px;`;
-  toast.innerHTML = `<span style="font-weight:700">${icons[type]}</span>${message}`;
-  container.appendChild(toast);
-  setTimeout(() => { toast.style.animation = 'slideOut .25s ease'; setTimeout(() => toast.remove(), 250); }, duration);
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function formatDateTime(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-
-function timeAgo(dateStr) {
-  if (!dateStr) return '';
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1)  return 'just now';
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  if (d < 7)  return `${d}d ago`;
-  return formatDate(dateStr);
-}
-
-function statusBadge(status) {
-  const cls = 'badge badge-' + status.replace('_', '-');
-  return `<span class="${cls}">${STATUS_LABELS[status] || status}</span>`;
-}
-
-function roleBadge(role) {
-  return `<span class="badge badge-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>`;
-}
-
-function initials(name) {
-  if (!name) return '?';
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-}
-
-function setInnerLoading(el, text = 'Loading...') {
-  if (!el) return;
-  el.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;padding:40px;gap:12px;color:#7a9e8c;">
-    <div class="spinner"></div><span>${text}</span></div>`;
-}
-
-function emptyState(icon, title, text, btnHtml = '') {
-  return `<div class="empty-state">
-    <div class="empty-state-icon">${icon}</div>
-    <div class="empty-state-title">${title}</div>
-    <div class="empty-state-text">${text}</div>
-    ${btnHtml ? `<div style="margin-top:18px">${btnHtml}</div>` : ''}
-  </div>`;
-}
-
-// Fill sidebar user info
-function fillSidebarUser() {
-  const user = getUser();
-  if (!user) return;
-  const av  = document.getElementById('sidebar-user-av');
-  const nm  = document.getElementById('sidebar-user-name');
-  const em  = document.getElementById('sidebar-user-email');
-  const rb  = document.getElementById('sidebar-role-badge');
-  if (av) {
-    if (user.photoUrl) {
-      av.innerHTML = `<img src="${user.photoUrl}" alt="${user.name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`;
-      av.style.background = 'none';
-    } else {
-      av.textContent = initials(user.name);
-    }
-  }
-  if (nm) nm.textContent = user.name || 'User';
-  if (em) em.textContent = user.email || '';
-  if (rb) {
-    const roleStr = user.role || '';
-    rb.textContent = roleStr.toUpperCase();
-    rb.className = roleStr ? `sidebar-role-badge role-${roleStr}` : 'sidebar-role-badge';
-  }
-}
-
-// Toast animation styles
-const toastStyle = document.createElement('style');
-toastStyle.textContent = `
-  @keyframes slideIn  { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
-  @keyframes slideOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(20px); } }
-`;
-document.head.appendChild(toastStyle);
-
-
-// ============================================================
-//  ── Authentication & Profile Handlers (Legacy auth.js) ──
-// ============================================================
-
+// ── 3. AUTHENTICATION & LOGIN PROCESS ────────────────────────
 function initGoogleAuth() {
   if (!window.google) return;
   google.accounts.id.initialize({
@@ -376,53 +256,7 @@ async function handleUpdateProfile(e) {
   }
 }
 
-function showPageLoader(msg = 'Loading...') {
-  let el = document.getElementById('page-loader');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'page-loader';
-    el.className = 'page-loader';
-    el.innerHTML = `<div class="page-loader-logo">Bio<em><span class="brand-x">X</span>Ape</em></div>
-      <div class="spinner"></div>
-      <p id="loader-msg" style="font-size:13px;color:#7a9e8c">${msg}</p>`;
-    document.body.appendChild(el);
-  } else {
-    document.getElementById('loader-msg').textContent = msg;
-    el.style.display = 'flex';
-  }
-}
-
-function hidePageLoader() {
-  const el = document.getElementById('page-loader');
-  if (el) el.style.display = 'none';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const loginForm   = document.getElementById('login-form');
-  const profileForm = document.getElementById('profile-form');
-  const passForm    = document.getElementById('change-password-form');
-  const logoutBtns  = document.querySelectorAll('.btn-logout');
-
-  if (loginForm)   loginForm.addEventListener('submit', handleEmailLogin);
-  if (profileForm) profileForm.addEventListener('submit', handleUpdateProfile);
-  if (passForm)    passForm.addEventListener('submit', handleChangePassword);
-  logoutBtns.forEach(btn => btn.addEventListener('click', logout));
-
-  // Init Google auth if on login page
-  if (document.getElementById('google-signin-btn')) {
-    if (window.google) initGoogleAuth();
-    else window.addEventListener('load', initGoogleAuth);
-  }
-
-  // Redirect if already logged in and on login page
-  if (document.body.dataset.page === 'login' && isLoggedIn()) redirectByRole();
-});
-
-
-// ============================================================
-//  ── Real-Time Notifications & Polling (Legacy notifications.js) ──
-// ============================================================
-
+// ── 4. NOTIFICATIONS POLLING & EVENTS ────────────────────────
 let notifPollTimer = null;
 
 async function fetchUnreadCount() {
@@ -504,35 +338,7 @@ function stopNotifPolling() {
   if (notifPollTimer) clearInterval(notifPollTimer);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (!isLoggedIn()) return;
-
-  const bell = document.getElementById('notif-bell');
-  if (bell) bell.addEventListener('click', toggleNotifDropdown);
-
-  const readAllBtn = document.getElementById('notif-read-all');
-  if (readAllBtn) readAllBtn.addEventListener('click', markAllRead);
-
-  // Close dropdown on outside click
-  document.addEventListener('click', e => {
-    const dropdown = document.getElementById('notif-dropdown');
-    const bell = document.getElementById('notif-bell');
-    if (dropdown?.classList.contains('open') &&
-        !dropdown.contains(e.target) &&
-        !bell?.contains(e.target)) {
-      dropdown.classList.remove('open');
-      markAllRead();
-    }
-  });
-
-  startNotifPolling();
-});
-
-
-// ============================================================
-//  ── Mammoth.js .docx Conversion Engine (Legacy docx-preview.js) ──
-// ============================================================
-
+// ── 5. MAMMOTH.JS DOCX UTILITIES ──────────────────────────────
 async function previewDocxFile(file, targetEl) {
   if (!file || !targetEl) return;
   if (!file.name.endsWith('.docx')) {
@@ -656,3 +462,155 @@ async function handleFileSelected(file, zone, previewEl, callback) {
     if (callback) callback(file, null);
   }
 }
+
+// ── 6. DYNAMIC UI FORMATTERS & HELPERS ───────────────────────
+function showToast(message, type = 'success', duration = 3500) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;';
+    document.body.appendChild(container);
+  }
+  const colors = {
+    success: '#27a363', error: '#dc2626', info: '#2563eb', warning: '#d97706'
+  };
+  const icons = { success: '✓', error: '✕', info: 'ℹ', warning: '⚠' };
+  const toast = document.createElement('div');
+  toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 18px;
+    background:${colors[type]};color:#fff;border-radius:10px;font-size:13.5px;
+    font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.15);
+    animation:slideIn .25s ease;max-width:340px;`;
+  toast.innerHTML = `<span style="font-weight:700">${icons[type]}</span>${message}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.animation = 'slideOut .25s ease'; setTimeout(() => toast.remove(), 250); }, duration);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1)  return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 7)  return `${d}d ago`;
+  return formatDate(dateStr);
+}
+
+function statusBadge(status) {
+  const cls = 'badge badge-' + status.replace('_', '-');
+  return `<span class="${cls}">${STATUS_LABELS[status] || status}</span>`;
+}
+
+function roleBadge(role) {
+  return `<span class="badge badge-${role}">${role.charAt(0).toUpperCase() + role.slice(1)}</span>`;
+}
+
+function initials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function setInnerLoading(el, text = 'Loading...') {
+  if (!el) return;
+  el.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;padding:40px;gap:12px;color:#7a9e8c;">
+    <div class="spinner"></div><span>${text}</span></div>`;
+}
+
+function emptyState(icon, title, text, btnHtml = '') {
+  return `<div class="empty-state">
+    <div class="empty-state-icon">${icon}</div>
+    <div class="empty-state-title">${title}</div>
+    <div class="empty-state-text">${text}</div>
+    ${btnHtml ? `<div style="margin-top:18px">${btnHtml}</div>` : ''}
+  </div>`;
+}
+
+function fillSidebarUser() {
+  const user = getUser();
+  if (!user) return;
+  const av  = document.getElementById('sidebar-user-av');
+  const nm  = document.getElementById('sidebar-user-name');
+  const em  = document.getElementById('sidebar-user-email');
+  const rb  = document.getElementById('sidebar-role-badge');
+  if (av) {
+    if (user.photoUrl) {
+      av.innerHTML = `<img src="${user.photoUrl}" alt="${user.name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`;
+      av.style.background = 'none';
+    } else {
+      av.textContent = initials(user.name);
+    }
+  }
+  if (nm) nm.textContent = user.name || 'User';
+  if (em) em.textContent = user.email || '';
+  if (rb) {
+    const roleStr = user.role || '';
+    rb.textContent = roleStr.toUpperCase();
+    rb.className = roleStr ? `sidebar-role-badge role-${roleStr}` : 'sidebar-role-badge';
+  }
+}
+
+// ── 7. CENTRAL DOMContentLoaded SETUP ─────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Common elements setup
+  const loginForm   = document.getElementById('login-form');
+  const profileForm = document.getElementById('profile-form');
+  const passForm    = document.getElementById('change-password-form');
+  const logoutBtns  = document.querySelectorAll('.btn-logout');
+
+  if (loginForm)   loginForm.addEventListener('submit', handleEmailLogin);
+  if (profileForm) profileForm.addEventListener('submit', handleUpdateProfile);
+  if (passForm)    passForm.addEventListener('submit', handleChangePassword);
+  logoutBtns.forEach(btn => btn.addEventListener('click', logout));
+
+  // Init Google auth if on login page
+  if (document.getElementById('google-signin-btn')) {
+    if (window.google) initGoogleAuth();
+    else window.addEventListener('load', initGoogleAuth);
+  }
+
+  // Redirect if already logged in and on login page
+  if (document.body.dataset.page === 'login' && isLoggedIn()) redirectByRole();
+
+  // Notification listeners if logged in
+  if (isLoggedIn()) {
+    const bell = document.getElementById('notif-bell');
+    if (bell) bell.addEventListener('click', toggleNotifDropdown);
+
+    const readAllBtn = document.getElementById('notif-read-all');
+    if (readAllBtn) readAllBtn.addEventListener('click', markAllRead);
+
+    document.addEventListener('click', e => {
+      const dropdown = document.getElementById('notif-dropdown');
+      const bell = document.getElementById('notif-bell');
+      if (dropdown?.classList.contains('open') &&
+          !dropdown.contains(e.target) &&
+          !bell?.contains(e.target)) {
+        dropdown.classList.remove('open');
+        markAllRead();
+      }
+    });
+
+    startNotifPolling();
+  }
+});
+
+// Toast CSS Injection
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
+  @keyframes slideIn  { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes slideOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(20px); } }
+`;
+document.head.appendChild(toastStyle);
