@@ -418,7 +418,7 @@ tr:hover td { background: var(--g50); }
 .badge-changes-needed { background: var(--amber-l); color: #92400e; }
 .badge-admin-review   { background: #fef3c7;   color: #92400e; }
 .badge-approved { background: var(--accent-l); color: var(--g700); }
-.badge-published{ background: #ccfbf1;     color: #0f766e; }
+.badge-published{ background: #6ee7b7;     color: #064e3b; }
 .badge-rejected { background: var(--red-l);    color: #991b1b; }
 
 /* ── PIPELINE TRACKER ────────────────────────────────────── */
