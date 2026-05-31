@@ -274,7 +274,7 @@
   </div>
 </div>
 
-<script src="js/dashboard-core.js"></script>
+<script src="js/dashboard-core.js?v=1.0.1"></script>
 <script>
 let currentDocxFile = null;
 let postDocxMeta    = null;
@@ -480,7 +480,7 @@ function initCoverUpload() {
     const file = input.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = e => { prev.src=e.target.result; prev.style.display='block'; };
+    reader.onload = e => { prev.src=e.target.result; prev.classList.remove('d-none'); };
     reader.readAsDataURL(file);
   });
 }
@@ -609,9 +609,19 @@ async function editPost(id) {
   document.getElementById('post-category').value= p.category||'';
   document.getElementById('post-type').value    = p.contentType||'article';
   document.getElementById('post-docx-url').value= p.docxFileUrl||'';
+  document.getElementById('post-cover-url').value= p.coverImageUrl||'';
   document.getElementById('editing-post-id').value = p._id;
   tagsArray = p.tags||[];
   renderTags();
+  
+  const coverPrev = document.getElementById('cover-preview');
+  if (p.coverImageUrl) {
+    coverPrev.src = p.coverImageUrl;
+    coverPrev.classList.remove('d-none');
+  } else {
+    coverPrev.classList.add('d-none');
+  }
+  
   if (p.editorComment) {
     document.getElementById('post-notes').value = `EDITOR FEEDBACK: ${p.editorComment}`;
   }

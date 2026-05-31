@@ -354,7 +354,7 @@
   </div>
 </div>
 
-<script src="js/dashboard-core.js"></script>
+<script src="js/dashboard-core.js?v=1.0.1"></script>
 <script>
 let reviewingPostId = null;
 let currentDocxFile = null;
@@ -364,7 +364,6 @@ let tagsArray       = [];
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('editor')) return;
   fillSidebarUser();
-  await loadOverview();
   hidePageLoader();
   const dashLayout = document.getElementById('dash-layout');
   if (dashLayout) {
@@ -373,6 +372,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   initProfilePhotoUpload();
   fillProfileForm();
+  await loadOverview();
 
   // Initialize post creation utilities for editors
   await populateCategoriesDropdown();
@@ -520,9 +520,9 @@ async function openReview(postId, title, docxUrl, coverImageUrl) {
   const coverPreview = document.getElementById('review-cover-preview');
   if (coverImageUrl) {
     coverPreview.src = coverImageUrl;
-    coverContainer.style.display = 'block';
+    coverContainer.classList.remove('d-none');
   } else {
-    coverContainer.style.display = 'none';
+    coverContainer.classList.add('d-none');
   }
   
   if (docxUrl) {
@@ -723,7 +723,7 @@ function initCoverUpload() {
     const file = input.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = e => { prev.src=e.target.result; prev.style.display='block'; };
+    reader.onload = e => { prev.src=e.target.result; prev.classList.remove('d-none'); };
     reader.readAsDataURL(file);
   });
 }
@@ -808,7 +808,16 @@ async function editPost(id) {
   document.getElementById('post-category').value= p.category||'';
   document.getElementById('post-type').value    = p.contentType||'article';
   document.getElementById('post-docx-url').value= p.docxFileUrl||'';
+  document.getElementById('post-cover-url').value= p.coverImageUrl||'';
   document.getElementById('editing-post-id').value = p._id;
+  
+  const coverPrev = document.getElementById('cover-preview');
+  if (p.coverImageUrl) {
+    coverPrev.src = p.coverImageUrl;
+    coverPrev.classList.remove('d-none');
+  } else {
+    coverPrev.classList.add('d-none');
+  }
   
   if (p.editorComment) {
     document.getElementById('post-notes').value = `REVIEWER FEEDBACK: ${p.editorComment}`;
@@ -876,9 +885,9 @@ async function openPreview(postId, title, docxUrl, status, category, contentType
   const coverPreview = document.getElementById('preview-cover-preview');
   if (coverImageUrl) {
     coverPreview.src = coverImageUrl;
-    coverContainer.style.display = 'block';
+    coverContainer.classList.remove('d-none');
   } else {
-    coverContainer.style.display = 'none';
+    coverContainer.classList.add('d-none');
   }
 
   // Comments / Feedback

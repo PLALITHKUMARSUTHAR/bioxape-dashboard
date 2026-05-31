@@ -398,7 +398,7 @@
   </div>
 </div>
 
-<script src="js/dashboard-core.js"></script>
+<script src="js/dashboard-core.js?v=1.0.1"></script>
 <script src="js/admin-sitebuilder.js"></script>
 <script>
 let approvingPostId = null;
@@ -406,7 +406,6 @@ let approvingPostId = null;
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('admin')) return;
   fillSidebarUser();
-  await loadOverview();
   hidePageLoader();
   const dashLayout = document.getElementById('dash-layout');
   if (dashLayout) {
@@ -415,6 +414,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   initProfilePhotoUpload();
   fillProfileForm();
+  await loadOverview();
 });
 
 function toggleNavDropdown(el) {
@@ -609,9 +609,9 @@ async function openApproveModal(postId, title, docxUrl, categories, coverImageUr
   const coverPreview = document.getElementById('approve-cover-preview');
   if (coverImageUrl) {
     coverPreview.src = coverImageUrl;
-    coverContainer.style.display = 'block';
+    coverContainer.classList.remove('d-none');
   } else {
-    coverContainer.style.display = 'none';
+    coverContainer.classList.add('d-none');
   }
 
   if (docxUrl) await previewDocxUrl(docxUrl, document.getElementById('approve-preview-area'));
@@ -990,9 +990,9 @@ async function openPreview(postId, title, docxUrl, status, category, contentType
   const coverPreview = document.getElementById('preview-cover-preview');
   if (coverImageUrl) {
     coverPreview.src = coverImageUrl;
-    coverContainer.style.display = 'block';
+    coverContainer.classList.remove('d-none');
   } else {
-    coverContainer.style.display = 'none';
+    coverContainer.classList.add('d-none');
   }
 
   // Comments / Feedback

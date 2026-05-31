@@ -5,10 +5,10 @@
 
 // ── 1. CONFIG & CONSTANTS ────────────────────────────────────
 const CONFIG = {
-  API_BASE:      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+  API_BASE:      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname
     ? 'http://localhost:5000/api' 
     : 'https://bioxape-backend.onrender.com/api',
-  BLOG_URL:      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  BLOG_URL:      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname
     ? '../index.html'
     : 'https://www.bioxape.com',
   DASHBOARD_URL: window.location.origin,
@@ -83,7 +83,7 @@ async function apiCall(endpoint, method = 'GET', body = null, isFormData = false
     const data = await res.json();
     if (res.status === 401) {
       clearAuth();
-      window.location.href = '/index.html';
+      window.location.href = 'index.html';
       return null;
     }
     return data;
@@ -119,14 +119,14 @@ function getUserRole() { const u = getUser(); return u ? u.role : null; }
 function requireAuth(requiredRole = null) {
   if (!isLoggedIn()) {
     clearAuth();
-    window.location.href = '/index.html';
+    window.location.href = 'index.html';
     return false;
   }
   const role = getUserRole();
   if (![ROLES.ADMIN, ROLES.EDITOR, ROLES.AUTHOR].includes(role)) {
     console.warn("requireAuth: Invalid user role:", role);
     clearAuth();
-    window.location.href = '/index.html';
+    window.location.href = 'index.html';
     return false;
   }
   if (requiredRole && role !== requiredRole && role !== ROLES.ADMIN) {
@@ -138,13 +138,13 @@ function requireAuth(requiredRole = null) {
 
 function redirectByRole() {
   const role = getUserRole();
-  if (role === ROLES.ADMIN)  window.location.href = '/admin.html';
-  else if (role === ROLES.EDITOR) window.location.href = '/editor.html';
-  else if (role === ROLES.AUTHOR) window.location.href = '/author.html';
+  if (role === ROLES.ADMIN)  window.location.href = 'admin.html';
+  else if (role === ROLES.EDITOR) window.location.href = 'editor.html';
+  else if (role === ROLES.AUTHOR) window.location.href = 'author.html';
   else {
     console.warn("Unknown or invalid user role:", role);
     clearAuth();
-    window.location.href = '/index.html';
+    window.location.href = 'index.html';
   }
 }
 
@@ -207,7 +207,7 @@ async function handleEmailLogin(e) {
 async function logout() {
   await apiCall('/auth/logout', 'POST');
   clearAuth();
-  window.location.href = '/index.html';
+  window.location.href = 'index.html';
 }
 
 async function handleChangePassword(e) {
@@ -521,6 +521,24 @@ function roleBadge(role) {
 function initials(name) {
   if (!name) return '?';
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function showPageLoader(message = 'Loading...') {
+  const loader = document.getElementById('page-loader');
+  const msg = document.getElementById('loader-msg');
+  if (msg) msg.textContent = message;
+  if (loader) {
+    loader.classList.remove('d-none');
+    loader.style.display = 'flex';
+  }
+}
+
+function hidePageLoader() {
+  const loader = document.getElementById('page-loader');
+  if (loader) {
+    loader.classList.add('d-none');
+    loader.style.display = 'none';
+  }
 }
 
 function setInnerLoading(el, text = 'Loading...') {
