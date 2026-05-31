@@ -288,7 +288,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('author')) return;
   fillSidebarUser();
   hidePageLoader();
-  document.getElementById('dash-layout').style.display = 'flex';
+  const dashLayout = document.getElementById('dash-layout');
+  if (dashLayout) {
+    dashLayout.classList.remove('d-none');
+    dashLayout.style.display = 'flex';
+  }
   await populateCategoriesDropdown();
   await loadOverview();
   initUploadZone('docx-zone','docx-input','docx-preview-area',(file,meta)=>{

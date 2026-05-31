@@ -411,7 +411,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   fillSidebarUser();
   await loadOverview();
   hidePageLoader();
-  document.getElementById('dash-layout').style.display='flex';
+  const dashLayout = document.getElementById('dash-layout');
+  if (dashLayout) {
+    dashLayout.classList.remove('d-none');
+    dashLayout.style.display = 'flex';
+  }
   initProfilePhotoUpload();
   fillProfileForm();
 });
