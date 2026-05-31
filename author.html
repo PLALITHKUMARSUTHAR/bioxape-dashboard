@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Author Dashboard — BioXApe</title>
 <link rel="stylesheet" href="css/dashboard.css"/>
-<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+<script src="https://unpkg.com/mammoth/mammoth.browser.min.js" defer></script>
 <style>
   /* Clean utility styles to eliminate inline styles */
   .d-none { display: none !important; }
@@ -285,9 +285,7 @@ let tagsArray       = [];
 
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  if (!requireAuth()) return;
-  const user = getUser();
-  if (user.role !== 'author') { window.location.href = '/index.html'; return; }
+  if (!requireAuth('author')) return;
   fillSidebarUser();
   hidePageLoader();
   document.getElementById('dash-layout').style.display = 'flex';
@@ -335,8 +333,11 @@ async function populateCategoriesDropdown() {
 }
 
 function toggleNavDropdown(el) {
+  if (!el) return;
   const wrapper = el.closest('.nav-dropdown-wrapper');
+  if (!wrapper) return;
   const items = wrapper.querySelector('.nav-dropdown-items');
+  if (!items) return;
   wrapper.classList.toggle('open');
   items.classList.toggle('collapsed');
 }
@@ -352,7 +353,8 @@ function showTab(name) {
     const dropdown = document.getElementById('account-dropdown');
     const items = document.getElementById('account-dropdown-items');
     if (dropdown && items) {
-      dropdown.classList.add('open');
+      const wrapper = dropdown.closest('.nav-dropdown-wrapper');
+      if (wrapper) wrapper.classList.add('open');
       items.classList.remove('collapsed');
     }
   }

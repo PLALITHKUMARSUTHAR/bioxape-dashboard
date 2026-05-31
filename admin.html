@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Admin Dashboard — BioXApe</title>
 <link rel="stylesheet" href="css/dashboard.css"/>
-<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+<script src="https://unpkg.com/mammoth/mammoth.browser.min.js" defer></script>
 <style>
   /* Clean utility styles to eliminate inline styles */
   .d-none { display: none !important; }
@@ -417,8 +417,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function toggleNavDropdown(el) {
+  if (!el) return;
   const wrapper = el.closest('.nav-dropdown-wrapper');
+  if (!wrapper) return;
   const items = wrapper.querySelector('.nav-dropdown-items');
+  if (!items) return;
   wrapper.classList.toggle('open');
   items.classList.toggle('collapsed');
 }
@@ -438,7 +441,8 @@ function showTab(name) {
     const dropdown = document.getElementById('account-dropdown');
     const items = document.getElementById('account-dropdown-items');
     if (dropdown && items) {
-      dropdown.classList.add('open');
+      const wrapper = dropdown.closest('.nav-dropdown-wrapper');
+      if (wrapper) wrapper.classList.add('open');
       items.classList.remove('collapsed');
     }
   }
@@ -483,7 +487,7 @@ async function loadOverview() {
   document.getElementById('stat-review').textContent  = pending.length;
   document.getElementById('stat-pub').textContent     = published.length;
   document.getElementById('stat-users').textContent   = usersRes?.data?.length||0;
-  document.getElementById('stat-subs').textContent    = subsRes?.data?.filter(s=>s.status==='active').length||0;
+  document.getElementById('stat-subs').textContent    = subsRes?.data?.filter(s=>s.status==='active')?.length||0;
   document.getElementById('review-badge').textContent = pending.length;
 
   const el = document.getElementById('overview-review-list');
@@ -496,12 +500,15 @@ async function loadOverview() {
   // Recent activity
   const actEl = document.getElementById('recent-activity');
   const recent = postsRes?.data?.slice(0,6)||[];
-  actEl.innerHTML = recent.map(p=>`
+  actEl.innerHTML = recent.map(p=>{
+    const titleText = p.title || 'Untitled Post';
+    return `
     <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
       <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0"></div>
-      <div><div style="font-size:13px;font-weight:500">${p.title.slice(0,45)}${p.title.length>45?'...':''}</div>
+      <div><div style="font-size:13px;font-weight:500">${titleText.slice(0,45)}${titleText.length>45?'...':''}</div>
       <div style="font-size:11.5px;color:#7a9e8c">${statusBadge(p.status)} · ${timeAgo(p.updatedAt)}</div></div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function loadPlatformStats() {
@@ -512,11 +519,10 @@ async function loadPlatformStats() {
     apiCall('/users/all'),
     apiCall('/subscribe/all')
   ]);
-  if (!postsRes?.success || !usersRes?.success || !subsRes?.success) return;
   
-  const posts = postsRes.data;
-  const users = usersRes.data;
-  const subs = subsRes.data;
+  const posts = postsRes?.data || [];
+  const users = usersRes?.data || [];
+  const subs = subsRes?.data || [];
 
   // Calculation stats
   const totalPosts = posts.length;

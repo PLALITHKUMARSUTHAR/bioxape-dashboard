@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Editor Dashboard — BioXApe</title>
 <link rel="stylesheet" href="css/dashboard.css"/>
-<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+<script src="https://unpkg.com/mammoth/mammoth.browser.min.js" defer></script>
 <style>
   /* Clean utility styles to eliminate inline styles */
   .d-none { display: none !important; }
@@ -364,9 +364,7 @@ let postDocxMeta    = null;
 let tagsArray       = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-  if (!requireAuth()) return;
-  const user = getUser();
-  if (!['editor','admin'].includes(user.role)) { window.location.href='/index.html'; return; }
+  if (!requireAuth('editor')) return;
   fillSidebarUser();
   await loadOverview();
   hidePageLoader();
@@ -386,8 +384,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function toggleNavDropdown(el) {
+  if (!el) return;
   const wrapper = el.closest('.nav-dropdown-wrapper');
+  if (!wrapper) return;
   const items = wrapper.querySelector('.nav-dropdown-items');
+  if (!items) return;
   wrapper.classList.toggle('open');
   items.classList.toggle('collapsed');
 }
@@ -407,7 +408,8 @@ function showTab(name) {
     const dropdown = document.getElementById('account-dropdown');
     const items = document.getElementById('account-dropdown-items');
     if (dropdown && items) {
-      dropdown.classList.add('open');
+      const wrapper = dropdown.closest('.nav-dropdown-wrapper');
+      if (wrapper) wrapper.classList.add('open');
       items.classList.remove('collapsed');
     }
   }
@@ -435,13 +437,14 @@ function showTab(name) {
 async function loadOverview() {
   const result = await apiCall('/posts/editor-queue');
   if (!result?.success) return;
-  const pending = result.data.filter(p=>p.status==='submitted');
+  const queueData = result.data || [];
+  const pending = queueData.filter(p=>p.status==='submitted');
   document.getElementById('stat-pending').textContent = pending.length;
   document.getElementById('pending-badge').textContent = pending.length;
-  document.getElementById('stat-approved').textContent = result.data.filter(p=>['admin_review','approved','published'].includes(p.status)).length;
+  document.getElementById('stat-approved').textContent = queueData.filter(p=>['admin_review','approved','published'].includes(p.status)).length;
   
   // Calculate total posts reviewed by this editor
-  const reviewedCount = result.data.filter(p => p.status !== 'submitted').length;
+  const reviewedCount = queueData.filter(p => p.status !== 'submitted').length;
   document.getElementById('stat-reviewed').textContent = reviewedCount;
 
   const el = document.getElementById('overview-pending-list');
@@ -449,15 +452,15 @@ async function loadOverview() {
   else { el.innerHTML = pending.slice(0,5).map(p=>postReviewCard(p)).join(''); }
 
   // Render recent reviews
-  renderRecentReviews(result.data);
+  renderRecentReviews(queueData);
 
   const authResult = await apiCall('/users/my-authors');
-  if (authResult?.success) document.getElementById('stat-authors').textContent = authResult.data.length;
+  if (authResult?.success) document.getElementById('stat-authors').textContent = authResult.data?.length || 0;
 
   // Fetch and calculate authorship stats for the editor
   const myPostsRes = await apiCall('/posts/my-posts');
   if (myPostsRes?.success) {
-    const myPosts = myPostsRes.data;
+    const myPosts = myPostsRes.data || [];
     const myTotal = myPosts.length;
     const myPending = myPosts.filter(p=>['submitted','editor_review','admin_review'].includes(p.status)).length;
     const myPublished = myPosts.filter(p=>p.status==='published').length;

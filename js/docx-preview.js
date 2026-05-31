@@ -16,6 +16,9 @@ async function previewDocxFile(file, targetEl) {
     <div class="spinner"></div><span>Converting document...</span></div>`;
 
   try {
+    if (typeof mammoth === 'undefined') {
+      throw new Error('Mammoth.js library is not loaded. Please verify your internet connection or check if CDN is blocked.');
+    }
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.convertToHtml({ arrayBuffer });
 
@@ -52,6 +55,9 @@ async function previewDocxUrl(url, targetEl) {
   targetEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:24px;color:#7a9e8c;">
     <div class="spinner"></div><span>Loading document preview...</span></div>`;
   try {
+    if (typeof mammoth === 'undefined') {
+      throw new Error('Mammoth.js library is not loaded. Please verify your internet connection or check if CDN is blocked.');
+    }
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
     const result = await mammoth.convertToHtml({ arrayBuffer });

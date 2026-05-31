@@ -98,7 +98,16 @@ async function apiCall(endpoint, method = 'GET', body = null, isFormData = false
 // ── Auth Helpers ─────────────────────────────────────────────
 
 function getToken()    { return localStorage.getItem(CONFIG.TOKEN_KEY); }
-function getUser()     { const u = localStorage.getItem(CONFIG.USER_KEY); return u ? JSON.parse(u) : null; }
+function getUser()     {
+  try {
+    const u = localStorage.getItem(CONFIG.USER_KEY);
+    return u ? JSON.parse(u) : null;
+  } catch (e) {
+    console.warn("Invalid user object in localStorage, clearing auth.");
+    clearAuth();
+    return null;
+  }
+}
 function setAuth(token, user) {
   localStorage.setItem(CONFIG.TOKEN_KEY, token);
   localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(user));
@@ -111,9 +120,20 @@ function isLoggedIn()  { return !!getToken() && !!getUser(); }
 function getUserRole() { const u = getUser(); return u ? u.role : null; }
 
 function requireAuth(requiredRole = null) {
-  if (!isLoggedIn()) { window.location.href = '/index.html'; return false; }
-  if (requiredRole && getUserRole() !== requiredRole && getUserRole() !== ROLES.ADMIN) {
+  if (!isLoggedIn()) {
+    clearAuth();
     window.location.href = '/index.html';
+    return false;
+  }
+  const role = getUserRole();
+  if (![ROLES.ADMIN, ROLES.EDITOR, ROLES.AUTHOR].includes(role)) {
+    console.warn("requireAuth: Invalid user role:", role);
+    clearAuth();
+    window.location.href = '/index.html';
+    return false;
+  }
+  if (requiredRole && role !== requiredRole && role !== ROLES.ADMIN) {
+    redirectByRole();
     return false;
   }
   return true;
@@ -123,7 +143,12 @@ function redirectByRole() {
   const role = getUserRole();
   if (role === ROLES.ADMIN)  window.location.href = '/admin.html';
   else if (role === ROLES.EDITOR) window.location.href = '/editor.html';
-  else window.location.href = '/author.html';
+  else if (role === ROLES.AUTHOR) window.location.href = '/author.html';
+  else {
+    console.warn("Unknown or invalid user role:", role);
+    clearAuth();
+    window.location.href = '/index.html';
+  }
 }
 
 // ── UI Helpers ───────────────────────────────────────────────
@@ -221,8 +246,9 @@ function fillSidebarUser() {
   if (nm) nm.textContent = user.name || 'User';
   if (em) em.textContent = user.email || '';
   if (rb) {
-    rb.textContent = user.role.toUpperCase();
-    rb.className = `sidebar-role-badge role-${user.role}`;
+    const roleStr = user.role || '';
+    rb.textContent = roleStr.toUpperCase();
+    rb.className = roleStr ? `sidebar-role-badge role-${roleStr}` : 'sidebar-role-badge';
   }
 }
 
