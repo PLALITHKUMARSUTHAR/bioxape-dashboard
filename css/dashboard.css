@@ -152,6 +152,7 @@ img { max-width: 100%; display: block; }
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
   transition: color 0.2s ease;
   padding-right: 20px;
