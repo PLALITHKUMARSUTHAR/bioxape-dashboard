@@ -143,6 +143,23 @@
       text-decoration: none;
       display: inline-block;
       text-align: center;
+      box-sizing: border-box;
+      flex: 0 0 calc((100% - 40px) / 5);
+    }
+    @media (max-width: 1024px) {
+      .cat-a {
+        flex: 0 0 calc((100% - 30px) / 4);
+      }
+    }
+    @media (max-width: 768px) {
+      .cat-a {
+        flex: 0 0 calc((100% - 20px) / 3);
+      }
+    }
+    @media (max-width: 580px) {
+      .cat-a {
+        flex: 0 0 calc((100% - 10px) / 2);
+      }
     }
     .cat-a:hover {
       color: var(--accent);
@@ -314,7 +331,7 @@
 
     /* FOOTER */
     #bx-footer{background:var(--g800);color:#e8f5ef;padding:52px 0 24px}
-    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.3fr;gap:34px;margin-bottom:38px}
+    .footer-grid{display:grid;grid-template-columns:1fr 1fr 1.3fr 2fr;gap:34px;margin-bottom:38px}
     .ft-brand-name{font-family:'Playfair Display',serif;font-size:22px;color:#fff;margin-bottom:11px;font-weight:700}
     .ft-brand-name em{font-style:italic;color:#6ee7b7}
     .ft-desc{font-size:13px;color:#9dc9b5;line-height:1.65;margin-bottom:17px}
@@ -458,15 +475,6 @@
     <div class="bx-wrap">
       <div class="footer-grid">
         <div>
-          <div class="ft-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
-          <div class="ft-desc">Where complex science meets clarity. Premium biotechnology insight platform covering genomics, drug discovery, base editing, and bioinformatics.</div>
-          <div class="ft-social">
-            <a class="ft-soc" id="footer-social-twitter" href="#">X</a>
-            <a class="ft-soc" id="footer-social-linkedin" href="#">in</a>
-            <a class="ft-soc" id="footer-social-instagram" href="#">ig</a>
-          </div>
-        </div>
-        <div>
           <div class="ft-col-h">Content</div>
           <a class="ft-link" href="index.html">Latest Articles</a>
           <a class="ft-link" href="public-pages/about.html">About Us</a>
@@ -484,6 +492,15 @@
             <div class="ft-nl-h">Weekly Science Digest</div>
             <input class="ft-nl-inp" type="email" id="ft-nl-email" placeholder="your@email.com"/>
             <button class="ft-nl-btn" onclick="subscribeNewsletter()">Subscribe</button>
+          </div>
+        </div>
+        <div>
+          <div class="ft-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
+          <div class="ft-desc">Where complex science meets clarity. Premium biotechnology insight platform covering genomics, drug discovery, base editing, and bioinformatics.</div>
+          <div class="ft-social">
+            <a class="ft-soc" id="footer-social-twitter" href="#">X</a>
+            <a class="ft-soc" id="footer-social-linkedin" href="#">in</a>
+            <a class="ft-soc" id="footer-social-instagram" href="#">ig</a>
           </div>
         </div>
       </div>
