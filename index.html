@@ -289,6 +289,46 @@
       border: 1px solid var(--border);
     }
     
+    /* PAGINATION */
+    .pagination-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 30px;
+      padding: 10px 0;
+    }
+    .page-btn {
+      padding: 8px 16px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text2);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .page-btn:hover:not(:disabled) {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--g50);
+      transform: translateY(-1px);
+    }
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: var(--off);
+    }
+    .page-info {
+      font-size: 13.5px;
+      color: var(--text3);
+      font-weight: 500;
+    }
+    
     /* RESEARCH SPOTLIGHT SECTION */
     .research-grid {
       display: grid;
@@ -814,6 +854,11 @@
           <div id="bx-latest-articles-grid" class="posts-list-horizontal">
             <!-- Populated dynamically via JS -->
           </div>
+
+          <!-- PAGINATION CONTROLS -->
+          <div id="bx-latest-articles-pagination" class="pagination-container">
+            <!-- Populated dynamically via JS -->
+          </div>
         </div>
 
         <!-- SIDEBAR -->
@@ -983,6 +1028,10 @@
       ? 'http://localhost:5000/api' 
       : 'https://bioxape-backend.onrender.com/api';
 
+    let latestArticlesPage = 1;
+    const latestArticlesLimit = 10; // Accommodate exactly 10 latest articles
+    let latestArticlesShowCover = true;
+
     async function fetchSiteConfig() {
       try {
         const res  = await fetch(CMS_API + '/site/all');
@@ -994,7 +1043,8 @@
         if (cfg.hero_featured||cfg.hero_stack) renderHero(cfg.hero_featured, cfg.hero_stack);
         if (cfg.latest_articles)      renderLatestArticlesConfig(cfg.latest_articles);
         
-        fetchLatestArticles(cfg.latest_articles?.limit || 6, cfg.latest_articles?.title || 'Latest Articles', cfg.latest_articles?.showCoverImage !== false);
+        latestArticlesShowCover = cfg.latest_articles?.showCoverImage !== false;
+        fetchLatestArticles(1);
         
         if (cfg.news_strip)           renderNewsStrip(cfg.news_strip);
         if (cfg.trending)             renderTrending(cfg.trending);
@@ -1005,7 +1055,10 @@
         if (cfg.store)                renderStore(cfg.store);
         if (cfg.footer)               renderFooter(cfg.footer);
         renderAuthors();
-      } catch(e) { console.warn('CMS sync failed - using static fallback', e.message); }
+      } catch(e) { 
+        console.warn('CMS sync failed - using static fallback', e.message); 
+        fetchLatestArticles(1);
+      }
     }
 
     function renderLatestArticlesConfig(data) {
@@ -1015,10 +1068,10 @@
       }
     }
 
-    async function fetchLatestArticles(limit, title, showCover, category = '') {
+    async function fetchLatestArticles(page = 1) {
       try {
-        let url = `${CMS_API}/posts/public/feed?limit=${limit}`;
-        if (category) url += `&category=${encodeURIComponent(category)}`;
+        latestArticlesPage = page;
+        let url = `${CMS_API}/posts/public/feed?limit=${latestArticlesLimit}&page=${page}`;
         
         const res = await fetch(url);
         const data = await res.json();
@@ -1026,13 +1079,14 @@
         if (!gridEl) return;
 
         if (!data.success || !data.posts || data.posts.length === 0) {
-          gridEl.innerHTML = `<div class="no-articles-placeholder">No articles found for this category.</div>`;
+          gridEl.innerHTML = `<div class="no-articles-placeholder">No articles found.</div>`;
+          renderPagination(0, page);
           return;
         }
         
         gridEl.innerHTML = data.posts.map(p => {
           let thumbHtml = '';
-          if (showCover && p.coverImageUrl) {
+          if (latestArticlesShowCover && p.coverImageUrl) {
             thumbHtml = `<div class="article-cover-thumb-wrap"><img src="${p.coverImageUrl}" class="article-cover-thumb-img" alt="${p.title}"/></div>`;
           } else {
             thumbHtml = `<div class="art-img ai1">🔬</div>`;
@@ -1056,8 +1110,42 @@
             </div>
           `;
         }).join('');
+
+        renderPagination(data.total || 0, page);
       } catch(e) {
         console.warn('Failed to fetch dynamic articles:', e.message);
+      }
+    }
+
+    function renderPagination(total, page) {
+      const container = document.getElementById('bx-latest-articles-pagination');
+      if (!container) return;
+      
+      const totalPages = Math.ceil(total / latestArticlesLimit);
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+      
+      let prevDisabled = page <= 1 ? 'disabled' : '';
+      let nextDisabled = page >= totalPages ? 'disabled' : '';
+      
+      container.innerHTML = `
+        <button class="page-btn" ${prevDisabled} onclick="changeArticlesPage(${page - 1})">
+          &larr; Previous
+        </button>
+        <span class="page-info">Page ${page} of ${totalPages}</span>
+        <button class="page-btn" ${nextDisabled} onclick="changeArticlesPage(${page + 1})">
+          Next &rarr;
+        </button>
+      `;
+    }
+
+    function changeArticlesPage(newPage) {
+      fetchLatestArticles(newPage);
+      const gridEl = document.getElementById('bx-latest-articles-grid');
+      if (gridEl) {
+        gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
 
