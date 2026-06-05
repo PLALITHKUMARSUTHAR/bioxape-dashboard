@@ -53,9 +53,9 @@ const CONTENT_TYPES = [
 
 const CATEGORIES = [
   'Genomics & Gene Editing',
-  'Biopharmaceuticals & Drug Discovery',
+  'Biopharmaceuticals',
   'Bioinformatics',
-  'Synthetic Biology & Protein Engineering',
+  'Synthetic Biology',
   'Industrial Biotechnology',
   'Agricultural Biotechnology',
   'Clinical Trials & Industry News'

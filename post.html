@@ -47,31 +47,36 @@
     .nav-links{display:flex;gap:2px}
     .nav-links a{padding:8px 12px;font-size:13px;color:var(--text3);border-radius:7px;font-weight:400;transition:all .15s}
     .nav-links a:hover{background:var(--g50);color:var(--accent)}
-    .search-box {
+    #bx-search-container {
+      padding: 24px 0 8px;
+      background: var(--white);
+    }
+    .search-bar-wrap {
       display: flex;
       align-items: center;
       background: var(--off);
       border: 1.5px solid var(--border);
-      border-radius: 20px;
-      padding: 2px 6px 2px 12px;
-      width: 180px;
-      transition: all 0.25s ease;
+      border-radius: 24px;
+      padding: 4px 8px 4px 18px;
+      max-width: 600px;
+      margin: 0 auto;
+      transition: all 0.2s ease;
     }
-    .search-box:focus-within {
-      width: 240px;
+    .search-bar-wrap:focus-within {
       border-color: var(--accent);
       background: var(--white);
-      box-shadow: 0 0 0 3px rgba(39, 163, 99, 0.15);
+      box-shadow: 0 4px 20px rgba(39, 163, 99, 0.08);
     }
-    .search-box input {
+    .search-bar-wrap input {
       border: none;
       background: none;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text1);
       outline: none;
       width: 100%;
+      height: 36px;
     }
-    .search-box button {
+    .search-bar-wrap button {
       border: none;
       background: none;
       color: var(--text3);
@@ -79,10 +84,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 4px;
+      padding: 8px;
       transition: color 0.15s;
     }
-    .search-box button:hover {
+    .search-bar-wrap button:hover {
       color: var(--accent);
     }
     .nav-right{display:flex;align-items:center;gap:10px}
@@ -149,17 +154,23 @@
             <a href="public-pages/write-for-us.html">Write for Us</a>
             <a href="public-pages/contact.html">Contact</a>
           </div>
-          <div class="search-box">
-            <input type="text" id="nav-search-input" placeholder="Search..."/>
-            <button id="nav-search-btn" onclick="executeSearch()" aria-label="Search" title="Search">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </button>
-          </div>
         </div>
         <div class="nav-right">
           <a class="btn-dash" href="login.html">Dashboard</a>
           <a class="btn-sub" href="public-pages/subscribe.html">Subscribe ✦</a>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH BAR BELOW NAVBARS -->
+  <div id="bx-search-container">
+    <div class="bx-wrap">
+      <div class="search-bar-wrap">
+        <input type="text" id="nav-search-input" placeholder="Search articles, topics, synonyms..."/>
+        <button id="nav-search-btn" onclick="executeSearch()" aria-label="Search" title="Search">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
     </div>
   </div>

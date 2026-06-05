@@ -49,32 +49,36 @@
     .nav-links a{padding:8px 12px;font-size:13px;color:var(--text3);border-radius:7px;font-weight:400;transition:all .15s}
     .nav-links a:hover{background:var(--g50);color:var(--accent)}
 
-    /* Search Box */
-    .search-box {
+    #bx-search-container {
+      padding: 24px 0 8px;
+      background: var(--white);
+    }
+    .search-bar-wrap {
       display: flex;
       align-items: center;
       background: var(--off);
       border: 1.5px solid var(--border);
-      border-radius: 20px;
-      padding: 2px 6px 2px 12px;
-      width: 180px;
-      transition: all 0.25s ease;
+      border-radius: 24px;
+      padding: 4px 8px 4px 18px;
+      max-width: 600px;
+      margin: 0 auto;
+      transition: all 0.2s ease;
     }
-    .search-box:focus-within {
-      width: 240px;
+    .search-bar-wrap:focus-within {
       border-color: var(--accent);
       background: var(--white);
-      box-shadow: 0 0 0 3px rgba(39, 163, 99, 0.15);
+      box-shadow: 0 4px 20px rgba(39, 163, 99, 0.08);
     }
-    .search-box input {
+    .search-bar-wrap input {
       border: none;
       background: none;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text1);
       outline: none;
       width: 100%;
+      height: 36px;
     }
-    .search-box button {
+    .search-bar-wrap button {
       border: none;
       background: none;
       color: var(--text3);
@@ -82,10 +86,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 4px;
+      padding: 8px;
       transition: color 0.15s;
     }
-    .search-box button:hover {
+    .search-bar-wrap button:hover {
       color: var(--accent);
     }
 
@@ -155,21 +159,101 @@
     .sec-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:10px}
     .sec-line{width:30px;height:3px;background:var(--accent);border-radius:2px;flex-shrink:0}
     .sec-title-acc{color:var(--accent)}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-
-    /* ARTICLE CARDS */
-    .art-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s}
-    .art-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-    .art-img{height:155px;display:flex;align-items:center;justify-content:center;font-size:32px}
+    /* HORIZONTAL ARTICLE CARDS */
+    .articles-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .art-card {
+      display: flex;
+      flex-direction: row;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 160px;
+    }
+    .art-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    }
+    .art-img, .article-cover-thumb-wrap {
+      width: 200px;
+      height: 100%;
+      min-height: 160px;
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin: 0;
+      border: none;
+      border-radius: 0;
+    }
+    .article-cover-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .ai1{background:linear-gradient(135deg,var(--g50),var(--g100))}
-    .art-body{padding:16px}
-    .art-title{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:600;color:var(--text1);margin-bottom:7px;line-height:1.32}
-    .art-exc{font-size:12.5px;color:var(--text3);line-height:1.6;margin-bottom:12px}
-    .art-meta{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--text4)}
-    .art-meta-left{display:flex;align-items:center;gap:7px}
+    .art-body {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1;
+    }
+    .art-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text1);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .art-exc {
+      font-size: 13px;
+      color: var(--text3);
+      line-height: 1.6;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .art-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text4);
+      margin-top: auto;
+    }
+    .art-meta-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
     .av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
     .tag{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.2px;margin-bottom:8px}
     .tg{background:var(--accent-l);color:var(--g700)}
+
+    /* MOBILE STACKING FOR HORIZONTAL CARDS */
+    @media(max-width: 768px) {
+      .art-card {
+        flex-direction: column;
+      }
+      .art-img, .article-cover-thumb-wrap {
+        width: 100%;
+        height: 160px;
+        min-height: 160px;
+      }
+    }
 
     .no-articles-placeholder {
       grid-column: 1/-1;
@@ -224,16 +308,15 @@
     /* RESPONSIVE */
     @media(max-width:1024px){
       .footer-grid{grid-template-columns:1fr 1fr}
-      .grid3{grid-template-columns:1fr 1fr}
+      .articles-list{grid-template-columns:1fr 1fr}
     }
     @media(max-width:768px){
       .bx-wrap{padding:0 16px}
       .nav-row{flex-wrap:wrap;height:auto;padding:12px 0;gap:8px}
       .nav-links-search-wrap {flex-direction:column;width:100%;gap:12px}
       .nav-links{flex-wrap:wrap;justify-content:center}
-      .search-box {width:100%;max-width:320px}
       .nav-right{width:100%;justify-content:center}
-      .grid3{grid-template-columns:1fr}
+      .articles-list{grid-template-columns:1fr}
       .footer-grid{grid-template-columns:1fr}
       .footer-bottom{flex-direction:column;text-align:center}
       .category-hero-title{font-size:30px}
@@ -259,12 +342,6 @@
             <a href="public-pages/write-for-us.html">Write for Us</a>
             <a href="public-pages/contact.html">Contact</a>
           </div>
-          <div class="search-box">
-            <input type="text" id="nav-search-input" placeholder="Search..."/>
-            <button id="nav-search-btn" onclick="executeSearch()" aria-label="Search" title="Search">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </button>
-          </div>
         </div>
         <div class="nav-right">
           <a class="btn-dash" href="login.html">Dashboard</a>
@@ -279,6 +356,18 @@
     <div class="bx-wrap">
       <div id="bx-catbar-inner">
         <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH BAR BELOW NAVBARS -->
+  <div id="bx-search-container">
+    <div class="bx-wrap">
+      <div class="search-bar-wrap">
+        <input type="text" id="nav-search-input" placeholder="Search articles, topics, synonyms..."/>
+        <button id="nav-search-btn" onclick="executeSearch()" aria-label="Search" title="Search">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -305,7 +394,7 @@
         </div>
       </div>
 
-      <div id="bx-articles-grid" class="grid3">
+      <div id="bx-articles-grid" class="articles-list">
         <div class="loader">
           <div class="spinner"></div>
           <span>Loading articles...</span>
@@ -365,7 +454,7 @@
         gradient: "linear-gradient(135deg, #0f1f16 0%, #136b3d 100%)",
         tag: "Genomics"
       },
-      "Biopharmaceuticals & Drug Discovery": {
+      "Biopharmaceuticals": {
         desc: "Research insights into therapeutic antibodies, cancer vaccine design, cell therapies (CAR-T), and advanced drug validation methodologies.",
         gradient: "linear-gradient(135deg, #0b1a30 0%, #1e40af 100%)",
         tag: "Drug Discovery"
@@ -375,7 +464,7 @@
         gradient: "linear-gradient(135deg, #0d1e2e 0%, #0d9488 100%)",
         tag: "Bioinformatics"
       },
-      "Synthetic Biology & Protein Engineering": {
+      "Synthetic Biology": {
         desc: "AlphaFold design predictions, artificial metabolic networks, de novo enzyme synthesis, and programmed genetic circuits.",
         gradient: "linear-gradient(135deg, #1f1035 0%, #5b21b6 100%)",
         tag: "Synthetic Biology"
