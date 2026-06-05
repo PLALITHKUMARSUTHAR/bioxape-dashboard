@@ -111,11 +111,51 @@
     .btn-dash{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text2);background:none;text-decoration:none;font-weight:500}
     .btn-sub{padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
 
-    /* CATEGORY NAV */
-    #bx-catbar{background:var(--off);border-bottom:1px solid var(--border)}
-    #bx-catbar-inner{display:grid;grid-template-columns:repeat(5,1fr);gap:0;max-width:1050px;margin:0 auto;padding:6px 0}
-    .cat-a{padding:10px 6px;font-size:12.5px;color:var(--text3);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent;font-weight:400;transition:all .15s;text-decoration:none;display:block;text-align:center;overflow:hidden;text-overflow:ellipsis}
-    .cat-a:hover,.cat-a.active{color:var(--accent);border-bottom-color:var(--accent)}
+     /* CATEGORY NAV - PREMIUM PILLS */
+    #bx-catbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    #bx-catbar-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0;
+    }
+    #bx-catbar-inner::-webkit-scrollbar {
+      display: none;
+    }
+    .cat-a {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text2);
+      background: var(--off);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    .cat-a:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--g50);
+      transform: translateY(-1px);
+    }
+    .cat-a.active {
+      color: var(--white);
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(39, 163, 99, 0.2);
+    }
 
     /* CATEGORY HERO BANNER */
     #bx-category-hero {
@@ -489,10 +529,15 @@
         gradient: "linear-gradient(135deg, #1b2e0f 0%, #3f6212 100%)",
         tag: "AgriTech"
       },
-      "Clinical Trials & Industry News": {
-        desc: "FDA & regulatory approval benchmarks, clinical phase metrics, venture funding summaries, and international science policies.",
+      "Clinical Trials": {
+        desc: "FDA & regulatory approval benchmarks, clinical phase metrics, trial outcomes, and research patient updates.",
         gradient: "linear-gradient(135deg, #320f0f 0%, #991b1b 100%)",
-        tag: "Clinical & News"
+        tag: "Clinical Trials"
+      },
+      "Industry News": {
+        desc: "Venture funding summaries, biotech corporate developments, international science policies, and market reports.",
+        gradient: "linear-gradient(135deg, #1c1917 0%, #44403c 100%)",
+        tag: "Industry News"
       }
     };
 

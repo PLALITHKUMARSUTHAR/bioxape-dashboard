@@ -58,7 +58,8 @@ const CATEGORIES = [
   'Synthetic Biology',
   'Industrial Biotechnology',
   'Agricultural Biotechnology',
-  'Clinical Trials & Industry News'
+  'Clinical Trials',
+  'Industry News'
 ];
 
 // ── 2. API & AUTH HELPERS ────────────────────────────────────
