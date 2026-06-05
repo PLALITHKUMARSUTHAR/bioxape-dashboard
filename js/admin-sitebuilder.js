@@ -209,6 +209,8 @@ function researchSection(data) {
       <input class="form-input" id="res-title" value="${hero.title||''}" placeholder="Research paper title..."/></div>
     <div class="form-group"><label class="form-label">Excerpt</label>
       <textarea class="form-textarea" id="res-excerpt" rows="2">${hero.excerpt||''}</textarea></div>
+    <div class="form-group"><label class="form-label">Full Paper URL</label>
+      <input class="form-input" id="res-paper-url" value="${hero.paperUrl||''}" placeholder="https://nature.com/articles/..."/></div>
     <div class="form-group"><label class="form-label">4 Stat Cards (value|label)</label>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         ${(hero.stats||[{},{},{},{}]).map((s,i)=>`
@@ -227,8 +229,12 @@ function researchSection(data) {
           <input class="form-input" id="res-card-title-${i}" value="${c.title||''}" placeholder="Paper title..."/></div>
         <div class="form-group"><label class="form-label">Excerpt</label>
           <textarea class="form-textarea" id="res-card-excerpt-${i}" rows="2">${c.excerpt||''}</textarea></div>
-        <div class="form-group"><label class="form-label">Impact Factor</label>
-          <input class="form-input" id="res-card-if-${i}" value="${c.ifScore||''}" style="width:100px"/></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Impact Factor</label>
+            <input class="form-input" id="res-card-if-${i}" value="${c.ifScore||''}" style="width:100px"/></div>
+          <div class="form-group"><label class="form-label">Paper URL</label>
+            <input class="form-input" id="res-card-url-${i}" value="${c.paperUrl||''}" placeholder="https://science.org/..."/></div>
+        </div>
       </div>`).join('')}
     <div class="modal-footer"><button class="btn btn-primary" onclick="saveResearch()">Save Research Spotlight</button></div>
   `);
@@ -493,13 +499,15 @@ async function saveResearch() {
     title:   document.getElementById('res-title')?.value||'',
     excerpt: document.getElementById('res-excerpt')?.value||'',
     ifScore: document.getElementById('res-if')?.value||'',
+    paperUrl: document.getElementById('res-paper-url')?.value||'',
     stats
   };
   const cards = [0,1].map(i => ({
     journal: document.getElementById(`res-card-journal-${i}`)?.value||'',
     title:   document.getElementById(`res-card-title-${i}`)?.value||'',
     excerpt: document.getElementById(`res-card-excerpt-${i}`)?.value||'',
-    ifScore: document.getElementById(`res-card-if-${i}`)?.value||''
+    ifScore: document.getElementById(`res-card-if-${i}`)?.value||'',
+    paperUrl: document.getElementById(`res-card-url-${i}`)?.value||''
   }));
   const result = await apiCall('/site/config/research_spotlight','PUT',{ data: { hero, cards } });
   result?.success ? showToast('Research spotlight saved!','success') : showToast('Save failed','error');
