@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <title>Topic Insights — BioXApe</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ============================================================
+       BioXape — Premium Category Theme
+       ============================================================ */
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --g50:#f0faf4;--g100:#d4f0e0;--g200:#a8dfc0;--g300:#6ec49a;
+      --g400:#3db87a;--g500:#27a363;--g600:#1a8a50;--g700:#136b3d;
+      --g800:#0c4d2c;--g900:#072e1a;
+      --white:#ffffff;--off:#f8faf9;--surface:#f2f7f4;
+      --border:#e0ece5;--border2:#c8ddd2;
+      --text1:#0f1f16;--text2:#2d4a38;--text3:#4a7060;--text4:#7a9e8c;
+      --accent:#27a363;--accent-l:#e8f7ef;--accent-d:#136b3d;
+      --amber:#d97706;--amber-l:#fef3c7;
+      --red:#dc2626;--red-l:#fee2e2;
+      --blue:#2563eb;--blue-l:#dbeafe;
+      --purple:#7c3aed;--purple-l:#ede9fe;
+      --teal:#0d9488;--teal-l:#ccfbf1;
+    }
+    body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.7;color:var(--text1);background:var(--white)}
+    a{text-decoration:none;color:var(--accent);transition:color .2s}
+    a:hover{color:var(--accent-d)}
+    img{max-width:100%;height:auto;display:block}
+    .bx-wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+
+    /* NAV */
+    #bx-nav{background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1000}
+    .nav-row{display:flex;align-items:center;justify-content:space-between;height:66px}
+    .bx-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .bx-brand-mark{width:38px;height:38px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center}
+    .bx-brand-mark svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+    .bx-brand-name{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:var(--text1)}
+    .bx-brand-name em{font-style:italic;color:var(--accent)}
+    .brand-x{font-size:1.5em;display:inline-block;line-height:0.8;vertical-align:-0.05em}
+    
+    .nav-links-search-wrap{display:flex;align-items:center;gap:20px;flex:1;justify-content:center}
+    .nav-links{display:flex;gap:2px}
+    .nav-links a{padding:8px 12px;font-size:13px;color:var(--text3);border-radius:7px;font-weight:400;transition:all .15s}
+    .nav-links a:hover{background:var(--g50);color:var(--accent)}
+
+    /* Search Box */
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--off);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 6px 2px 12px;
+      width: 180px;
+      transition: all 0.25s ease;
+    }
+    .search-box:focus-within {
+      width: 240px;
+      border-color: var(--accent);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(39, 163, 99, 0.15);
+    }
+    .search-box input {
+      border: none;
+      background: none;
+      font-size: 13px;
+      color: var(--text1);
+      outline: none;
+      width: 100%;
+    }
+    .search-box button {
+      border: none;
+      background: none;
+      color: var(--text3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      transition: color 0.15s;
+    }
+    .search-box button:hover {
+      color: var(--accent);
+    }
+
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .btn-dash{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text2);background:none;text-decoration:none;font-weight:500}
+    .btn-sub{padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+
+    /* CATEGORY NAV */
+    #bx-catbar{background:var(--off);border-bottom:1px solid var(--border)}
+    #bx-catbar-inner{display:grid;grid-template-columns:repeat(5,1fr);gap:0;max-width:1050px;margin:0 auto;padding:6px 0}
+    .cat-a{padding:10px 6px;font-size:12.5px;color:var(--text3);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent;font-weight:400;transition:all .15s;text-decoration:none;display:block;text-align:center;overflow:hidden;text-overflow:ellipsis}
+    .cat-a:hover,.cat-a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+    /* CATEGORY HERO BANNER */
+    #bx-category-hero {
+      padding: 56px 0;
+      background: linear-gradient(135deg, var(--g800) 0%, var(--g600) 100%);
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+      border-bottom: 2px solid var(--border);
+    }
+    .category-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+    }
+    .category-hero-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      color: #a8dfc0;
+    }
+    .category-hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .category-hero-desc {
+      font-size: 15.5px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    
+    /* Grid decoration */
+    .hero-grid-pattern {
+      position: absolute;
+      inset: 0;
+      opacity: 0.08;
+      background-size: 20px 20px;
+      background-image: linear-gradient(to right, white 1px, transparent 1px),
+                        linear-gradient(to bottom, white 1px, transparent 1px);
+    }
+
+    /* MAIN CONTENT */
+    .bx-sec{padding:48px 0}
+    .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;border-bottom:2px solid var(--border);padding-bottom:13px}
+    .sec-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:10px}
+    .sec-line{width:30px;height:3px;background:var(--accent);border-radius:2px;flex-shrink:0}
+    .sec-title-acc{color:var(--accent)}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+
+    /* ARTICLE CARDS */
+    .art-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s}
+    .art-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+    .art-img{height:155px;display:flex;align-items:center;justify-content:center;font-size:32px}
+    .ai1{background:linear-gradient(135deg,var(--g50),var(--g100))}
+    .art-body{padding:16px}
+    .art-title{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:600;color:var(--text1);margin-bottom:7px;line-height:1.32}
+    .art-exc{font-size:12.5px;color:var(--text3);line-height:1.6;margin-bottom:12px}
+    .art-meta{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--text4)}
+    .art-meta-left{display:flex;align-items:center;gap:7px}
+    .av{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+    .tag{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.2px;margin-bottom:8px}
+    .tg{background:var(--accent-l);color:var(--g700)}
+
+    .no-articles-placeholder {
+      grid-column: 1/-1;
+      text-align: center;
+      color: var(--text4);
+      padding: 80px 20px;
+      font-size: 15px;
+      background: var(--off);
+      border-radius: 12px;
+      border: 1.5px dashed var(--border);
+    }
+    .article-cover-thumb-wrap { height:155px; overflow:hidden; border-bottom:1.5px solid var(--border); }
+    .article-cover-thumb-img { width:100%; height:100%; object-fit:cover; }
+
+    /* FOOTER */
+    #bx-footer{background:var(--g800);color:#e8f5ef;padding:52px 0 24px}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.3fr;gap:34px;margin-bottom:38px}
+    .ft-brand-name{font-family:'Playfair Display',serif;font-size:22px;color:#fff;margin-bottom:11px;font-weight:700}
+    .ft-brand-name em{font-style:italic;color:#6ee7b7}
+    .ft-desc{font-size:13px;color:#9dc9b5;line-height:1.65;margin-bottom:17px}
+    .ft-social{display:flex;gap:8px}
+    .ft-soc{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;color:#9dc9b5;text-decoration:none}
+    .ft-soc:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+    .ft-col-h{font-size:12.5px;font-weight:700;color:#d1ede3;text-transform:uppercase;letter-spacing:.6px;margin-bottom:13px}
+    .ft-link{display:block;font-size:13px;color:#7aaa94;padding:4px 0;cursor:pointer;transition:color .15s;text-decoration:none}
+    .ft-link:hover{color:#6ee7b7}
+    .ft-nl{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:17px}
+    .ft-nl-h{font-size:14px;font-weight:600;color:#e8f5ef;margin-bottom:10px}
+    .ft-nl-inp{width:100%;padding:9px 12px;border:1px solid rgba(255,255,255,.15);border-radius:7px;background:rgba(255,255,255,.07);color:#e8f5ef;font-size:12.5px;margin-bottom:8px;font-family:'Inter',sans-serif}
+    .ft-nl-btn{width:100%;padding:9px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+    .footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .ft-copy{font-size:12px;color:#5a8a72}
+
+    .loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 60px;
+      color: var(--text4);
+    }
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* RESPONSIVE */
+    @media(max-width:1024px){
+      .footer-grid{grid-template-columns:1fr 1fr}
+      .grid3{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:768px){
+      .bx-wrap{padding:0 16px}
+      .nav-row{flex-wrap:wrap;height:auto;padding:12px 0;gap:8px}
+      .nav-links-search-wrap {flex-direction:column;width:100%;gap:12px}
+      .nav-links{flex-wrap:wrap;justify-content:center}
+      .search-box {width:100%;max-width:320px}
+      .nav-right{width:100%;justify-content:center}
+      .grid3{grid-template-columns:1fr}
+      .footer-grid{grid-template-columns:1fr}
+      .footer-bottom{flex-direction:column;text-align:center}
+      .category-hero-title{font-size:30px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <div id="bx-nav">
+    <div class="bx-wrap">
+      <div class="nav-row">
+        <a class="bx-brand" href="index.html">
+          <div class="bx-brand-mark">
+            <svg viewBox="0 0 24 24"><path d="M12 3c0 0-3 4-3 8s3 8 3 8"/><path d="M12 3c0 0 3 4 3 8s-3 8-3 8"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+          </div>
+          <div class="bx-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
+        </a>
+        <div class="nav-links-search-wrap">
+          <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="public-pages/about.html">About</a>
+            <a href="public-pages/write-for-us.html">Write for Us</a>
+            <a href="public-pages/contact.html">Contact</a>
+          </div>
+          <div class="search-box">
+            <input type="text" id="nav-search-input" placeholder="Search..."/>
+            <button id="nav-search-btn" onclick="executeSearch()" aria-label="Search" title="Search">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+          </div>
+        </div>
+        <div class="nav-right">
+          <a class="btn-dash" href="login.html">Dashboard</a>
+          <a class="btn-sub" href="public-pages/subscribe.html">Subscribe ✦</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY NAV -->
+  <div id="bx-catbar">
+    <div class="bx-wrap">
+      <div id="bx-catbar-inner">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY HERO BANNER -->
+  <section id="bx-category-hero">
+    <div class="hero-grid-pattern"></div>
+    <div class="bx-wrap">
+      <div class="category-hero-content">
+        <span class="category-hero-tag" id="bx-hero-tag">Biotechnology Topic</span>
+        <h1 class="category-hero-title" id="bx-hero-title">Topic Insights</h1>
+        <p class="category-hero-desc" id="bx-hero-desc">Explore our curated scientific articles and updates on this topic.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENT GRID SECTION -->
+  <section class="bx-sec">
+    <div class="bx-wrap">
+      <div class="sec-head">
+        <div class="sec-title">
+          <div class="sec-line"></div>
+          <span id="bx-grid-heading">Featured Articles</span>
+        </div>
+      </div>
+
+      <div id="bx-articles-grid" class="grid3">
+        <div class="loader">
+          <div class="spinner"></div>
+          <span>Loading articles...</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="bx-footer">
+    <div class="bx-wrap">
+      <div class="footer-grid">
+        <div>
+          <div class="ft-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
+          <div class="ft-desc">Where complex science meets clarity. Premium biotechnology insight platform covering genomics, drug discovery, base editing, and bioinformatics.</div>
+          <div class="ft-social">
+            <a class="ft-soc" id="footer-social-twitter" href="#">X</a>
+            <a class="ft-soc" id="footer-social-linkedin" href="#">in</a>
+            <a class="ft-soc" id="footer-social-instagram" href="#">ig</a>
+          </div>
+        </div>
+        <div>
+          <div class="ft-col-h">Content</div>
+          <a class="ft-link" href="index.html">Latest Articles</a>
+          <a class="ft-link" href="public-pages/about.html">About Us</a>
+          <a class="ft-link" href="public-pages/write-for-us.html">Write for Us</a>
+          <a class="ft-link" href="public-pages/contact.html">Contact Support</a>
+        </div>
+        <div>
+          <div class="ft-col-h">Membership</div>
+          <a class="ft-link" href="public-pages/subscribe.html">Subscribe</a>
+          <a class="ft-link" href="register.html">Sign Up</a>
+        </div>
+        <div>
+          <div class="ft-col-h">Newsletter</div>
+          <div class="ft-nl">
+            <div class="ft-nl-h">Weekly Science Digest</div>
+            <input class="ft-nl-inp" type="email" id="ft-nl-email" placeholder="your@email.com"/>
+            <button class="ft-nl-btn" onclick="subscribeNewsletter()">Subscribe</button>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="ft-copy" id="footer-copyright">© 2026 BioXApe. All rights reserved. Made with dedication in India.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const CMS_API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname
+      ? 'http://localhost:5000/api' 
+      : 'https://bioxape-backend.onrender.com/api';
+
+    const CATEGORY_DESCS = {
+      "Genomics & Gene Editing": {
+        desc: "Deep dive into CRISPR systems, base/prime editing, NGS sequencing technologies, and next-gen molecular therapeutics.",
+        gradient: "linear-gradient(135deg, #0f1f16 0%, #136b3d 100%)",
+        tag: "Genomics"
+      },
+      "Biopharmaceuticals & Drug Discovery": {
+        desc: "Research insights into therapeutic antibodies, cancer vaccine design, cell therapies (CAR-T), and advanced drug validation methodologies.",
+        gradient: "linear-gradient(135deg, #0b1a30 0%, #1e40af 100%)",
+        tag: "Drug Discovery"
+      },
+      "Bioinformatics": {
+        desc: "Computational pipelines, statistical modeling of multi-omics data, custom sequence alignment scripts, and molecular dynamics databases.",
+        gradient: "linear-gradient(135deg, #0d1e2e 0%, #0d9488 100%)",
+        tag: "Bioinformatics"
+      },
+      "Synthetic Biology & Protein Engineering": {
+        desc: "AlphaFold design predictions, artificial metabolic networks, de novo enzyme synthesis, and programmed genetic circuits.",
+        gradient: "linear-gradient(135deg, #1f1035 0%, #5b21b6 100%)",
+        tag: "Synthetic Biology"
+      },
+      "Industrial Biotechnology": {
+        desc: "Optimized bioreactor designs, scalable industrial enzyme kinetics, customized microbial fermentation, and next-gen biofuels.",
+        gradient: "linear-gradient(135deg, #2e1c07 0%, #7c2d12 100%)",
+        tag: "Industrial"
+      },
+      "Agricultural Biotechnology": {
+        desc: "CRISPR editing in crop systems, crop yield optimization, biological pest controls, and GM agriculture policy advancements.",
+        gradient: "linear-gradient(135deg, #1b2e0f 0%, #3f6212 100%)",
+        tag: "AgriTech"
+      },
+      "Clinical Trials & Industry News": {
+        desc: "FDA & regulatory approval benchmarks, clinical phase metrics, venture funding summaries, and international science policies.",
+        gradient: "linear-gradient(135deg, #320f0f 0%, #991b1b 100%)",
+        tag: "Clinical & News"
+      }
+    };
+
+    function getParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    async function loadPage() {
+      // 1. Load Navbar Categories in background
+      const siteConfigPromise = fetchSiteConfig();
+
+      // 2. Fetch specific posts
+      const categoryName = getParam('name');
+      const searchQuery = getParam('q') || getParam('search');
+
+      const gridEl = document.getElementById('bx-articles-grid');
+      const titleEl = document.getElementById('bx-hero-title');
+      const descEl = document.getElementById('bx-hero-desc');
+      const tagEl = document.getElementById('bx-hero-tag');
+      const bannerEl = document.getElementById('bx-category-hero');
+      const gridHeading = document.getElementById('bx-grid-heading');
+
+      let url = `${CMS_API}/posts/public/feed?limit=24`;
+
+      if (categoryName) {
+        // Category Mode
+        document.title = `${categoryName} — BioXApe`;
+        titleEl.textContent = categoryName;
+        gridHeading.textContent = `${categoryName} Feed`;
+        url += `&category=${encodeURIComponent(categoryName)}`;
+
+        const meta = CATEGORY_DESCS[categoryName] || {
+          desc: "Explore curated insights and science communication on this topic.",
+          gradient: "linear-gradient(135deg, var(--g800) 0%, var(--g600) 100%)",
+          tag: "Biotechnology"
+        };
+        descEl.textContent = meta.desc;
+        tagEl.textContent = meta.tag;
+        bannerEl.style.background = meta.gradient;
+
+        // Highlight active class in category navbar once configuration loads
+        siteConfigPromise.then(() => {
+          document.querySelectorAll('.cat-a').forEach(a => {
+            if (a.textContent.trim() === categoryName) {
+              a.classList.add('active');
+            } else {
+              a.classList.remove('active');
+            }
+          });
+        });
+
+      } else if (searchQuery) {
+        // Search Mode
+        document.title = `Search Results: ${searchQuery} — BioXApe`;
+        titleEl.textContent = `Search: "${searchQuery}"`;
+        gridHeading.textContent = `Results for "${searchQuery}"`;
+        url += `&q=${encodeURIComponent(searchQuery)}`;
+        
+        tagEl.textContent = "Search Console";
+        descEl.textContent = "Explore articles and database entries matching your search query.";
+        bannerEl.style.background = "linear-gradient(135deg, #1e293b 0%, #475569 100%)";
+        document.getElementById('nav-search-input').value = searchQuery;
+      } else {
+        // Fallback
+        window.location.href = 'index.html';
+        return;
+      }
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.success || !data.posts || data.posts.length === 0) {
+          gridEl.innerHTML = `
+            <div class="no-articles-placeholder">
+              <h3>No articles found</h3>
+              <p style="margin-top: 8px; color: var(--text3);">No publication matches your criteria at the moment. Try adjusting your search query or choosing another topic.</p>
+            </div>`;
+          return;
+        }
+
+        gridEl.innerHTML = data.posts.map(p => {
+          let thumbHtml = '';
+          if (p.coverImageUrl) {
+            thumbHtml = `<div class="article-cover-thumb-wrap"><img src="${p.coverImageUrl}" class="article-cover-thumb-img" alt="${p.title}"/></div>`;
+          } else {
+            thumbHtml = `<div class="art-img ai1">🔬</div>`;
+          }
+
+          return `
+            <div class="art-card" onclick="window.location.href='post.html?id=${p._id}'">
+              ${thumbHtml}
+              <div class="art-body">
+                <span class="tag tg">${p.category || 'Science'}</span>
+                <div class="art-title">${p.title}</div>
+                <div class="art-exc">${p.excerpt || ''}</div>
+                <div class="art-meta">
+                  <div class="art-meta-left">
+                    <div class="av">${p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU'}</div>
+                    <span>${p.authorName || 'Author'}</span>
+                  </div>
+                  <span>${p.readTimeMinutes || 1} min read</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (e) {
+        gridEl.innerHTML = `<div class="no-articles-placeholder">✕ Failed to load articles. Please try again.</div>`;
+      }
+    }
+
+    async function fetchSiteConfig() {
+      try {
+        const res  = await fetch(CMS_API + '/site/all');
+        const data = await res.json();
+        if (!data.success) return;
+        const cfg = data.data;
+        if (cfg.category_nav) renderCategoryNav(cfg.category_nav);
+        if (cfg.footer) renderFooter(cfg.footer);
+      } catch(e) {
+        console.warn('Config fetch failed');
+      }
+    }
+
+    function renderCategoryNav(data) {
+      const el = document.getElementById('bx-catbar-inner');
+      if (!el || !data.items) return;
+      el.innerHTML = [...data.items]
+        .sort((a,b)=>a.order-b.order)
+        .filter(i=>i.active!==false && i.label!=='All Topics' && i.label!=='all topics')
+        .map((i,idx)=> {
+          return `<a class="cat-a" href="category.html?name=${encodeURIComponent(i.label)}">${i.label}</a>`;
+        }).join('');
+    }
+
+    function executeSearch() {
+      const query = document.getElementById('nav-search-input').value.trim();
+      if (query) {
+        window.location.href = `category.html?q=${encodeURIComponent(query)}`;
+      }
+    }
+
+    // Enter key support for search
+    document.getElementById('nav-search-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        executeSearch();
+      }
+    });
+
+    function renderFooter(data) {
+      if(!data) return;
+      const s=data.socialLinks||{};
+      if(s.twitter)  { const e=document.getElementById('footer-social-twitter');  if(e) e.href=s.twitter; }
+      if(s.linkedin) { const e=document.getElementById('footer-social-linkedin'); if(e) e.href=s.linkedin; }
+      if(s.instagram){ const e=document.getElementById('footer-social-instagram');if(e) e.href=s.instagram; }
+      if(data.copyrightText){ const e=document.getElementById('footer-copyright'); if(e) e.textContent=data.copyrightText; }
+    }
+
+    async function subscribeNewsletter() {
+      const emailEl = document.getElementById('ft-nl-email');
+      if(!emailEl||!emailEl.value) { alert('Please enter your email'); return; }
+      const email = emailEl.value.trim();
+      if(!email.includes('@')) { alert('Please enter a valid email'); return; }
+      try {
+        await fetch(CMS_API+'/auth/newsletter-subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+        emailEl.value='';
+        alert('Subscribed! Welcome to BioXApe.');
+      } catch(e) { alert('Please try again.'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPage);
+  </script>
+</body>
+</html>

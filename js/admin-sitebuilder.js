@@ -74,7 +74,7 @@ function heroSection(hero, stack) {
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Category Tag</label>
-          <input class="form-input" id="hero-category" value="${hero?.category||''}" placeholder="CRISPR"/>
+          <input class="form-input" id="hero-category" value="${hero?.category||''}" placeholder="Genomics"/>
         </div>
         <div class="form-group">
           <label class="form-label">Date Label</label>

@@ -92,7 +92,7 @@
     <div class="dash-topbar">
       <div class="topbar-title" id="topbar-title">Overview</div>
       <div class="topbar-right">
-        <a href="../index.html" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
+        <a href="index.html" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
         <button class="notif-bell" id="notif-bell">🔔<span class="notif-count hidden" id="notif-count">0</span></button>
       </div>
     </div>
@@ -239,7 +239,7 @@
         <div class="card">
           <div class="card-head"><div class="card-title"><div class="card-line"></div>Category Manager</div><button class="btn btn-primary btn-sm" onclick="openAddCategoryModal()">+ Add Category</button></div>
           <div class="tbl-wrap"><table>
-            <thead><tr><th>Display Name</th><th>Blogger Label</th><th>Posts</th><th>Active</th><th>Order</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Display Name</th><th>Category Label</th><th>Posts</th><th>Active</th><th>Order</th><th>Actions</th></tr></thead>
             <tbody id="categories-tbody"></tbody>
           </table></div>
         </div>
@@ -349,9 +349,9 @@
     <div id="approve-preview-area" class="mb-20"></div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Final Categories (Blogger Labels)</label>
-        <input class="form-input" type="text" id="approve-categories" placeholder="CRISPR, Genomics, Research"/>
-        <div class="form-hint">Comma-separated. These become Blogger post labels.</div>
+        <label class="form-label">Final Categories (Category Labels)</label>
+        <input class="form-input" type="text" id="approve-categories" placeholder="Genomics_GeneEditing, Bioinformatics"/>
+        <div class="form-hint">Comma-separated. These are the categories assigned to the post.</div>
       </div>
       <div class="form-group">
         <label class="form-label">Admin Note (optional)</label>
@@ -390,8 +390,8 @@
 <div class="modal-overlay" id="cat-modal">
   <div class="modal">
     <div class="modal-head"><div class="modal-title">Add Category</div><button class="modal-close" onclick="closeModal('cat-modal')">✕</button></div>
-    <div class="form-group"><label class="form-label" for="cat-display">Display Name <span>*</span></label><input class="form-input" id="cat-display" placeholder="CRISPR & Gene Editing"/></div>
-    <div class="form-group"><label class="form-label" for="cat-label">Blogger Label <span>*</span></label><input class="form-input" id="cat-label" placeholder="CRISPR"/><div class="form-hint">Exact label used in Blogger posts. No spaces.</div></div>
+    <div class="form-group"><label class="form-label" for="cat-display">Display Name <span>*</span></label><input class="form-input" id="cat-display" placeholder="Genomics & Gene Editing"/></div>
+    <div class="form-group"><label class="form-label" for="cat-label">Category Label <span>*</span></label><input class="form-input" id="cat-label" placeholder="Genomics_GeneEditing"/><div class="form-hint">Exact identifier used for URLs. No spaces.</div></div>
     <div class="form-group"><label class="form-label" for="cat-desc">Description</label><textarea class="form-textarea" id="cat-desc" placeholder="Brief category description..." rows="2"></textarea></div>
     <div class="form-group"><label class="form-label" for="cat-order">Nav Order</label><input class="form-input" type="number" id="cat-order" placeholder="e.g. 10" title="Navigation order value" value="10"/></div>
     <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('cat-modal')">Cancel</button><button class="btn btn-primary" onclick="saveCategory()">Add Category</button></div>

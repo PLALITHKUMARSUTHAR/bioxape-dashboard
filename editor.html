@@ -91,7 +91,7 @@
     <div class="dash-topbar">
       <div class="topbar-title" id="topbar-title">Overview</div>
       <div class="topbar-right">
-        <a href="../index.html" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
+        <a href="index.html" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
         <button class="notif-bell" id="notif-bell">🔔<span class="notif-count hidden" id="notif-count">0</span></button>
       </div>
     </div>
@@ -187,13 +187,13 @@
                 <label class="form-label">Primary Category <span>*</span></label>
                 <select class="form-select" id="post-category">
                   <option value="">Select category...</option>
-                  <option>CRISPR &amp; Gene Editing</option><option>Biopharmaceuticals</option>
-                  <option>Synthetic Biology</option><option>Genomics &amp; Sequencing</option>
-                  <option>Agricultural Biotech</option><option>Bioinformatics</option>
-                  <option>Clinical Trials</option><option>Protein Engineering</option>
-                  <option>Microbiome</option><option>Lab Tools &amp; Reviews</option>
-                  <option>Regulatory</option><option>Medical Biotech</option>
-                  <option>Industry News</option><option>Interviews</option>
+                  <option>Genomics &amp; Gene Editing</option>
+                  <option>Biopharmaceuticals &amp; Drug Discovery</option>
+                  <option>Bioinformatics</option>
+                  <option>Synthetic Biology &amp; Protein Engineering</option>
+                  <option>Industrial Biotechnology</option>
+                  <option>Agricultural Biotechnology</option>
+                  <option>Clinical Trials &amp; Industry News</option>
                 </select>
               </div>
               <div class="form-group d-none">
@@ -642,26 +642,32 @@ function fillProfileForm() {
 async function populateCategoriesDropdown() {
   const select = document.getElementById('post-category');
   if (!select) return;
-  const result = await apiCall('/site/categories');
+  
   const currentVal = select.value;
+  
+  // Populate immediately with local CATEGORIES (no async delay!)
+  const localCategories = typeof CATEGORIES !== 'undefined' ? CATEGORIES : [];
   select.innerHTML = '<option value="">Select category...</option>';
-  
-  let categoriesToUse = [];
-  if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
-    categoriesToUse = result.data.map(c => c.displayName);
-  } else {
-    categoriesToUse = typeof CATEGORIES !== 'undefined' ? CATEGORIES : [];
-  }
-  
-  categoriesToUse.forEach(catName => {
+  localCategories.forEach(catName => {
     const opt = document.createElement('option');
     opt.value = catName;
     opt.textContent = catName;
     select.appendChild(opt);
   });
-  
-  if (currentVal) {
-    select.value = currentVal;
+  if (currentVal) select.value = currentVal;
+
+  // Fetch from DB in background to update
+  const result = await apiCall('/site/categories');
+  if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
+    const activeVal = select.value;
+    select.innerHTML = '<option value="">Select category...</option>';
+    result.data.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.displayName;
+      opt.textContent = c.displayName;
+      select.appendChild(opt);
+    });
+    if (activeVal) select.value = activeVal;
   }
 }
 
@@ -719,12 +725,23 @@ function initCoverUpload() {
   const input = document.getElementById('cover-input');
   const prev  = document.getElementById('cover-preview');
   zone.addEventListener('click', ()=>input.click());
-  input.addEventListener('change', ()=>{
+  input.addEventListener('change', async ()=>{
     const file = input.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = e => { prev.src=e.target.result; prev.classList.remove('d-none'); };
     reader.readAsDataURL(file);
+
+    showToast('Uploading cover image...', 'info');
+    const fd = new FormData();
+    fd.append('cover', file);
+    const coverResult = await apiCall('/upload/cover', 'POST', fd, true);
+    if (coverResult?.success) {
+      document.getElementById('post-cover-url').value = coverResult.url;
+      showToast('Cover image uploaded successfully', 'success');
+    } else {
+      showToast(coverResult?.message || 'Cover image upload failed', 'error');
+    }
   });
 }
 
@@ -763,12 +780,16 @@ async function submitPost(e) {
     data.readTimeMinutes = postDocxMeta?.readTime || 1;
   }
 
+  // Upload cover if selected but not yet uploaded
   const coverFile = document.getElementById('cover-input').files[0];
-  if (coverFile) {
+  if (coverFile && !document.getElementById('post-cover-url').value) {
     const fd2 = new FormData();
     fd2.append('cover', coverFile);
     const coverResult = await apiCall('/upload/cover','POST',fd2,true);
-    if (coverResult?.success) { data.coverImageUrl = coverResult.url; }
+    if (coverResult?.success) {
+      document.getElementById('post-cover-url').value = coverResult.url;
+      data.coverImageUrl = coverResult.url;
+    }
   }
 
   btn.textContent='Submitting...';

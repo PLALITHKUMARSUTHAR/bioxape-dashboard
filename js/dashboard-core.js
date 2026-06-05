@@ -9,7 +9,7 @@ const CONFIG = {
     ? 'http://localhost:5000/api' 
     : 'https://bioxape-backend.onrender.com/api',
   BLOG_URL:      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname
-    ? '../index.html'
+    ? 'index.html'
     : 'https://www.bioxape.com',
   DASHBOARD_URL: window.location.origin,
   GOOGLE_CLIENT_ID: '775909460532-rnu253qk8csj4kjfmeb95ghf3cfhjje0.apps.googleusercontent.com',
@@ -52,20 +52,13 @@ const CONTENT_TYPES = [
 ];
 
 const CATEGORIES = [
-  'CRISPR & Gene Editing',
-  'Biopharmaceuticals',
-  'Synthetic Biology',
-  'Genomics & Sequencing',
-  'Agricultural Biotech',
+  'Genomics & Gene Editing',
+  'Biopharmaceuticals & Drug Discovery',
   'Bioinformatics',
-  'Clinical Trials',
-  'Protein Engineering',
-  'Microbiome',
-  'Lab Tools & Reviews',
-  'Regulatory',
-  'Medical Biotech',
-  'Industry News',
-  'Interviews'
+  'Synthetic Biology & Protein Engineering',
+  'Industrial Biotechnology',
+  'Agricultural Biotechnology',
+  'Clinical Trials & Industry News'
 ];
 
 // ── 2. API & AUTH HELPERS ────────────────────────────────────
@@ -83,7 +76,7 @@ async function apiCall(endpoint, method = 'GET', body = null, isFormData = false
     const data = await res.json();
     if (res.status === 401) {
       clearAuth();
-      window.location.href = 'index.html';
+      window.location.href = 'login.html';
       return null;
     }
     return data;
@@ -119,14 +112,14 @@ function getUserRole() { const u = getUser(); return u ? u.role : null; }
 function requireAuth(requiredRole = null) {
   if (!isLoggedIn()) {
     clearAuth();
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
     return false;
   }
   const role = getUserRole();
   if (![ROLES.ADMIN, ROLES.EDITOR, ROLES.AUTHOR].includes(role)) {
     console.warn("requireAuth: Invalid user role:", role);
     clearAuth();
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
     return false;
   }
   if (requiredRole && role !== requiredRole && role !== ROLES.ADMIN) {
@@ -144,7 +137,7 @@ function redirectByRole() {
   else {
     console.warn("Unknown or invalid user role:", role);
     clearAuth();
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
   }
 }
 
@@ -207,7 +200,7 @@ async function handleEmailLogin(e) {
 async function logout() {
   await apiCall('/auth/logout', 'POST');
   clearAuth();
-  window.location.href = 'index.html';
+  window.location.href = 'login.html';
 }
 
 async function handleChangePassword(e) {

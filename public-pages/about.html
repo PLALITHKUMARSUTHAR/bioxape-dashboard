@@ -1,0 +1,132 @@
+<!-- ============================================================
+  BioXApe Public Pages
+  Files: about.html | contact.html | privacy-policy.html | write-for-us.html
+  Each section below is a complete standalone HTML file.
+  Copy each section into its own file as indicated.
+============================================================ -->
+
+<!-- ══════════════════════════════════════════════════════════
+     FILE 1: about.html
+     Copy everything between the FILE markers into about.html
+══════════════════════════════════════════════════════════ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>About BioXApe — Premium Biotechnology Blog</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#27a363;--g50:#f0faf4;--g100:#d4f0e0;--g700:#136b3d;--g800:#0c4d2c;--text1:#0f1f16;--text2:#2d4a38;--text3:#4a7060;--text4:#7a9e8c;--border:#e0ece5;--white:#fff}
+body{font-family:'Inter',sans-serif;color:var(--text1);background:var(--white)}
+a{text-decoration:none;color:var(--accent)}
+.nav{background:var(--white);border-bottom:1px solid var(--border);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.brand{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text1)}
+.brand em{font-style:italic;color:var(--accent)}
+.brand-x{font-size:1.5em;display:inline-block;line-height:0.8;vertical-align:-0.05em}
+.nav-links a{margin-left:20px;font-size:13.5px;color:var(--text3)}
+.nav-links a:hover{color:var(--accent)}
+.hero-about{background:linear-gradient(145deg,var(--g800),var(--accent));padding:72px 40px;text-align:center;color:#fff}
+.hero-about h1{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;margin-bottom:14px}
+.hero-about h1 em{font-style:italic;color:#6ee7b7}
+.hero-about p{font-size:17px;opacity:.85;max-width:600px;margin:0 auto;line-height:1.65}
+.page{max-width:1100px;margin:0 auto;padding:64px 32px}
+.section{margin-bottom:64px}
+.section-label{font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.section-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--text1);margin-bottom:16px}
+.section-body{font-size:15.5px;color:var(--text2);line-height:1.8}
+.values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:28px}
+.value-card{background:var(--g50);border:1.5px solid var(--border);border-radius:14px;padding:24px}
+.value-icon{font-size:28px;margin-bottom:12px}
+.value-title{font-size:15px;font-weight:600;color:var(--text1);margin-bottom:6px}
+.value-text{font-size:13.5px;color:var(--text3);line-height:1.6}
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:28px}
+.team-card{text-align:center;padding:24px 16px;background:var(--g50);border:1.5px solid var(--border);border-radius:14px}
+.team-av{width:70px;height:70px;border-radius:50%;background:var(--accent);color:#fff;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.team-name{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:3px}
+.team-role{font-size:12px;color:var(--text3);margin-bottom:3px}
+.team-org{font-size:11.5px;color:var(--text4)}
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--g800);border-radius:16px;overflow:hidden;margin:40px 0}
+.stat-item{padding:28px;text-align:center;border-right:1px solid rgba(255,255,255,.1)}
+.stat-item:last-child{border-right:none}
+.stat-val{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:#6ee7b7;margin-bottom:4px}
+.stat-lab{font-size:12.5px;color:rgba(255,255,255,.65)}
+.footer-simple{background:var(--g800);color:#9dc9b5;text-align:center;padding:24px;font-size:13px}
+.footer-simple a{color:#6ee7b7}
+.btn-row{margin-top:20px;display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{display:inline-block;padding:12px 24px;background:var(--accent);color:#fff;border-radius:9px;font-size:14px;font-weight:600}
+.btn-secondary{display:inline-block;padding:12px 24px;border:1.5px solid var(--border);color:var(--text2);border-radius:9px;font-size:14px}
+@media(max-width:768px){.values-grid,.team-grid,.stats-strip{grid-template-columns:1fr 1fr}.hero-about h1{font-size:32px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="../index.html">Bio<em><span class="brand-x">X</span>Ape</em></a>
+  <div class="nav-links">
+    <a href="../index.html">Home</a><a href="../category.html">Research</a>
+    <a href="subscribe.html">Subscribe</a><a href="contact.html">Contact</a>
+  </div>
+</nav>
+
+<div class="hero-about">
+  <h1>About Bio<em><span class="brand-x">X</span>Ape</em></h1>
+  <p>Your trusted source for biotechnology insights, research summaries, and science communication — built for scientists, researchers, and the bio-curious worldwide.</p>
+</div>
+
+<div class="page">
+
+  <div class="stats-strip">
+    <div class="stat-item"><div class="stat-val">14K+</div><div class="stat-lab">Newsletter Subscribers</div></div>
+    <div class="stat-item"><div class="stat-val">340+</div><div class="stat-lab">Articles Published</div></div>
+    <div class="stat-item"><div class="stat-val">12</div><div class="stat-lab">Expert Authors</div></div>
+    <div class="stat-item"><div class="stat-val">48</div><div class="stat-lab">Research Summaries</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Our Mission</div>
+    <div class="section-title">Making Biotechnology Accessible</div>
+    <div class="section-body">
+      BioXApe was founded with a single belief: cutting-edge biotechnology research should not be locked behind walls of jargon and inaccessible journals. We bridge the gap between complex science and the people who need to understand it — whether you are a research scientist, a student, a healthcare professional, or simply a curious mind.
+      <br/><br/>
+      We cover the full spectrum of biotechnology: CRISPR and gene editing, biopharmaceuticals and drug discovery, agricultural biotech, synthetic biology, bioinformatics, microbiome science, clinical trials, regulatory developments, and the business of biotech. Every article is fact-checked, peer-referenced, and written with clarity.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">What We Stand For</div>
+    <div class="section-title">Our Core Values</div>
+    <div class="values-grid">
+      <div class="value-card"><div class="value-icon">🔬</div><div class="value-title">Scientific Accuracy</div><div class="value-text">Every claim is backed by peer-reviewed evidence. We cite sources, link to papers, and never sensationalise.</div></div>
+      <div class="value-card"><div class="value-icon">🌍</div><div class="value-title">Global Perspective</div><div class="value-text">Biotech is borderless. We cover research from India, USA, Europe, and beyond with equal rigour.</div></div>
+      <div class="value-card"><div class="value-icon">📖</div><div class="value-title">Clarity First</div><div class="value-text">Complex science, written plainly. No unnecessary jargon. Every reader deserves to understand.</div></div>
+      <div class="value-card"><div class="value-icon">⚡</div><div class="value-title">Speed with Depth</div><div class="value-text">We publish fast without sacrificing depth. Breaking news today, deep analysis tomorrow.</div></div>
+      <div class="value-card"><div class="value-icon">🤝</div><div class="value-title">Independence</div><div class="value-text">No pharma funding, no undisclosed conflicts. Our editorial decisions are guided by science alone.</div></div>
+      <div class="value-card"><div class="value-icon">🇮🇳</div><div class="value-title">India-Rooted</div><div class="value-text">Built in India, amplifying Indian biotechnology research to the world stage.</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Our Team</div>
+    <div class="section-title">The People Behind BioXApe</div>
+    <div class="team-grid">
+      <div class="team-card"><div class="team-av">DR</div><div class="team-name">Dr. Deepa Rao</div><div class="team-role">Senior Science Editor</div><div class="team-org">Ph.D. Genomics · IISc Bangalore</div></div>
+      <div class="team-card"><div class="team-av">SJ</div><div class="team-name">Siddharth Joshi</div><div class="team-role">Bioinformatics Writer</div><div class="team-org">M.Sc. Bioinformatics · IIT Delhi</div></div>
+      <div class="team-card"><div class="team-av">PK</div><div class="team-name">Priya Krishnan</div><div class="team-role">Industry Analyst</div><div class="team-org">MBA Biotech · BITS Pilani</div></div>
+      <div class="team-card"><div class="team-av">AM</div><div class="team-name">Dr. Ananya Mehta</div><div class="team-role">AgriTech Correspondent</div><div class="team-org">Ph.D. Plant Biotech · IARI Delhi</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Want to Contribute?</div>
+    <div class="section-title">Write for BioXApe</div>
+    <div class="section-body">We are always looking for expert voices in biotechnology. If you are a researcher, scientist, industry professional, or science communicator with something valuable to say, we want to hear from you.</div>
+    <div class="btn-row">
+      <a href="write-for-us.html" class="btn-primary">Apply to Write →</a>
+      <a href="contact.html" class="btn-secondary">Contact Us</a>
+    </div>
+  </div>
+
+</div>
+<div class="footer-simple">© 2026 BioXApe · Made with dedication in India 🇮🇳 · <a href="privacy-policy.html">Privacy Policy</a> · <a href="#">Terms</a></div>
+</body>
+</html>

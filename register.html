@@ -83,7 +83,7 @@
 
       <div class="register-text">
         Already have an active account?
-        <a href="index.html" class="register-link">Sign In</a>
+        <a href="login.html" class="register-link">Sign In</a>
       </div>
 
     </div>
@@ -96,7 +96,7 @@
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const email = params.get('email');
-
+ 
     if (!token || !email) {
       document.getElementById('registration-container').innerHTML = `
         <div class="err-container">
@@ -105,7 +105,7 @@
           <p class="err-desc">
             The account activation link is missing required secure tokens or has expired. Please contact the administrator to request a new invitation email.
           </p>
-          <a class="btn btn-primary d-inline-block" href="index.html">Go to Sign In</a>
+          <a class="btn btn-primary d-inline-block" href="login.html">Go to Sign In</a>
         </div>
       `;
       return;

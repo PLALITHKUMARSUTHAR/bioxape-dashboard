@@ -24,7 +24,9 @@
   .profile-photo-preview-style { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border); }
   .profile-av-placeholder-style { width: 80px; height: 80px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
   .cover-preview-sm { margin-top: 10px; width: 100%; max-height: 200px; object-fit: cover; border-radius: 9px; border: 1.5px solid var(--border); }
+  .cover-preview-style { width: 100%; max-height: 240px; object-fit: cover; border-radius: 9px; border: 1.5px solid var(--border); }
   .preview-meta-style { margin-bottom: 15px; font-size: 13px; color: #7a9e8c; }
+  .preview-cover-container-style { margin-bottom: 15px; text-align: center; }
   .preview-body-style { margin-bottom: 20px; max-height: 60vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 9px; padding: 16px; background: var(--off); }
 </style>
 </head>
@@ -79,7 +81,7 @@
     <div class="dash-topbar">
       <div class="topbar-title" id="topbar-title">Overview</div>
       <div class="topbar-right">
-        <a href="../index.html" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
+        <a href="index.html" target="_blank" class="btn btn-secondary btn-sm">View Blog ↗</a>
         <button class="notif-bell" id="notif-bell">🔔<span class="notif-count hidden" id="notif-count">0</span></button>
       </div>
     </div>
@@ -136,13 +138,13 @@
                 <label class="form-label">Primary Category <span>*</span></label>
                 <select class="form-select" id="post-category">
                   <option value="">Select category...</option>
-                  <option>CRISPR &amp; Gene Editing</option><option>Biopharmaceuticals</option>
-                  <option>Synthetic Biology</option><option>Genomics &amp; Sequencing</option>
-                  <option>Agricultural Biotech</option><option>Bioinformatics</option>
-                  <option>Clinical Trials</option><option>Protein Engineering</option>
-                  <option>Microbiome</option><option>Lab Tools &amp; Reviews</option>
-                  <option>Regulatory</option><option>Medical Biotech</option>
-                  <option>Industry News</option><option>Interviews</option>
+                  <option>Genomics &amp; Gene Editing</option>
+                  <option>Biopharmaceuticals &amp; Drug Discovery</option>
+                  <option>Bioinformatics</option>
+                  <option>Synthetic Biology &amp; Protein Engineering</option>
+                  <option>Industrial Biotechnology</option>
+                  <option>Agricultural Biotechnology</option>
+                  <option>Clinical Trials &amp; Industry News</option>
                 </select>
               </div>
               <div class="form-group d-none">
@@ -267,6 +269,10 @@
       <button class="modal-close" onclick="closeModal('preview-modal')">✕</button>
     </div>
     <div class="preview-meta-style" id="preview-modal-meta"></div>
+    <div id="preview-cover-container" class="preview-cover-container-style d-none">
+      <img id="preview-cover-preview" src="" alt="Cover Image" class="cover-preview-style"/>
+    </div>
+    <div id="preview-comments-area" class="mb-15 d-none"></div>
     <div id="preview-preview-area" class="preview-body-style"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('preview-modal')">Close</button>
@@ -307,29 +313,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function populateCategoriesDropdown() {
   const select = document.getElementById('post-category');
   if (!select) return;
-  const result = await apiCall('/site/categories');
   
-  // Save the currently selected category to restore it after loading
   const currentVal = select.value;
+  
+  // Populate immediately with local CATEGORIES (no async delay!)
+  const localCategories = typeof CATEGORIES !== 'undefined' ? CATEGORIES : [];
   select.innerHTML = '<option value="">Select category...</option>';
-  
-  let categoriesToUse = [];
-  if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
-    categoriesToUse = result.data.map(c => c.displayName);
-  } else {
-    // Fallback to default categories defined in config.js
-    categoriesToUse = typeof CATEGORIES !== 'undefined' ? CATEGORIES : [];
-  }
-  
-  categoriesToUse.forEach(catName => {
+  localCategories.forEach(catName => {
     const opt = document.createElement('option');
     opt.value = catName;
     opt.textContent = catName;
     select.appendChild(opt);
   });
-  
-  if (currentVal) {
-    select.value = currentVal;
+  if (currentVal) select.value = currentVal;
+
+  // Fetch from DB in background to update
+  const result = await apiCall('/site/categories');
+  if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
+    const activeVal = select.value;
+    select.innerHTML = '<option value="">Select category...</option>';
+    result.data.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.displayName;
+      opt.textContent = c.displayName;
+      select.appendChild(opt);
+    });
+    if (activeVal) select.value = activeVal;
   }
 }
 
@@ -387,7 +396,7 @@ async function loadOverview() {
         ${p.status==='draft'||p.status==='changes_needed'?`
           <a href="#" onclick="editPost('${p._id}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
         `:`
-          <a href="#" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
+          <a href="#" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}','${p.coverImageUrl||''}','${p.editorComment||''}','${p.adminComment||''}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
         `}
       </td>
       <td>${statusBadge(p.status)}</td>
@@ -402,7 +411,7 @@ async function loadOverview() {
           <a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl.startsWith('/')?'..'+p.bloggerPostUrl:p.bloggerPostUrl}" target="_blank">View Blog</a>
         `:''}
         ${!['draft','changes_needed'].includes(p.status)?`
-          <button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}')">Open</button>
+          <button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}','${p.coverImageUrl||''}','${p.editorComment||''}','${p.adminComment||''}')">Open</button>
         `:''}
       </td>
     </tr>`).join('')}
@@ -420,7 +429,7 @@ async function loadAllPosts() {
       ${p.status==='draft'||p.status==='changes_needed'?`
         <a href="#" onclick="editPost('${p._id}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
       `:`
-        <a href="#" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
+        <a href="#" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}','${p.coverImageUrl||''}','${p.editorComment||''}','${p.adminComment||''}'); return false;" style="font-weight:600;color:var(--text1)">${p.title}</a>
       `}
       ${p.editorComment&&p.status==='changes_needed'?`<div style="font-size:12px;color:#d97706;margin-top:3px">Editor: ${p.editorComment}</div>`:''}
     </td>
@@ -433,7 +442,7 @@ async function loadAllPosts() {
       ${p.status==='published'&&p.bloggerPostUrl?`<a class="btn btn-secondary btn-sm" href="${p.bloggerPostUrl.startsWith('/')?'..'+p.bloggerPostUrl:p.bloggerPostUrl}" target="_blank">View</a>`:''}
       ${p.status==='draft'?`<button class="btn btn-primary btn-sm" onclick="submitPostById('${p._id}')">Submit</button>`:''}
       ${['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-danger btn-sm" onclick="deletePost('${p._id}')">Delete</button>`:''}
-      ${!['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}')">Open</button>`:''}
+      ${!['draft', 'changes_needed'].includes(p.status)?`<button class="btn btn-primary btn-sm" onclick="openPreview('${p._id}','${p.title.replace(/'/g,"\\'")}','${p.docxFileUrl||''}','${p.status}','${p.category||''}','${p.contentType||''}','${p.createdAt}','${p.coverImageUrl||''}','${p.editorComment||''}','${p.adminComment||''}')">Open</button>`:''}
     </td>
   </tr>`).join('');
 }
@@ -476,12 +485,23 @@ function initCoverUpload() {
   const input = document.getElementById('cover-input');
   const prev  = document.getElementById('cover-preview');
   zone.addEventListener('click', ()=>input.click());
-  input.addEventListener('change', ()=>{
+  input.addEventListener('change', async ()=>{
     const file = input.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = e => { prev.src=e.target.result; prev.classList.remove('d-none'); };
     reader.readAsDataURL(file);
+
+    showToast('Uploading cover image...', 'info');
+    const fd = new FormData();
+    fd.append('cover', file);
+    const coverResult = await apiCall('/upload/cover', 'POST', fd, true);
+    if (coverResult?.success) {
+      document.getElementById('post-cover-url').value = coverResult.url;
+      showToast('Cover image uploaded successfully', 'success');
+    } else {
+      showToast(coverResult?.message || 'Cover image upload failed', 'error');
+    }
   });
 }
 
@@ -563,13 +583,16 @@ async function submitPost(e) {
     data.readTimeMinutes = postDocxMeta?.readTime || 1;
   }
 
-  // Upload cover if selected
+  // Upload cover if selected but not yet uploaded
   const coverFile = document.getElementById('cover-input').files[0];
-  if (coverFile) {
+  if (coverFile && !document.getElementById('post-cover-url').value) {
     const fd2 = new FormData();
     fd2.append('cover', coverFile);
     const coverResult = await apiCall('/upload/cover','POST',fd2,true);
-    if (coverResult?.success) { data.coverImageUrl = coverResult.url; }
+    if (coverResult?.success) {
+      document.getElementById('post-cover-url').value = coverResult.url;
+      data.coverImageUrl = coverResult.url;
+    }
   }
 
   btn.textContent='Submitting...';
@@ -694,7 +717,7 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('open');
 }
 
-async function openPreview(postId, title, docxUrl, status, category, contentType, dateStr) {
+async function openPreview(postId, title, docxUrl, status, category, contentType, dateStr, coverImageUrl, editorComment, adminComment) {
   document.getElementById('preview-modal-title').textContent = title;
   document.getElementById('preview-modal-meta').innerHTML = `
     <strong>Status:</strong> ${statusBadge(status)} &middot; 
@@ -702,6 +725,37 @@ async function openPreview(postId, title, docxUrl, status, category, contentType
     <strong>Type:</strong> ${contentType||'article'} &middot; 
     <strong>Date:</strong> ${formatDate(dateStr)}
   `;
+  
+  // Cover Image
+  const coverContainer = document.getElementById('preview-cover-container');
+  const coverPreview = document.getElementById('preview-cover-preview');
+  if (coverImageUrl) {
+    coverPreview.src = coverImageUrl;
+    coverContainer.classList.remove('d-none');
+  } else {
+    coverContainer.classList.add('d-none');
+  }
+
+  // Comments / Feedback
+  const commentsArea = document.getElementById('preview-comments-area');
+  let commentsHtml = '';
+  if (editorComment) {
+    commentsHtml += `<div style="background:#fef3c7;border:1px solid #fcd34d;padding:10px 14px;border-radius:8px;font-size:13px;color:#d97706;margin-bottom:8px">
+      <strong>Editor Feedback:</strong> "${editorComment}"
+    </div>`;
+  }
+  if (adminComment) {
+    commentsHtml += `<div style="background:#fee2e2;border:1px solid #fca5a5;padding:10px 14px;border-radius:8px;font-size:13px;color:#dc2626;">
+      <strong>Admin Feedback:</strong> "${adminComment}"
+    </div>`;
+  }
+  if (commentsHtml) {
+    commentsArea.innerHTML = commentsHtml;
+    commentsArea.classList.remove('d-none');
+  } else {
+    commentsArea.classList.add('d-none');
+  }
+
   document.getElementById('preview-modal').classList.add('open');
   
   const area = document.getElementById('preview-preview-area');

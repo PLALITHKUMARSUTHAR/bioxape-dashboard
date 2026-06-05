@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+  <title>Article — BioXApe</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ============================================================
+       BioXape — Premium Article Theme
+       ============================================================ */
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --g50:#f0faf4;--g100:#d4f0e0;--g200:#a8dfc0;--g300:#6ec49a;
+      --g400:#3db87a;--g500:#27a363;--g600:#1a8a50;--g700:#136b3d;
+      --g800:#0c4d2c;--g900:#072e1a;
+      --white:#ffffff;--off:#f8faf9;--surface:#f2f7f4;
+      --border:#e0ece5;--border2:#c8ddd2;
+      --text1:#0f1f16;--text2:#2d4a38;--text3:#4a7060;--text4:#7a9e8c;
+      --accent:#27a363;--accent-l:#e8f7ef;--accent-d:#136b3d;
+      --amber:#d97706;--amber-l:#fef3c7;
+      --red:#dc2626;--red-l:#fee2e2;
+      --blue:#2563eb;--blue-l:#dbeafe;
+      --purple:#7c3aed;--purple-l:#ede9fe;
+      --teal:#0d9488;--teal-l:#ccfbf1;
+    }
+    body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.75;color:var(--text2);background:var(--white)}
+    a{text-decoration:none;color:var(--accent);transition:color .2s}
+    a:hover{color:var(--accent-d)}
+    img{max-width:100%;height:auto;display:block;border-radius:10px;margin:24px 0}
+    .bx-wrap{max-width:960px;margin:0 auto;padding:0 24px}
+
+    /* NAV */
+    #bx-nav{background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1000}
+    .nav-row{display:flex;align-items:center;justify-content:space-between;height:66px}
+    .bx-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .bx-brand-mark{width:38px;height:38px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center}
+    .bx-brand-mark svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+    .bx-brand-name{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:var(--text1)}
+    .bx-brand-name em{font-style:italic;color:var(--accent)}
+    .brand-x{font-size:1.5em;display:inline-block;line-height:0.8;vertical-align:-0.05em}
+    .nav-links-search-wrap{display:flex;align-items:center;gap:20px;flex:1;justify-content:center}
+    .nav-links{display:flex;gap:2px}
+    .nav-links a{padding:8px 12px;font-size:13px;color:var(--text3);border-radius:7px;font-weight:400;transition:all .15s}
+    .nav-links a:hover{background:var(--g50);color:var(--accent)}
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--off);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 6px 2px 12px;
+      width: 180px;
+      transition: all 0.25s ease;
+    }
+    .search-box:focus-within {
+      width: 240px;
+      border-color: var(--accent);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(39, 163, 99, 0.15);
+    }
+    .search-box input {
+      border: none;
+      background: none;
+      font-size: 13px;
+      color: var(--text1);
+      outline: none;
+      width: 100%;
+    }
+    .search-box button {
+      border: none;
+      background: none;
+      color: var(--text3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      transition: color 0.15s;
+    }
+    .search-box button:hover {
+      color: var(--accent);
+    }
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .btn-dash{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text2);background:none;text-decoration:none;font-weight:500}
+    .btn-sub{padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+    
+    .art-cat{display:inline-block;padding:4px 10px;background:var(--accent-l);color:var(--g700);border-radius:6px;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;cursor:pointer;transition:background 0.2s}
+    .art-cat:hover{background:var(--g200)}
+
+    /* ARTICLE CONTAINER */
+    .article-header{padding:48px 0 24px;border-bottom:1px solid var(--border)}
+    .art-cat{display:inline-block;padding:4px 10px;background:var(--accent-l);color:var(--g700);border-radius:6px;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px}
+    .art-title{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--text1);line-height:1.2;margin-bottom:20px}
+    .art-exc{font-size:17px;line-height:1.65;color:var(--text3);margin-bottom:24px;font-style:italic}
+    
+    .art-meta-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+    .av-chip{display:flex;align-items:center;gap:12px}
+    .av{width:42px;height:42px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+    .auth-name{font-size:14.5px;font-weight:600;color:var(--text1)}
+    .auth-date{font-size:12.5px;color:var(--text4);margin-top:2px}
+    .read-badge{font-size:13px;color:var(--text3);background:var(--surface);padding:5px 12px;border-radius:6px}
+
+    /* ARTICLE BODY */
+    .article-body{padding:36px 0 64px;font-size:17.5px;color:var(--text1);line-height:1.85}
+    .article-body p{margin-bottom:24px}
+    .article-body h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--text1);margin:36px 0 16px;line-height:1.3}
+    .article-body h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--text1);margin:28px 0 12px}
+    .article-body ul, .article-body ol{margin:0 0 24px 24px}
+    .article-body li{margin-bottom:8px}
+    .article-body blockquote{background:var(--g50);border-left:4px solid var(--accent);padding:16px 20px;border-radius:0 8px 8px 0;margin:24px 0;font-style:italic;color:var(--g800)}
+
+    /* COVER IMAGE */
+    .art-cover{width:100%;height:380px;overflow:hidden;border-radius:14px;border:1.5px solid var(--border);margin-top:28px}
+    .art-cover img{width:100%;height:100%;object-fit:cover;margin:0}
+
+    /* FOOTER */
+    #bx-footer{background:var(--g800);color:#e8f5ef;padding:40px 0 24px;border-top:2px solid var(--border)}
+    .footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .ft-copy{font-size:12px;color:#5a8a72}
+
+    .loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 0;color:var(--text4)}
+    .spinner{width:36px;height:36px;border:3px solid var(--g200);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .hidden { display: none !important; }
+    .text-danger { color: var(--red) !important; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <div id="bx-nav">
+    <div class="bx-wrap">
+      <div class="nav-row">
+        <a class="bx-brand" href="index.html">
+          <div class="bx-brand-mark">
+            <svg viewBox="0 0 24 24"><path d="M12 3c0 0-3 4-3 8s3 8 3 8"/><path d="M12 3c0 0 3 4 3 8s-3 8-3 8"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+          </div>
+          <div class="bx-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
+        </a>
+        <div class="nav-links-search-wrap">
+          <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="public-pages/about.html">About</a>
+            <a href="public-pages/write-for-us.html">Write for Us</a>
+            <a href="public-pages/contact.html">Contact</a>
+          </div>
+          <div class="search-box">
+            <input type="text" id="nav-search-input" placeholder="Search..."/>
+            <button id="nav-search-btn" onclick="executeSearch()" aria-label="Search" title="Search">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+          </div>
+        </div>
+        <div class="nav-right">
+          <a class="btn-dash" href="login.html">Dashboard</a>
+          <a class="btn-sub" href="public-pages/subscribe.html">Subscribe ✦</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARTICLE CONTAINER -->
+  <article class="bx-wrap" id="article-view">
+    <div class="loader" id="article-loader">
+      <div class="spinner"></div>
+      <p>Fetching biotechnology insights...</p>
+    </div>
+    
+    <div id="article-content" class="hidden">
+      <header class="article-header">
+        <span class="art-cat" id="post-category">Science</span>
+        <h1 class="art-title" id="post-title">Loading...</h1>
+        <p class="art-exc" id="post-excerpt"></p>
+        
+        <div class="art-meta-row">
+          <div class="av-chip">
+            <div class="av" id="post-av">AU</div>
+            <div>
+              <div class="auth-name" id="post-author">Author</div>
+              <div class="auth-date" id="post-date">May 2026</div>
+            </div>
+          </div>
+          <span class="read-badge" id="post-readtime">1 min read</span>
+        </div>
+
+        <div class="art-cover hidden" id="post-cover-container">
+          <img id="post-cover" src="" alt="Article cover image"/>
+        </div>
+      </header>
+
+      <section class="article-body" id="post-body">
+        <!-- Rendered dynamically -->
+      </section>
+    </div>
+  </article>
+
+  <!-- FOOTER -->
+  <footer id="bx-footer">
+    <div class="bx-wrap">
+      <div class="footer-bottom">
+        <div class="ft-copy">© 2026 BioXApe. All rights reserved. Made with dedication in India.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DYNAMIC DATA SYNC -->
+  <script>
+    const CMS_API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname
+      ? 'http://localhost:5000/api' 
+      : 'https://bioxape-backend.onrender.com/api';
+
+    function getParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    async function loadArticle() {
+      const id = getParam('id');
+      if (!id) {
+        document.getElementById('article-loader').innerHTML = '<p class="text-danger">✕ Article ID missing in query string.</p>';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${CMS_API}/posts/public/${id}`);
+        const data = await res.json();
+        
+        if (!data.success || !data.post) {
+          document.getElementById('article-loader').innerHTML = '<p class="text-danger">✕ Article not found or has not been published yet.</p>';
+          return;
+        }
+
+        const p = data.post;
+        document.title = `${p.title} — BioXApe`;
+
+        const catEl = document.getElementById('post-category');
+        catEl.textContent = p.category || 'Science';
+        if (p.category) {
+          catEl.onclick = () => {
+            window.location.href = `category.html?name=${encodeURIComponent(p.category)}`;
+          };
+        }
+        
+        document.getElementById('post-title').textContent = p.title;
+        document.getElementById('post-excerpt').textContent = p.excerpt || '';
+        document.getElementById('post-author').textContent = p.authorName || 'BioXApe Writer';
+        document.getElementById('post-date').textContent = formatDate(p.publishedAt || p.createdAt);
+        document.getElementById('post-readtime').textContent = `${p.readTimeMinutes || 2} min read`;
+        document.getElementById('post-av').textContent = p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU';
+        document.getElementById('post-body').innerHTML = p.bodyHtml || '<p>No content available.</p>';
+
+        if (p.coverImageUrl) {
+          document.getElementById('post-cover').src = p.coverImageUrl;
+          document.getElementById('post-cover-container').classList.remove('hidden');
+        }
+
+        document.getElementById('article-loader').classList.add('hidden');
+        document.getElementById('article-content').classList.remove('hidden');
+      } catch (err) {
+        console.error('Error fetching article details:', err);
+        document.getElementById('article-loader').innerHTML = '<p class="text-danger">✕ Unable to load the article at this time. Please check your connection.</p>';
+      }
+    }
+
+    function executeSearch() {
+      const query = document.getElementById('nav-search-input').value.trim();
+      if (query) {
+        window.location.href = `category.html?q=${encodeURIComponent(query)}`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadArticle();
+      
+      const searchInput = document.getElementById('nav-search-input');
+      if (searchInput) {
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            executeSearch();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
