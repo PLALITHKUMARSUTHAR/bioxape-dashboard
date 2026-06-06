@@ -120,84 +120,51 @@
       color: var(--accent) !important;
     }
 
-    /* Search button in nav */
-    .nav-search-btn {
-      background: none;
-      border: none;
-      color: var(--text3);
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 50%;
+    .nav-links-search-wrap {
       display: flex;
       align-items: center;
+      gap: 16px;
+      flex: 1;
       justify-content: center;
-      transition: all 0.15s ease;
-      margin-right: 4px;
     }
-    .nav-search-btn:hover {
-      background: var(--g50);
-      color: var(--accent);
-    }
-    .nav-search-btn svg {
-      width: 18px;
-      height: 18px;
-    }
-    /* SEARCH STRIP */
-    #bx-search-strip {
-      background: var(--white);
-      padding: 16px 0 24px;
-    }
-    .search-bar-container {
+    /* Integrated Search Bar */
+    .nav-search-bar {
       display: flex;
       align-items: center;
       background: var(--off);
       border: 1.5px solid var(--border);
-      border-radius: 30px;
-      padding: 4px 6px 4px 18px;
-      max-width: 700px;
-      margin: 0 auto;
-      box-sizing: border-box;
+      border-radius: 20px;
+      padding: 5px 12px;
+      margin-left: 16px;
+      width: 220px;
       transition: all 0.25s ease;
+      position: relative;
     }
-    .search-bar-container:focus-within {
+    .nav-search-bar:focus-within {
       border-color: var(--accent);
       background: var(--white);
-      box-shadow: 0 4px 16px rgba(39, 163, 99, 0.12);
+      box-shadow: 0 4px 12px rgba(39, 163, 99, 0.08);
+      width: 280px;
     }
-    .search-bar-container .search-icon {
+    .nav-search-icon {
       color: var(--text3);
-      width: 18px;
-      height: 18px;
-      margin-right: 12px;
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
       flex-shrink: 0;
+      cursor: pointer;
     }
-    .search-bar-container input {
+    .nav-search-bar input {
       border: none;
       background: none;
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text1);
       outline: none;
       width: 100%;
       font-family: inherit;
     }
-    .search-bar-container input::placeholder {
+    .nav-search-bar input::placeholder {
       color: var(--text4);
-    }
-    .search-bar-container .search-btn {
-      background: var(--accent);
-      color: var(--white);
-      border: none;
-      border-radius: 20px;
-      padding: 8px 22px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-      margin-left: 10px;
-      flex-shrink: 0;
-    }
-    .search-bar-container .search-btn:hover {
-      background: var(--accent-d);
     }
     .nav-right{display:flex;align-items:center;gap:10px}
     .btn-dash{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text2);background:none;text-decoration:none;font-weight:500}
@@ -716,7 +683,9 @@
     @media(max-width:768px){
       .bx-wrap{padding:0 16px}
       .nav-row{flex-wrap:wrap;height:auto;padding:12px 0;gap:8px}
+      .nav-links-search-wrap{flex-direction:column;width:100%;gap:12px}
       .nav-links{flex-wrap:wrap;justify-content:center}
+      .nav-search-bar{width:100% !important;margin-left:0 !important;margin-top:8px}
       .nav-right{width:100%;justify-content:center}
       .grid3,.grid2,.grid4,#bx-plans-grid{grid-template-columns:1fr}
       .interview-card{grid-template-columns:1fr}
@@ -793,11 +762,12 @@
             <a href="index.html#bx-store-section">Store</a>
             <a href="public-pages/write-for-us.html">Write for Us</a>
           </div>
+          <div class="nav-search-bar">
+            <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="nav-search-input" placeholder="Search topics, articles..."/>
+          </div>
         </div>
         <div class="nav-right">
-          <button class="nav-search-btn" onclick="focusSearch()" aria-label="Search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          </button>
           <a class="btn-dash" href="login.html">Dashboard</a>
           <a class="btn-sub" href="public-pages/subscribe.html">Subscribe ✦</a>
         </div>
@@ -807,16 +777,7 @@
 
 
 
-  <!-- SEARCH STRIP -->
-  <div id="bx-search-strip">
-    <div class="bx-wrap">
-      <div class="search-bar-container">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="nav-search-input" placeholder="Search biotechnology research, topics and authors..."/>
-        <button class="search-btn" onclick="executeSearch()">Search</button>
-      </div>
-    </div>
-  </div>
+
 
   <!-- HERO MAGAZINE GRID -->
   <section id="bx-hero">
@@ -1388,6 +1349,12 @@
           if (e.key === 'Enter') {
             executeSearch();
           }
+        });
+      }
+      const searchIcon = document.querySelector('.nav-search-icon');
+      if (searchIcon) {
+        searchIcon.addEventListener('click', () => {
+          executeSearch();
         });
       }
     });
