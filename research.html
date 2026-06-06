@@ -747,7 +747,7 @@
               <a href="category.html?name=Cancer%20Research">Cancer Research</a>
             </div>
           </div>
-          <a href="research.html">Research</a>
+          <a href="research.html" style="color: var(--accent); font-weight: 600;">Research</a>
           <a href="store.html">Store</a>
           <a href="public-pages/write-for-us.html">Write for Us</a>
         </div>
@@ -767,137 +767,48 @@
 
 
 
-  <!-- HERO MAGAZINE GRID -->
-  <section id="bx-hero">
+  <!-- RESEARCH HERO -->
+  <section id="bx-research-hero" style="background: linear-gradient(135deg, var(--g800) 0%, var(--g600) 100%); padding: 56px 0; color: var(--white); text-align: center; border-bottom: 2px solid var(--border);">
     <div class="bx-wrap">
-      <div class="hero-live-badge">Live from the lab bench</div>
-      <div class="mag-grid">
-        <div class="hero-main-card" id="bx-hero-card">
-          <div class="hero-main-img">
-            <div class="hero-img-over"></div>
-            <svg class="hero-dna-svg" viewBox="0 0 65 130" fill="none">
-              <path d="M12 6 Q54 26 12 53 Q54 80 12 107 Q54 127 12 145" stroke="white" stroke-width="2.5" fill="none"/>
-              <path d="M53 6 Q11 26 53 53 Q11 80 53 107 Q11 127 53 145" stroke="#6ee7b7" stroke-width="2.5" fill="none"/>
-              <line x1="12" y1="26" x2="53" y2="26" stroke="white" stroke-width="1.5" opacity=".5"/>
-              <line x1="53" y1="53" x2="12" y2="53" stroke="white" stroke-width="1.5" opacity=".5"/>
-              <line x1="12" y1="80" x2="53" y2="80" stroke="white" stroke-width="1.5" opacity=".5"/>
-            </svg>
-            <div class="relative-z1"><span class="tag tg hero-badge-tag" id="bx-hero-category">Featured</span></div>
-          </div>
-          <div class="hero-main-body">
-            <span class="tag tg">Research</span>
-            <div class="hero-main-title" id="bx-hero-title">CRISPR Prime Editing Achieves 94% Precision</div>
-            <div class="hero-main-exc" id="bx-hero-excerpt">A landmark study demonstrates that next-generation base editors can near-eliminate unintended genomic changes.</div>
-            <div class="hero-meta-row">
-              <div class="av-chip">
-                <div class="av">DR</div>
-                <div><div class="auth-name" id="bx-hero-author">Dr. Deepa Rao</div><div class="auth-date" id="bx-hero-date">May 2026</div></div>
-              </div>
-              <span class="read-badge">9 min read</span>
-            </div>
-          </div>
-        </div>
-        <div class="hero-stack">
-          <div class="stack-card" id="bx-stack-0"><div class="stack-thumb th-a">&#129514;</div><div class="stack-body"><span class="tag ta">Industry</span><div class="stack-title">Biocon mRNA Plant Goes Live</div><div class="stack-meta">May 6 - 5 min read</div></div></div>
-          <div class="stack-card" id="bx-stack-1"><div class="stack-thumb th-b">&#128300;</div><div class="stack-body"><span class="tag tb">Research</span><div class="stack-title">AlphaFold 3 vs RoseTTAFold Benchmark</div><div class="stack-meta">May 5 - 7 min read</div></div></div>
-          <div class="stack-card" id="bx-stack-2"><div class="stack-thumb th-p">&#127807;</div><div class="stack-body"><span class="tag tp">AgriTech</span><div class="stack-title">GM Mustard Gets Final Approval</div><div class="stack-meta">May 4 - 4 min read</div></div></div>
-          <div class="stack-card" id="bx-stack-3"><div class="stack-thumb th-r">&#128138;</div><div class="stack-body"><span class="tag tr">Medical</span><div class="stack-title">CAR-T Therapy Succeeds in Autoimmune Conditions</div><div class="stack-meta">May 3 - 6 min read</div></div></div>
-        </div>
-      </div>
+      <h1 style="font-family:'Playfair Display',serif; font-size:42px; font-weight:700; margin-bottom:12px; line-height:1.2;">Research <span style="color:#6ee7b7">Spotlight &amp; Summaries</span></h1>
+      <p style="font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; line-height:1.6;">Stay updated with cutting-edge peer-reviewed research papers and summaries, translated into clear and actionable science insights.</p>
     </div>
   </section>
 
-  <!-- NEWS STRIP -->
-  <div id="bx-newsstrip">
-    <div class="bx-wrap">
-      <div class="news-grid-inner">
-        <div class="news-label">Latest News</div>
-        <div id="bx-news-items">
-          <div class="news-item"><div class="news-dot"></div><div class="news-text">WHO publishes updated Global Biosafety Framework</div><span class="tag tr news-tag-style">Regulatory</span><span class="news-time">2h ago</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MAIN CONTENT + SIDEBAR -->
-  <section class="bx-sec">
-    <div class="bx-wrap">
-      <div class="with-sidebar">
-        <div>
-          <div class="sec-head">
-            <div class="sec-title"><div class="sec-line"></div>Latest <span class="sec-title-acc">Articles</span></div>
-          </div>
-
-          <!-- DYNAMIC LATEST ARTICLES GRID -->
-          <div id="bx-latest-articles-grid" class="posts-list-horizontal">
-            <!-- Populated dynamically via JS -->
-          </div>
-
-          <!-- PAGINATION CONTROLS -->
-          <div id="bx-latest-articles-pagination" class="pagination-container">
-            <!-- Populated dynamically via JS -->
-          </div>
-        </div>
-
-        <!-- SIDEBAR -->
-        <div class="sidebar">
-          <div class="widget widget-newsletter-style">
-            <div class="widget-head"><div class="widget-head-line"></div>Join 14,000+ Scientists</div>
-            <div class="nl-desc">Weekly science digest of critical biotech breakthroughs, directly to your inbox.</div>
-            <input class="nl-inp" type="email" id="nl-email" placeholder="your@email.com"/>
-            <button class="nl-btn" onclick="subscribeNewsletter()">Subscribe Free</button>
-            <div class="nl-note">GDPR compliant - Unsubscribe anytime</div>
-          </div>
-          <div class="widget">
-            <div class="widget-head"><div class="widget-head-line"></div>Trending This Week</div>
-            <div id="bx-trending-list">
-              <!-- Populated dynamically -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-
-  <!-- EXPERT INTERVIEWS -->
-  <section class="bx-sec" id="bx-interviews-section">
+  <!-- RESEARCH SPOTLIGHT -->
+  <section class="bx-sec-alt" id="bx-research-section">
     <div class="bx-wrap">
       <div class="sec-head">
-        <div class="sec-title"><div class="sec-line"></div>Expert <span class="sec-title-acc">Interviews</span></div>
+        <div class="sec-title"><div class="sec-line"></div>Research <span class="sec-title-acc">Spotlight</span></div>
       </div>
-      <div class="grid2">
-        <div class="interview-card" id="bx-interview-0">
-          <div class="int-photo int1">👩‍🔬</div>
-          <div class="int-body">
-            <div class="int-eyebrow">Featured Conversation</div>
-            <div class="int-title">Dr. Swati Sen on India's CRISPR Clinical Future</div>
-            <div class="int-exc">"We are designing clinical trials specifically optimized for target therapeutics unique to our demographics."</div>
-            <div class="int-meta">AIIMS Delhi · 12 min read</div>
+      <div class="research-grid">
+        <div class="res-hero">
+          <div>
+            <div class="journal-row"><div class="jdot"></div><div class="journal-name" id="bx-res-hero-journal">Nature Biotechnology</div></div>
+            <div class="res-title" id="bx-res-hero-title">In Vivo Epigenome Editing Restores Vision</div>
+            <div class="res-exc" id="bx-res-hero-excerpt">A breakthrough epigenome editing tool successfully reverses cellular aging hallmarks in ocular tissues.</div>
+            <div class="res-foot">
+              <div class="if-badge"><div class="if-dot"></div>Impact Factor <strong id="bx-res-hero-if">54.9</strong></div>
+              <button class="btn-paper">Read Full Paper ↗</button>
+            </div>
+          </div>
+          <div class="res-stats">
+            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-0">8.2×</div><div class="res-stat-lab" id="bx-res-stat-lab-0">Increased efficacy</div></div>
+            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-1">0</div><div class="res-stat-lab" id="bx-res-stat-lab-1">Off-target effects</div></div>
+            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-2">12m</div><div class="res-stat-lab" id="bx-res-stat-lab-2">Therapeutic retention</div></div>
+            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-3">FDA</div><div class="res-stat-lab" id="bx-res-stat-lab-3">Fast-track status</div></div>
           </div>
         </div>
-        <div class="interview-card" id="bx-interview-1">
-          <div class="int-photo int2">👨‍🔬</div>
-          <div class="int-body">
-            <div class="int-eyebrow">Industry Insights</div>
-            <div class="int-title">AI-Powered Drug Discovery: Hype vs Reality</div>
-            <div class="int-exc">"Generative biology models are yielding spectacular binders, but validation remains the primary rate-limiting factor."</div>
-            <div class="int-meta">Dr. Aris Thorne · MIT · 15 min read</div>
-          </div>
+        <div class="res-card">
+          <div class="journal-row"><div class="jdot"></div><div class="journal-name" id="bx-res-card-journal-0">Science</div></div>
+          <div class="res-title" id="bx-res-card-title-0">Synthetic Genomes Created from Scratch</div>
+          <div class="res-exc" id="bx-res-card-excerpt-0">Researchers synthesize the entire chromosome structure of yeast, paving the way for custom biological manufacturing.</div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- MEMBERSHIP PLANS -->
-  <section class="bx-sec-alt" id="bx-plans-section">
-    <div class="bx-wrap">
-      <div class="plans-eye">Science Communication Deserves Support</div>
-      <div class="plans-h">Access Premium Science Insights</div>
-      <div class="plans-sub">Choose a subscription to unlock complete, ad-free research analyses and reports.</div>
-      <div id="bx-plans-grid">
-        <!-- Populated dynamically -->
+        <div class="res-card">
+          <div class="journal-row"><div class="jdot"></div><div class="journal-name" id="bx-res-card-journal-1">Cell</div></div>
+          <div class="res-title" id="bx-res-card-title-1">CAR-T Cells Programmed to Target Cancer Stealth Vectors</div>
+          <div class="res-exc" id="bx-res-card-excerpt-1">Newly engineered receptors bypass solid tumour shield barriers to trigger complete elimination.</div>
+        </div>
       </div>
     </div>
   </section>
@@ -962,21 +873,10 @@
         const cfg = data.data;
         if (cfg.ticker)               renderTicker(cfg.ticker);
         if (cfg.category_nav)         renderCategoryNav(cfg.category_nav);
-        if (cfg.hero_featured||cfg.hero_stack) renderHero(cfg.hero_featured, cfg.hero_stack);
-        if (cfg.latest_articles)      renderLatestArticlesConfig(cfg.latest_articles);
-        
-        latestArticlesShowCover = cfg.latest_articles?.showCoverImage !== false;
-        fetchLatestArticles(1);
-        
-        if (cfg.news_strip)           renderNewsStrip(cfg.news_strip);
-        if (cfg.trending)             renderTrending(cfg.trending);
-        if (cfg.interviews)           renderInterviews(cfg.interviews);
-        if (cfg.subscription_plans)   renderPlans(cfg.subscription_plans);
+        if (cfg.research_spotlight)   renderResearch(cfg.research_spotlight);
         if (cfg.footer)               renderFooter(cfg.footer);
-        renderAuthors();
       } catch(e) { 
         console.warn('CMS sync failed - using static fallback', e.message); 
-        fetchLatestArticles(1);
       }
     }
 
