@@ -819,7 +819,12 @@
   <!-- STORE HERO -->
   <section id="bx-store-hero">
     <div class="bx-wrap">
-      <h1>BioXApe <span>Store &amp; Academy</span></h1>
+      <h1 style="display: inline-flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+        <div class="bx-brand-mark">
+          <svg viewBox="0 0 24 24"><path d="M12 3c0 0-3 4-3 8s3 8 3 8"/><path d="M12 3c0 0 3 4 3 8s-3 8-3 8"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+        </div>
+        BioXApe <span>Store</span>
+      </h1>
       <p>Expand your expertise with premium biology courses, branded gear, and free downloadable cheat sheets.</p>
     </div>
   </section>
@@ -945,7 +950,7 @@
       : 'https://bioxape-backend.onrender.com/api';
 
     let latestArticlesPage = 1;
-    const latestArticlesLimit = 3; // Limit to 3 to demonstrate pagination
+    const latestArticlesLimit = 10; // Limit to 10 to demonstrate pagination
     let latestArticlesShowCover = true;
 
     async function fetchSiteConfig() {

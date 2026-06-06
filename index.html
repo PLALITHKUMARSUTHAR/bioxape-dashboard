@@ -1042,7 +1042,7 @@
       : 'https://bioxape-backend.onrender.com/api';
 
     let latestArticlesPage = 1;
-    const latestArticlesLimit = 3; // Limit to 3 to demonstrate pagination
+    const latestArticlesLimit = 10; // Limit to 10 to demonstrate pagination
     let latestArticlesShowCover = true;
 
     async function fetchSiteConfig() {
@@ -1460,6 +1460,9 @@
 
       carouselPosts = posts.slice(0, 4); // Take top 4 posts
 
+      // Set explicit track width based on slide count
+      track.style.width = `${carouselPosts.length * 100}%`;
+
       // Generate HTML for slides
       track.innerHTML = carouselPosts.map((p, idx) => {
         let avatar = p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU';
@@ -1481,7 +1484,7 @@
         const dateIdAttr = idx === 0 ? 'id="bx-hero-date"' : '';
 
         return `
-          <div class="carousel-slide" ${slideIdAttr} onclick="window.location.href='post.html?id=${p._id}'">
+          <div class="carousel-slide" ${slideIdAttr} style="width: ${100 / carouselPosts.length}%; min-width: ${100 / carouselPosts.length}%;" onclick="window.location.href='post.html?id=${p._id}'">
             <div class="hero-main-img" style="position:relative;">
               ${coverHtml}
               <div class="hero-img-over"></div>
@@ -1531,7 +1534,7 @@
     function updateCarouselPosition() {
       const track = document.getElementById('bx-hero-carousel-track');
       if (!track) return;
-      track.style.transform = `translateX(-${currentCarouselIndex * 100}%)`;
+      track.style.transform = `translateX(-${currentCarouselIndex * (100 / Math.max(1, carouselPosts.length))}%)`;
 
       // Update dots
       const dots = document.querySelectorAll('.carousel-dot');
