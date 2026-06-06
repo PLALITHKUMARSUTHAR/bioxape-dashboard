@@ -706,6 +706,35 @@
         font-size: 24px;
       }
     }
+    /* ACTIVE LINK & HERO */
+    .nav-links a.nav-active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    #bx-research-hero {
+      background: linear-gradient(135deg, var(--g800) 0%, var(--g600) 100%);
+      padding: 56px 0;
+      color: var(--white);
+      text-align: center;
+      border-bottom: 2px solid var(--border);
+    }
+    #bx-research-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    #bx-research-hero h1 span {
+      color: #6ee7b7;
+    }
+    #bx-research-hero p {
+      font-size: 15px;
+      opacity: 0.85;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -747,7 +776,7 @@
               <a href="category.html?name=Cancer%20Research">Cancer Research</a>
             </div>
           </div>
-          <a href="research.html" style="color: var(--accent); font-weight: 600;">Research</a>
+          <a href="research.html" class="nav-active">Research</a>
           <a href="store.html">Store</a>
           <a href="public-pages/write-for-us.html">Write for Us</a>
         </div>
@@ -768,10 +797,10 @@
 
 
   <!-- RESEARCH HERO -->
-  <section id="bx-research-hero" style="background: linear-gradient(135deg, var(--g800) 0%, var(--g600) 100%); padding: 56px 0; color: var(--white); text-align: center; border-bottom: 2px solid var(--border);">
+  <section id="bx-research-hero">
     <div class="bx-wrap">
-      <h1 style="font-family:'Playfair Display',serif; font-size:42px; font-weight:700; margin-bottom:12px; line-height:1.2;">Research <span style="color:#6ee7b7">Spotlight &amp; Summaries</span></h1>
-      <p style="font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; line-height:1.6;">Stay updated with cutting-edge peer-reviewed research papers and summaries, translated into clear and actionable science insights.</p>
+      <h1>Research <span>Spotlight &amp; Summaries</span></h1>
+      <p>Stay updated with cutting-edge peer-reviewed research papers and summaries, translated into clear and actionable science insights.</p>
     </div>
   </section>
 
@@ -862,7 +891,7 @@
       : 'https://bioxape-backend.onrender.com/api';
 
     let latestArticlesPage = 1;
-    const latestArticlesLimit = 10; // Accommodate exactly 10 latest articles
+    const latestArticlesLimit = 3; // Limit to 3 to demonstrate pagination
     let latestArticlesShowCover = true;
 
     async function fetchSiteConfig() {
@@ -940,11 +969,7 @@
       const container = document.getElementById('bx-latest-articles-pagination');
       if (!container) return;
       
-      const totalPages = Math.ceil(total / latestArticlesLimit);
-      if (totalPages <= 1) {
-        container.innerHTML = '';
-        return;
-      }
+      const totalPages = Math.max(1, Math.ceil(total / latestArticlesLimit));
       
       let prevDisabled = page <= 1 ? 'disabled' : '';
       let nextDisabled = page >= totalPages ? 'disabled' : '';

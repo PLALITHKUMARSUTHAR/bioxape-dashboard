@@ -613,6 +613,55 @@
     .btn-cart{display:block;width:100%;text-align:center;padding:8px;margin-top:8px;background:var(--g50);border:1.5px solid var(--g200);color:var(--g700);border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif}
     .btn-cart:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 
+    /* Active navigation link */
+    .nav-links a.nav-active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Store hero section */
+    #bx-store-hero {
+      background: linear-gradient(135deg, var(--g800) 0%, var(--g600) 100%);
+      padding: 56px 0;
+      color: var(--white);
+      text-align: center;
+      border-bottom: 2px solid var(--border);
+    }
+    #bx-store-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    #bx-store-hero h1 span {
+      color: #6ee7b7;
+    }
+    #bx-store-hero p {
+      font-size: 15px;
+      opacity: 0.85;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Ebooks and Courses Section borders */
+    #bx-ebooks-section, #bx-courses-section-inner {
+      border-top: 1px solid var(--border);
+      padding-top: 48px;
+    }
+
+    /* Ebooks Cards custom styles */
+    #bx-ebooks-grid .store-price {
+      color: var(--accent);
+    }
+    #bx-ebooks-grid .btn-cart {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+
     /* AUTHORS */
     .authors-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
     .author-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;transition:all .2s}
@@ -748,7 +797,7 @@
             </div>
           </div>
           <a href="research.html">Research</a>
-          <a href="store.html" style="color: var(--accent); font-weight: 600;">Store</a>
+          <a href="store.html" class="nav-active">Store</a>
           <a href="public-pages/write-for-us.html">Write for Us</a>
         </div>
         <div class="nav-right">
@@ -768,24 +817,17 @@
 
 
   <!-- STORE HERO -->
-  <section id="bx-store-hero" style="background: linear-gradient(135deg, var(--g800) 0%, var(--g600) 100%); padding: 56px 0; color: var(--white); text-align: center; border-bottom: 2px solid var(--border);">
+  <section id="bx-store-hero">
     <div class="bx-wrap">
-      <h1 style="font-family:'Playfair Display',serif; font-size:42px; font-weight:700; margin-bottom:12px; line-height:1.2;">BioXApe <span style="color:#6ee7b7">Store &amp; Academy</span></h1>
-      <p style="font-size:15px; opacity:0.85; max-width:600px; margin:0 auto; line-height:1.6;">Expand your expertise with premium biology courses, branded gear, expert masterclasses, and free downloadable cheat sheets.</p>
+      <h1>BioXApe <span>Store &amp; Academy</span></h1>
+      <p>Expand your expertise with premium biology courses, branded gear, and free downloadable cheat sheets.</p>
     </div>
   </section>
 
   <!-- COURSES & STORE -->
   <section class="bx-sec" id="bx-courses-section">
     <div class="bx-wrap">
-      <div class="mb-48">
-        <div class="sec-head">
-          <div class="sec-title"><div class="sec-line"></div>Courses &amp; <span class="sec-title-acc">Masterclasses</span></div>
-        </div>
-        <div id="bx-courses-grid" class="grid2">
-          <!-- Populated dynamically -->
-        </div>
-      </div>
+      <!-- STORE SECTION -->
       <div id="bx-store-section" class="mb-48">
         <div class="sec-head">
           <div class="sec-title"><div class="sec-line"></div>Researcher <span class="sec-title-acc">Store</span></div>
@@ -794,8 +836,9 @@
           <!-- Populated dynamically -->
         </div>
       </div>
+
       <!-- EBOOKS SECTION -->
-      <div id="bx-ebooks-section" style="border-top: 1px solid var(--border); padding-top: 48px; margin-top: 48px;">
+      <div id="bx-ebooks-section" class="mb-48">
         <div class="sec-head">
           <div class="sec-title"><div class="sec-line"></div>Ebooks &amp; <span class="sec-title-acc">Downloads</span></div>
         </div>
@@ -806,8 +849,8 @@
             <div class="store-body">
               <div class="store-name">CRISPR Protocol Guide 2026</div>
               <div class="store-type">Ebook · PDF Download</div>
-              <div class="store-price" style="color: var(--accent);">Free</div>
-              <button class="btn-cart" style="background: var(--accent); color: #fff; border-color: var(--accent);">Download PDF 📥</button>
+              <div class="store-price">Free</div>
+              <button class="btn-cart">Download PDF 📥</button>
             </div>
           </div>
           <!-- Ebook Card 2 -->
@@ -816,8 +859,8 @@
             <div class="store-body">
               <div class="store-name">Biotech Careers Pathbook</div>
               <div class="store-type">Guide · PDF Download</div>
-              <div class="store-price" style="color: var(--accent);">Free</div>
-              <button class="btn-cart" style="background: var(--accent); color: #fff; border-color: var(--accent);">Download PDF 📥</button>
+              <div class="store-price">Free</div>
+              <button class="btn-cart">Download PDF 📥</button>
             </div>
           </div>
           <!-- Ebook Card 3 -->
@@ -826,8 +869,8 @@
             <div class="store-body">
               <div class="store-name">Bioinformatics Cheat Sheet</div>
               <div class="store-type">Reference · PDF Download</div>
-              <div class="store-price" style="color: var(--accent);">Free</div>
-              <button class="btn-cart" style="background: var(--accent); color: #fff; border-color: var(--accent);">Download PDF 📥</button>
+              <div class="store-price">Free</div>
+              <button class="btn-cart">Download PDF 📥</button>
             </div>
           </div>
           <!-- Ebook Card 4 -->
@@ -836,10 +879,20 @@
             <div class="store-body">
               <div class="store-name">Genomics Study Blueprint</div>
               <div class="store-type">Blueprint · PDF Download</div>
-              <div class="store-price" style="color: var(--accent);">Free</div>
-              <button class="btn-cart" style="background: var(--accent); color: #fff; border-color: var(--accent);">Download PDF 📥</button>
+              <div class="store-price">Free</div>
+              <button class="btn-cart">Download PDF 📥</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- COURSES SECTION -->
+      <div id="bx-courses-section-inner" class="mb-48">
+        <div class="sec-head">
+          <div class="sec-title"><div class="sec-line"></div>Courses</div>
+        </div>
+        <div id="bx-courses-grid" class="grid2">
+          <!-- Populated dynamically -->
         </div>
       </div>
     </div>
@@ -892,7 +945,7 @@
       : 'https://bioxape-backend.onrender.com/api';
 
     let latestArticlesPage = 1;
-    const latestArticlesLimit = 10; // Accommodate exactly 10 latest articles
+    const latestArticlesLimit = 3; // Limit to 3 to demonstrate pagination
     let latestArticlesShowCover = true;
 
     async function fetchSiteConfig() {
@@ -908,7 +961,29 @@
         if (cfg.footer)               renderFooter(cfg.footer);
       } catch(e) { 
         console.warn('CMS sync failed - using static fallback', e.message); 
+        setupFallbackStore();
       }
+    }
+
+    function setupFallbackStore() {
+      const fallbackCourses = {
+        items: [
+          { icon: "🧬", level: "Intermediate · Self-Paced · Certificate", title: "CRISPR: From Fundamentals to Clinical Applications", meta: "8 modules · 6 hours · 2,400 students enrolled", price: "1,499", oldPrice: "", enrollUrl: "#" },
+          { icon: "💻", level: "Beginner · Self-Paced · Certificate", title: "Bioinformatics with Python: Sequence to Structure", meta: "12 modules · 10 hours · 1,800 students enrolled", price: "1,999", oldPrice: "", enrollUrl: "#" },
+          { icon: "🤖", level: "Advanced · Live + Recorded · Certificate", title: "AI and Drug Discovery: AlphaFold, Docking and De Novo Design", meta: "6 modules · 8 hours · Live Q&A · 940 enrolled", price: "2,499", oldPrice: "3,499", enrollUrl: "#" },
+          { icon: "📊", level: "All Levels · eBook · Instant Download", title: "The 2026 India Biotech Industry Report: Trends Funding and Forecasts", meta: "128 pages · PDF + EPUB · Updated monthly", price: "799", oldPrice: "", enrollUrl: "#" }
+        ]
+      };
+      const fallbackStore = {
+        items: [
+          { emoji: "📓", name: "BioXApe Lab Notebook", type: "Hardcover · Branded Merch",     price: "499",   oldPrice: "",       cartUrl: "#" },
+          { emoji: "🖼️", name: "PCR Protocol Poster Set", type: "Digital Download · A2 Print", price: "249",   oldPrice: "399",   cartUrl: "#" },
+          { emoji: "👕", name: "DNA Helix Tee",           type: "Unisex Merch · S to 3XL",     price: "849",   oldPrice: "",       cartUrl: "#" },
+          { emoji: "📦", name: "Researcher Starter Bundle", type: "Bundle · 4 eBooks + Poster", price: "1,399", oldPrice: "2,400", cartUrl: "#" }
+        ]
+      };
+      renderCourses(fallbackCourses);
+      renderStore(fallbackStore);
     }
 
     function downloadEbook(title) {
@@ -982,11 +1057,7 @@
       const container = document.getElementById('bx-latest-articles-pagination');
       if (!container) return;
       
-      const totalPages = Math.ceil(total / latestArticlesLimit);
-      if (totalPages <= 1) {
-        container.innerHTML = '';
-        return;
-      }
+      const totalPages = Math.max(1, Math.ceil(total / latestArticlesLimit));
       
       let prevDisabled = page <= 1 ? 'disabled' : '';
       let nextDisabled = page >= totalPages ? 'disabled' : '';
@@ -1148,7 +1219,13 @@
       const el=document.getElementById('bx-courses-grid');
       if(!el||!data.items) return;
       const icons=['ci1','ci2','ci3','ci4'];
-      el.innerHTML=data.items.map((c,i)=>'<div class="course-card" onclick="window.open(\''+(c.enrollUrl||'#')+'\',\'_blank\')"><div class="course-icon '+icons[i%4]+'">'+(c.icon||'🔬')+'</div><div class="course-body"><div class="course-level">'+c.level+'</div><div class="course-title">'+c.title+'</div><div class="course-meta">'+c.meta+'</div><div class="course-foot"><div class="course-price">'+(c.oldPrice?'<span class="price-old">Rs '+c.oldPrice+'</span>':'')+'Rs '+c.price+'</div><button class="btn-enroll">Enroll Now</button></div></div></div>').join('');
+      const filteredItems = data.items.filter(c => {
+        const title = (c.title || '').toLowerCase();
+        const level = (c.level || '').toLowerCase();
+        const meta = (c.meta || '').toLowerCase();
+        return !title.includes('masterclass') && !level.includes('masterclass') && !meta.includes('masterclass');
+      });
+      el.innerHTML=filteredItems.map((c,i)=>'<div class="course-card" onclick="window.open(\''+(c.enrollUrl||'#')+'\',\'_blank\')"><div class="course-icon '+icons[i%4]+'">'+(c.icon||'🔬')+'</div><div class="course-body"><div class="course-level">'+c.level+'</div><div class="course-title">'+c.title+'</div><div class="course-meta">'+c.meta+'</div><div class="course-foot"><div class="course-price">'+(c.oldPrice?'<span class="price-old">Rs '+c.oldPrice+'</span>':'')+'Rs '+c.price+'</div><button class="btn-enroll">Enroll Now</button></div></div></div>').join('');
     }
 
     function renderStore(data) {
@@ -1212,6 +1289,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      setupFallbackStore();
       fetchSiteConfig();
       
       const searchInput = document.getElementById('nav-search-input');

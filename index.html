@@ -182,6 +182,85 @@
     .auth-name{font-size:13px;font-weight:500;color:var(--text2)}
     .auth-date{font-size:11.5px;color:var(--text4)}
     .read-badge{font-size:11.5px;color:var(--text4);background:var(--surface);padding:4px 9px;border-radius:5px}
+
+    /* HERO CAROUSEL STYLES */
+    .carousel-container {
+      position: relative;
+      overflow: hidden;
+    }
+    .carousel-track-wrapper {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+      width: 100%;
+      height: 100%;
+    }
+    .carousel-slide {
+      min-width: 100%;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+    .carousel-nav-btn {
+      position: absolute;
+      top: 150px;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid var(--border);
+      color: var(--text1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s;
+    }
+    .carousel-nav-btn:hover {
+      background: var(--white);
+      color: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .carousel-nav-btn.prev-btn { left: 16px; }
+    .carousel-nav-btn.next-btn { right: 16px; }
+    .carousel-indicators {
+      position: absolute;
+      top: 275px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .carousel-dot.active {
+      background: var(--white);
+      transform: scale(1.25);
+    }
+
+    /* DESKTOP SIDEBAR ALIGNMENT */
+    @media(min-width:1025px) {
+      .sidebar {
+        margin-top: 80px;
+      }
+    }
     .hero-stack{display:flex;flex-direction:column;gap:13px}
     .stack-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;display:flex;cursor:pointer;transition:border-color .2s}
     .stack-card:hover{border-color:var(--accent)}
@@ -772,30 +851,42 @@
     <div class="bx-wrap">
       <div class="hero-live-badge">Live from the lab bench</div>
       <div class="mag-grid">
-        <div class="hero-main-card" id="bx-hero-card">
-          <div class="hero-main-img">
-            <div class="hero-img-over"></div>
-            <svg class="hero-dna-svg" viewBox="0 0 65 130" fill="none">
-              <path d="M12 6 Q54 26 12 53 Q54 80 12 107 Q54 127 12 145" stroke="white" stroke-width="2.5" fill="none"/>
-              <path d="M53 6 Q11 26 53 53 Q11 80 53 107 Q11 127 53 145" stroke="#6ee7b7" stroke-width="2.5" fill="none"/>
-              <line x1="12" y1="26" x2="53" y2="26" stroke="white" stroke-width="1.5" opacity=".5"/>
-              <line x1="53" y1="53" x2="12" y2="53" stroke="white" stroke-width="1.5" opacity=".5"/>
-              <line x1="12" y1="80" x2="53" y2="80" stroke="white" stroke-width="1.5" opacity=".5"/>
-            </svg>
-            <div class="relative-z1"><span class="tag tg hero-badge-tag" id="bx-hero-category">Featured</span></div>
-          </div>
-          <div class="hero-main-body">
-            <span class="tag tg">Research</span>
-            <div class="hero-main-title" id="bx-hero-title">CRISPR Prime Editing Achieves 94% Precision</div>
-            <div class="hero-main-exc" id="bx-hero-excerpt">A landmark study demonstrates that next-generation base editors can near-eliminate unintended genomic changes.</div>
-            <div class="hero-meta-row">
-              <div class="av-chip">
-                <div class="av">DR</div>
-                <div><div class="auth-name" id="bx-hero-author">Dr. Deepa Rao</div><div class="auth-date" id="bx-hero-date">May 2026</div></div>
+        <!-- HERO CAROUSEL -->
+        <div class="hero-main-card carousel-container" id="bx-hero-carousel">
+          <div class="carousel-track-wrapper">
+            <div class="carousel-track" id="bx-hero-carousel-track">
+              <!-- Slide 1 (Static Fallback / Primary Featured Card) -->
+              <div class="carousel-slide active" id="bx-hero-card" onclick="window.location.href='post.html?id=6a1c06a60bf8bc1ea377b736'">
+                <div class="hero-main-img">
+                  <div class="hero-img-over"></div>
+                  <svg class="hero-dna-svg" viewBox="0 0 65 130" fill="none">
+                    <path d="M12 6 Q54 26 12 53 Q54 80 12 107 Q54 127 12 145" stroke="white" stroke-width="2.5" fill="none"/>
+                    <path d="M53 6 Q11 26 53 53 Q11 80 53 107 Q11 127 53 145" stroke="#6ee7b7" stroke-width="2.5" fill="none"/>
+                    <line x1="12" y1="26" x2="53" y2="26" stroke="white" stroke-width="1.5" opacity=".5"/>
+                    <line x1="53" y1="53" x2="12" y2="53" stroke="white" stroke-width="1.5" opacity=".5"/>
+                    <line x1="12" y1="80" x2="53" y2="80" stroke="white" stroke-width="1.5" opacity=".5"/>
+                  </svg>
+                  <div class="relative-z1"><span class="tag tg hero-badge-tag" id="bx-hero-category">Featured</span></div>
+                </div>
+                <div class="hero-main-body">
+                  <span class="tag tg">Research</span>
+                  <div class="hero-main-title" id="bx-hero-title">CRISPR Prime Editing Achieves 94% Precision</div>
+                  <div class="hero-main-exc" id="bx-hero-excerpt">A landmark study demonstrates that next-generation base editors can near-eliminate unintended genomic changes.</div>
+                  <div class="hero-meta-row">
+                    <div class="av-chip">
+                      <div class="av">DR</div>
+                      <div><div class="auth-name" id="bx-hero-author">Dr. Deepa Rao</div><div class="auth-date" id="bx-hero-date">May 2026</div></div>
+                    </div>
+                    <span class="read-badge">9 min read</span>
+                  </div>
+                </div>
               </div>
-              <span class="read-badge">9 min read</span>
             </div>
           </div>
+          <!-- Navigation controls -->
+          <button class="carousel-nav-btn prev-btn" type="button" aria-label="Previous slide">&lsaquo;</button>
+          <button class="carousel-nav-btn next-btn" type="button" aria-label="Next slide">&rsaquo;</button>
+          <div class="carousel-indicators" id="bx-carousel-indicators"></div>
         </div>
         <div class="hero-stack">
           <div class="stack-card" id="bx-stack-0"><div class="stack-thumb th-a">&#129514;</div><div class="stack-body"><span class="tag ta">Industry</span><div class="stack-title">Biocon mRNA Plant Goes Live</div><div class="stack-meta">May 6 - 5 min read</div></div></div>
@@ -951,7 +1042,7 @@
       : 'https://bioxape-backend.onrender.com/api';
 
     let latestArticlesPage = 1;
-    const latestArticlesLimit = 10; // Accommodate exactly 10 latest articles
+    const latestArticlesLimit = 3; // Limit to 3 to demonstrate pagination
     let latestArticlesShowCover = true;
 
     async function fetchSiteConfig() {
@@ -987,6 +1078,99 @@
       }
     }
 
+    const OFFLINE_POSTS = [
+      {
+        _id: '6a1c06a60bf8bc1ea377b736',
+        title: 'CRISPR Prime Editing Achieves 94% Precision',
+        excerpt: 'A landmark study demonstrates that next-generation base editors can near-eliminate unintended genomic changes.',
+        category: 'Research',
+        authorName: 'Dr. Deepa Rao',
+        publishedAt: '2026-05-06',
+        readTimeMinutes: 9
+      },
+      {
+        _id: 'stack-0',
+        title: 'Biocon mRNA Plant Goes Live',
+        excerpt: 'Biocon launches its state-of-the-art mRNA vaccine manufacturing facility to boost biosimilar exports.',
+        category: 'Industry',
+        authorName: 'Rohan Sharma',
+        publishedAt: '2026-05-06',
+        readTimeMinutes: 5
+      },
+      {
+        _id: 'stack-1',
+        title: 'AlphaFold 3 vs RoseTTAFold Benchmark',
+        excerpt: 'A comprehensive evaluation of the leading protein structure prediction tools on complex biomolecular targets.',
+        category: 'Research',
+        authorName: 'Sarah Jenkins',
+        publishedAt: '2026-05-05',
+        readTimeMinutes: 7
+      },
+      {
+        _id: 'stack-2',
+        title: 'GM Mustard Gets Final Approval',
+        excerpt: 'India regulatory bodies grant final biological safety clearance to GM mustard hybrid for commercial cultivation.',
+        category: 'AgriTech',
+        authorName: 'Amit Patel',
+        publishedAt: '2026-05-04',
+        readTimeMinutes: 4
+      },
+      {
+        _id: 'stack-3',
+        title: 'CAR-T Therapy Succeeds in Autoimmune Conditions',
+        excerpt: 'Clinical trials show complete remission in lupus patients using CD19-targeting CAR-T cell infusion.',
+        category: 'Medical',
+        authorName: 'Dr. John Doe',
+        publishedAt: '2026-05-03',
+        readTimeMinutes: 6
+      },
+      {
+        _id: 'offline-5',
+        title: 'FDA Approves Novel Gene Therapy for Hemophilia B',
+        excerpt: 'Single dose treatment provides sustained factor IX expression, eliminating bleeding episodes in 92% of patients.',
+        category: 'Regulatory',
+        authorName: 'Dr. Emily Vance',
+        publishedAt: '2026-05-02',
+        readTimeMinutes: 8
+      }
+    ];
+
+    function renderOfflineArticles(page) {
+      const gridEl = document.getElementById('bx-latest-articles-grid');
+      if (!gridEl) return;
+
+      const total = OFFLINE_POSTS.length;
+      const start = (page - 1) * latestArticlesLimit;
+      const end = start + latestArticlesLimit;
+      const paginatedPosts = OFFLINE_POSTS.slice(start, end);
+
+      gridEl.innerHTML = paginatedPosts.map(p => {
+        let thumbHtml = `<div class="art-img ai1">🔬</div>`;
+        return `
+          <div class="art-card" onclick="window.location.href='post.html?id=${p._id}'">
+            ${thumbHtml}
+            <div class="art-body">
+              <span class="tag tg">${p.category || 'Science'}</span>
+              <div class="art-title">${p.title}</div>
+              <div class="art-exc">${p.excerpt || ''}</div>
+              <div class="art-meta">
+                <div class="art-meta-left">
+                  <div class="av">${p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU'}</div>
+                  <span>${p.authorName || 'Author'}</span>
+                </div>
+                <span>${p.readTimeMinutes || 1} min read</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      renderPagination(total, page);
+      if (page === 1) {
+        initCarousel(OFFLINE_POSTS);
+      }
+    }
+
     async function fetchLatestArticles(page = 1) {
       try {
         latestArticlesPage = page;
@@ -998,8 +1182,8 @@
         if (!gridEl) return;
 
         if (!data.success || !data.posts || data.posts.length === 0) {
-          gridEl.innerHTML = `<div class="no-articles-placeholder">No articles found.</div>`;
-          renderPagination(0, page);
+          console.warn('No articles from CMS feed, using offline fallback');
+          renderOfflineArticles(page);
           return;
         }
         
@@ -1031,8 +1215,14 @@
         }).join('');
 
         renderPagination(data.total || 0, page);
+        
+        // Populate the hero carousel dynamically from page 1 posts
+        if (page === 1) {
+          initCarousel(data.posts);
+        }
       } catch(e) {
-        console.warn('Failed to fetch dynamic articles:', e.message);
+        console.warn('Failed to fetch dynamic articles, using offline mock data:', e.message);
+        renderOfflineArticles(page);
       }
     }
 
@@ -1040,11 +1230,7 @@
       const container = document.getElementById('bx-latest-articles-pagination');
       if (!container) return;
       
-      const totalPages = Math.ceil(total / latestArticlesLimit);
-      if (totalPages <= 1) {
-        container.innerHTML = '';
-        return;
-      }
+      const totalPages = Math.max(1, Math.ceil(total / latestArticlesLimit));
       
       let prevDisabled = page <= 1 ? 'disabled' : '';
       let nextDisabled = page >= totalPages ? 'disabled' : '';
@@ -1262,6 +1448,151 @@
       } catch(e) { alert('Please try again.'); }
     }
 
+    // Carousel script logic
+    let currentCarouselIndex = 0;
+    let carouselInterval;
+    let carouselPosts = [];
+
+    function initCarousel(posts) {
+      const track = document.getElementById('bx-hero-carousel-track');
+      const indicators = document.getElementById('bx-carousel-indicators');
+      if (!track || !posts || posts.length === 0) return;
+
+      carouselPosts = posts.slice(0, 4); // Take top 4 posts
+
+      // Generate HTML for slides
+      track.innerHTML = carouselPosts.map((p, idx) => {
+        let avatar = p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU';
+        let category = p.category || 'Science';
+        let dateStr = p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'May 2026';
+        let readTime = p.readTimeMinutes || 2;
+        let coverHtml = '';
+        
+        if (p.coverImageUrl) {
+          coverHtml = `<img class="article-cover-thumb-img" src="${p.coverImageUrl}" alt="${p.title}" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:0;"/>`;
+        }
+
+        // Keep IDs on the very first slide so CMS config site overrides work
+        const slideIdAttr = idx === 0 ? 'id="bx-hero-card"' : '';
+        const titleIdAttr = idx === 0 ? 'id="bx-hero-title"' : '';
+        const excIdAttr = idx === 0 ? 'id="bx-hero-excerpt"' : '';
+        const categoryIdAttr = idx === 0 ? 'id="bx-hero-category"' : '';
+        const authorIdAttr = idx === 0 ? 'id="bx-hero-author"' : '';
+        const dateIdAttr = idx === 0 ? 'id="bx-hero-date"' : '';
+
+        return `
+          <div class="carousel-slide" ${slideIdAttr} onclick="window.location.href='post.html?id=${p._id}'">
+            <div class="hero-main-img" style="position:relative;">
+              ${coverHtml}
+              <div class="hero-img-over"></div>
+              <svg class="hero-dna-svg" viewBox="0 0 65 130" fill="none">
+                <path d="M12 6 Q54 26 12 53 Q54 80 12 107 Q54 127 12 145" stroke="white" stroke-width="2.5" fill="none"/>
+                <path d="M53 6 Q11 26 53 53 Q11 80 53 107 Q11 127 53 145" stroke="#6ee7b7" stroke-width="2.5" fill="none"/>
+                <line x1="12" y1="26" x2="53" y2="26" stroke="white" stroke-width="1.5" opacity=".5"/>
+                <line x1="53" y1="53" x2="12" y2="53" stroke="white" stroke-width="1.5" opacity=".5"/>
+                <line x1="12" y1="80" x2="53" y2="80" stroke="white" stroke-width="1.5" opacity=".5"/>
+              </svg>
+              <div class="relative-z1" style="z-index: 1;"><span class="tag tg hero-badge-tag" ${categoryIdAttr}>Featured</span></div>
+            </div>
+            <div class="hero-main-body">
+              <span class="tag tg">${category}</span>
+              <div class="hero-main-title" ${titleIdAttr}>${p.title}</div>
+              <div class="hero-main-exc" ${excIdAttr}>${p.excerpt || ''}</div>
+              <div class="hero-meta-row">
+                <div class="av-chip">
+                  <div class="av">${avatar}</div>
+                  <div><div class="auth-name" ${authorIdAttr}>${p.authorName || 'Author'}</div><div class="auth-date" ${dateIdAttr}>${dateStr}</div></div>
+                </div>
+                <span class="read-badge">${readTime} min read</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Generate HTML for dots
+      if (indicators) {
+        indicators.innerHTML = carouselPosts.map((_, idx) => {
+          return `<div class="carousel-dot ${idx === 0 ? 'active' : ''}" onclick="goToCarouselIndex(${idx})"></div>`;
+        }).join('');
+      }
+
+      currentCarouselIndex = 0;
+      updateCarouselPosition();
+      startCarouselAutoplay();
+
+      // Bind button click handlers
+      const prevBtn = document.querySelector('.prev-btn');
+      const nextBtn = document.querySelector('.next-btn');
+      if (prevBtn) prevBtn.onclick = () => moveCarousel(-1);
+      if (nextBtn) nextBtn.onclick = () => moveCarousel(1);
+    }
+
+    function updateCarouselPosition() {
+      const track = document.getElementById('bx-hero-carousel-track');
+      if (!track) return;
+      track.style.transform = `translateX(-${currentCarouselIndex * 100}%)`;
+
+      // Update dots
+      const dots = document.querySelectorAll('.carousel-dot');
+      dots.forEach((dot, idx) => {
+        if (idx === currentCarouselIndex) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+    }
+
+    function moveCarousel(dir) {
+      if (carouselPosts.length <= 1) return;
+      currentCarouselIndex += dir;
+      if (currentCarouselIndex < 0) {
+        currentCarouselIndex = carouselPosts.length - 1;
+      } else if (currentCarouselIndex >= carouselPosts.length) {
+        currentCarouselIndex = 0;
+      }
+      updateCarouselPosition();
+      startCarouselAutoplay();
+    }
+
+    function goToCarouselIndex(idx) {
+      currentCarouselIndex = idx;
+      updateCarouselPosition();
+      startCarouselAutoplay();
+    }
+
+    function startCarouselAutoplay() {
+      clearInterval(carouselInterval);
+      carouselInterval = setInterval(() => {
+        moveCarousel(1);
+      }, 5000);
+    }
+
+    function setupFallbackCarousel() {
+      const track = document.getElementById('bx-hero-carousel-track');
+      const indicators = document.getElementById('bx-carousel-indicators');
+      if (!track) return;
+
+      const slides = track.querySelectorAll('.carousel-slide');
+      carouselPosts = Array.from(slides);
+
+      if (indicators) {
+        indicators.innerHTML = carouselPosts.map((_, idx) => {
+          return `<div class="carousel-dot ${idx === 0 ? 'active' : ''}" onclick="goToCarouselIndex(${idx})"></div>`;
+        }).join('');
+      }
+
+      const prevBtn = document.querySelector('.prev-btn');
+      const nextBtn = document.querySelector('.next-btn');
+      if (prevBtn) prevBtn.onclick = () => moveCarousel(-1);
+      if (nextBtn) nextBtn.onclick = () => moveCarousel(1);
+
+      currentCarouselIndex = 0;
+      updateCarouselPosition();
+      startCarouselAutoplay();
+    }
+
     function executeSearch() {
       const query = document.getElementById('nav-search-input').value.trim();
       if (query) {
@@ -1270,6 +1601,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      setupFallbackCarousel();
       fetchSiteConfig();
       
       const searchInput = document.getElementById('nav-search-input');
