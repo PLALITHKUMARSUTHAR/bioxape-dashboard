@@ -44,7 +44,7 @@
     /* TICKER */
     #bx-ticker{background:var(--g700);color:#fff;padding:7px 0;overflow:hidden;white-space:nowrap;font-size:12px}
     #bx-ticker-inner{overflow:hidden}
-    #bx-ticker-track{display:inline-block;animation:ticker-scroll 35s linear infinite}
+    #bx-ticker-track{display:inline-block;animation:ticker-scroll 45s linear infinite}
     @keyframes ticker-scroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
     #bx-ticker-track b{color:#a8dfc0;margin-right:8px}
     #bx-ticker-track span{margin-right:60px;opacity:.9}
@@ -120,13 +120,6 @@
       color: var(--accent) !important;
     }
 
-    .nav-links-search-wrap {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex: 1;
-      justify-content: center;
-    }
     /* Integrated Search Bar */
     .nav-search-bar {
       display: flex;
@@ -135,8 +128,7 @@
       border: 1.5px solid var(--border);
       border-radius: 20px;
       padding: 5px 12px;
-      margin-left: 16px;
-      width: 220px;
+      width: 280px;
       transition: all 0.25s ease;
       position: relative;
     }
@@ -144,7 +136,6 @@
       border-color: var(--accent);
       background: var(--white);
       box-shadow: 0 4px 12px rgba(39, 163, 99, 0.08);
-      width: 280px;
     }
     .nav-search-icon {
       color: var(--text3);
@@ -683,10 +674,9 @@
     @media(max-width:768px){
       .bx-wrap{padding:0 16px}
       .nav-row{flex-wrap:wrap;height:auto;padding:12px 0;gap:8px}
-      .nav-links-search-wrap{flex-direction:column;width:100%;gap:12px}
-      .nav-links{flex-wrap:wrap;justify-content:center}
-      .nav-search-bar{width:100% !important;margin-left:0 !important;margin-top:8px}
-      .nav-right{width:100%;justify-content:center}
+      .nav-links{flex-wrap:wrap;justify-content:center;width:100%;margin-bottom:8px}
+      .nav-search-bar{width:100% !important;margin-left:0 !important;margin-top:0 !important;margin-bottom:4px}
+      .nav-right{width:100%;justify-content:center;flex-wrap:wrap;gap:8px}
       .grid3,.grid2,.grid4,#bx-plans-grid{grid-template-columns:1fr}
       .interview-card{grid-template-columns:1fr}
       .int-photo{height:120px}
@@ -742,32 +732,30 @@
           </div>
           <div class="bx-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
         </a>
-        <div class="nav-links-search-wrap">
-          <div class="nav-links">
-            <a href="index.html">Home</a>
-            <div class="dropdown">
-              <a href="#" class="dropdown-trigger">Explore ▾</a>
-              <div class="dropdown-menu" id="explore-dropdown-menu">
-                <a href="category.html?name=Genomics">Genomics</a>
-                <a href="category.html?name=Biopharmaceuticals">Biopharmaceuticals</a>
-                <a href="category.html?name=Synthetic%20Biology">Synthetic Biology</a>
-                <a href="category.html?name=Bioinformatics">Bioinformatics</a>
-                <a href="category.html?name=Immunology%20%26%20Vaccines">Immunology & Vaccines</a>
-                <a href="category.html?name=Clinical%20Trials">Clinical Trials</a>
-                <a href="category.html?name=Industry%20News">Industry News</a>
-                <a href="category.html?name=Cancer%20Research">Cancer Research</a>
-              </div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <div class="dropdown">
+            <a href="#" class="dropdown-trigger">Explore ▾</a>
+            <div class="dropdown-menu" id="explore-dropdown-menu">
+              <a href="category.html?name=Genomics">Genomics</a>
+              <a href="category.html?name=Biopharmaceuticals">Biopharmaceuticals</a>
+              <a href="category.html?name=Synthetic%20Biology">Synthetic Biology</a>
+              <a href="category.html?name=Bioinformatics">Bioinformatics</a>
+              <a href="category.html?name=Immunology%20%26%20Vaccines">Immunology & Vaccines</a>
+              <a href="category.html?name=Clinical%20Trials">Clinical Trials</a>
+              <a href="category.html?name=Industry%20News">Industry News</a>
+              <a href="category.html?name=Cancer%20Research">Cancer Research</a>
             </div>
-            <a href="index.html#bx-research-section">Research</a>
-            <a href="index.html#bx-store-section">Store</a>
-            <a href="public-pages/write-for-us.html">Write for Us</a>
           </div>
+          <a href="index.html#bx-research-section">Research</a>
+          <a href="index.html#bx-store-section">Store</a>
+          <a href="public-pages/write-for-us.html">Write for Us</a>
+        </div>
+        <div class="nav-right">
           <div class="nav-search-bar">
             <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="nav-search-input" placeholder="Search topics, articles..."/>
           </div>
-        </div>
-        <div class="nav-right">
           <a class="btn-dash" href="login.html">Dashboard</a>
           <a class="btn-sub" href="public-pages/subscribe.html">Subscribe ✦</a>
         </div>
