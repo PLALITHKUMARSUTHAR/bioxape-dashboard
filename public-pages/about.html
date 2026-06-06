@@ -21,11 +21,11 @@
 body{font-family:'Inter',sans-serif;color:var(--text1);background:var(--white)}
 a{text-decoration:none;color:var(--accent)}
 .nav{background:var(--white);border-bottom:1px solid var(--border);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.brand{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text1)}
+.brand{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text1);text-decoration:none}
 .brand em{font-style:italic;color:var(--accent)}
 .brand-x{font-size:1.5em;display:inline-block;line-height:0.8;vertical-align:-0.05em}
-.nav-links a{margin-left:20px;font-size:13.5px;color:var(--text3)}
-.nav-links a:hover{color:var(--accent)}
+.back{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text3);text-decoration:none;transition:all .15s}
+.back:hover{background:var(--g50);color:var(--accent)}
 .hero-about{background:linear-gradient(145deg,var(--g800),var(--accent));padding:72px 40px;text-align:center;color:#fff}
 .hero-about h1{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;margin-bottom:14px}
 .hero-about h1 em{font-style:italic;color:#6ee7b7}
@@ -62,10 +62,7 @@ a{text-decoration:none;color:var(--accent)}
 <body>
 <nav class="nav">
   <a class="brand" href="../index.html">Bio<em><span class="brand-x">X</span>Ape</em></a>
-  <div class="nav-links">
-    <a href="../index.html">Home</a><a href="../category.html">Research</a>
-    <a href="subscribe.html">Subscribe</a><a href="contact.html">Contact</a>
-  </div>
+  <a class="back" href="../index.html">← Back to Blog</a>
 </nav>
 
 <div class="hero-about">

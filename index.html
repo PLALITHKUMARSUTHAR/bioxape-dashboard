@@ -58,10 +58,88 @@
     .bx-brand-name{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:var(--text1)}
     .bx-brand-name em{font-style:italic;color:var(--accent)}
     .brand-x{font-size:1.5em;display:inline-block;line-height:0.8;vertical-align:-0.05em}
-    .nav-links-search-wrap{display:flex;align-items:center;gap:20px;flex:1;justify-content:center}
-    .nav-links{display:flex;gap:2px}
+    .nav-links{display:flex;align-items:center;gap:2px}
     .nav-links a{padding:8px 12px;font-size:13px;color:var(--text3);border-radius:7px;font-weight:400;transition:all .15s}
     .nav-links a:hover{background:var(--g50);color:var(--accent)}
+
+    /* Explore Dropdown Container */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-trigger {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--white);
+      min-width: 220px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 0;
+      z-index: 2000;
+      margin-top: 8px;
+    }
+    .dropdown:hover .dropdown-menu {
+      display: block;
+      animation: fadeInDropdown 0.2s ease;
+    }
+    .dropdown-menu a {
+      display: block !important;
+      padding: 10px 20px !important;
+      color: var(--text2) !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      text-decoration: none !important;
+      transition: all 0.15s ease !important;
+      text-align: left !important;
+      border-radius: 0 !important;
+    }
+    .dropdown-menu a:hover {
+      background-color: var(--g50) !important;
+      color: var(--accent) !important;
+    }
+    @keyframes fadeInDropdown {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 6px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    /* Search button in nav */
+    .nav-search-btn {
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      margin-right: 4px;
+    }
+    .nav-search-btn:hover {
+      background: var(--g50);
+      color: var(--accent);
+    }
+    .nav-search-btn svg {
+      width: 18px;
+      height: 18px;
+    }
     /* SEARCH STRIP */
     #bx-search-strip {
       background: var(--white);
@@ -673,6 +751,7 @@
 
     /* Clean utility styles to eliminate inline styles */
     .overflow-hidden { overflow:hidden !important; }
+    .mb-48 { margin-bottom: 48px !important; }
     .hero-dna-svg { position:absolute; top:22px; right:22px; opacity:.18; width:65px; height:130px; }
     .relative-z1 { position:relative; z-index:1; }
     .hero-badge-tag { background:rgba(163,230,53,.2); color:#bbf7d0; }
@@ -756,12 +835,28 @@
         <div class="nav-links-search-wrap">
           <div class="nav-links">
             <a href="index.html">Home</a>
-            <a href="public-pages/about.html">About</a>
+            <div class="dropdown">
+              <a href="#" class="dropdown-trigger">Explore ▾</a>
+              <div class="dropdown-menu" id="explore-dropdown-menu">
+                <a href="category.html?name=Genomics">Genomics</a>
+                <a href="category.html?name=Biopharmaceuticals">Biopharmaceuticals</a>
+                <a href="category.html?name=Synthetic%20Biology">Synthetic Biology</a>
+                <a href="category.html?name=Bioinformatics">Bioinformatics</a>
+                <a href="category.html?name=Immunology%20%26%20Vaccines">Immunology & Vaccines</a>
+                <a href="category.html?name=Clinical%20Trials">Clinical Trials</a>
+                <a href="category.html?name=Industry%20News">Industry News</a>
+                <a href="category.html?name=Cancer%20Research">Cancer Research</a>
+              </div>
+            </div>
+            <a href="index.html#bx-research-section">Research</a>
+            <a href="index.html#bx-store-section">Store</a>
             <a href="public-pages/write-for-us.html">Write for Us</a>
-            <a href="public-pages/contact.html">Contact</a>
           </div>
         </div>
         <div class="nav-right">
+          <button class="nav-search-btn" onclick="focusSearch()" aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
           <a class="btn-dash" href="login.html">Dashboard</a>
           <a class="btn-sub" href="public-pages/subscribe.html">Subscribe ✦</a>
         </div>
@@ -963,7 +1058,7 @@
   <!-- COURSES & STORE -->
   <section class="bx-sec" id="bx-courses-section">
     <div class="bx-wrap">
-      <div style="margin-bottom: 48px;">
+      <div class="mb-48">
         <div class="sec-head">
           <div class="sec-title"><div class="sec-line"></div>Courses &amp; <span class="sec-title-acc">Masterclasses</span></div>
         </div>
@@ -971,7 +1066,7 @@
           <!-- Populated dynamically -->
         </div>
       </div>
-      <div>
+      <div id="bx-store-section">
         <div class="sec-head">
           <div class="sec-title"><div class="sec-line"></div>Researcher <span class="sec-title-acc">Store</span></div>
         </div>
@@ -1157,13 +1252,32 @@
 
     function renderCategoryNav(data) {
       const el = document.getElementById('bx-catbar-inner');
-      if (!el || !data.items) return;
-      el.innerHTML = [...data.items]
+      const dropdownEl = document.getElementById('explore-dropdown-menu');
+      if (!data.items) return;
+      
+      const sortedItems = [...data.items]
         .sort((a,b)=>a.order-b.order)
-        .filter(i=>i.active!==false && i.label!=='All Topics' && i.label!=='all topics')
-        .map((i,idx)=> {
+        .filter(i=>i.active!==false && i.label!=='All Topics' && i.label!=='all topics');
+        
+      if (el) {
+        el.innerHTML = sortedItems.map((i,idx)=> {
           return `<a class="cat-a" href="category.html?name=${encodeURIComponent(i.label)}">${i.label}</a>`;
         }).join('');
+      }
+      
+      if (dropdownEl) {
+        dropdownEl.innerHTML = sortedItems.map((i,idx)=> {
+          return `<a href="category.html?name=${encodeURIComponent(i.label)}">${i.label}</a>`;
+        }).join('');
+      }
+    }
+
+    function focusSearch() {
+      const input = document.getElementById('nav-search-input');
+      if (input) {
+        input.focus();
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
 
     function renderHero(hero, stack) {
