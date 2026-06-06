@@ -74,11 +74,12 @@
       gap: 4px;
     }
     .dropdown-menu {
-      display: none;
+      opacity: 0;
+      visibility: hidden;
       position: absolute;
       top: 100%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, 10px);
       background-color: var(--white);
       min-width: 220px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -87,10 +88,21 @@
       padding: 8px 0;
       z-index: 2000;
       margin-top: 8px;
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    }
+    .dropdown-menu::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      left: 0;
+      right: 0;
+      height: 12px;
+      background: transparent;
     }
     .dropdown:hover .dropdown-menu {
-      display: block;
-      animation: fadeInDropdown 0.2s ease;
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, 0);
     }
     .dropdown-menu a {
       display: block !important;
@@ -106,16 +118,6 @@
     .dropdown-menu a:hover {
       background-color: var(--g50) !important;
       color: var(--accent) !important;
-    }
-    @keyframes fadeInDropdown {
-      from {
-        opacity: 0;
-        transform: translate(-50%, 6px);
-      }
-      to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-      }
     }
 
     /* Search button in nav */
@@ -201,68 +203,7 @@
     .btn-dash{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text2);background:none;text-decoration:none;font-weight:500}
     .btn-sub{padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
 
-     /* CATEGORY NAV - PREMIUM PILLS */
-    #bx-catbar {
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 0;
-    }
-    #bx-catbar-inner {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0;
-    }
-    #bx-catbar-inner::-webkit-scrollbar {
-      display: none;
-    }
-    .cat-a {
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text2);
-      background: var(--off);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      display: inline-block;
-      text-align: center;
-      box-sizing: border-box;
-      flex: 0 0 calc((100% - 40px) / 5);
-    }
-    @media (max-width: 1024px) {
-      .cat-a {
-        flex: 0 0 calc((100% - 30px) / 4);
-      }
-    }
-    @media (max-width: 768px) {
-      .cat-a {
-        flex: 0 0 calc((100% - 20px) / 3);
-      }
-    }
-    @media (max-width: 580px) {
-      .cat-a {
-        flex: 0 0 calc((100% - 10px) / 2);
-      }
-    }
-    .cat-a:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: var(--g50);
-      transform: translateY(-1px);
-    }
-    .cat-a.active {
-      color: var(--white);
-      background: var(--accent);
-      border-color: var(--accent);
-      box-shadow: 0 4px 12px rgba(39, 163, 99, 0.2);
-    }
+
 
     /* HERO */
     #bx-hero{padding:36px 0 0;background:var(--white)}
@@ -864,14 +805,7 @@
     </div>
   </div>
 
-  <!-- CATEGORY NAV -->
-  <div id="bx-catbar">
-    <div class="bx-wrap">
-      <div id="bx-catbar-inner">
-        <!-- Rendered dynamically -->
-      </div>
-    </div>
-  </div>
+
 
   <!-- SEARCH STRIP -->
   <div id="bx-search-strip">
@@ -1251,25 +1185,16 @@
     }
 
     function renderCategoryNav(data) {
-      const el = document.getElementById('bx-catbar-inner');
       const dropdownEl = document.getElementById('explore-dropdown-menu');
-      if (!data.items) return;
+      if (!data.items || !dropdownEl) return;
       
       const sortedItems = [...data.items]
         .sort((a,b)=>a.order-b.order)
         .filter(i=>i.active!==false && i.label!=='All Topics' && i.label!=='all topics');
         
-      if (el) {
-        el.innerHTML = sortedItems.map((i,idx)=> {
-          return `<a class="cat-a" href="category.html?name=${encodeURIComponent(i.label)}">${i.label}</a>`;
-        }).join('');
-      }
-      
-      if (dropdownEl) {
-        dropdownEl.innerHTML = sortedItems.map((i,idx)=> {
-          return `<a href="category.html?name=${encodeURIComponent(i.label)}">${i.label}</a>`;
-        }).join('');
-      }
+      dropdownEl.innerHTML = sortedItems.map((i,idx)=> {
+        return `<a href="category.html?name=${encodeURIComponent(i.label)}">${i.label}</a>`;
+      }).join('');
     }
 
     function focusSearch() {
