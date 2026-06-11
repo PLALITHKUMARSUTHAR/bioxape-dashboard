@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/forum/(.*)", "destination": "/index.html" },
+    { "source": "/forum", "destination": "/index.html" }
+  ]
+}
