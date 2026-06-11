@@ -1033,7 +1033,7 @@
         
         gridEl.innerHTML = data.posts.map(p => {
           let thumbHtml = '';
-          if (latestArticlesShowCover && p.coverImageUrl) {
+          if (p.coverImageUrl) {
             thumbHtml = `<div class="article-cover-thumb-wrap"><img src="${p.coverImageUrl}" class="article-cover-thumb-img" alt="${p.title}"/></div>`;
           } else {
             thumbHtml = `<div class="art-img ai1">🔬</div>`;
