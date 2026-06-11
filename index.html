@@ -741,7 +741,6 @@
     .news-tag-style { font-size:10px; padding:2px 7px; margin:0; }
     .widget-newsletter-style { background:linear-gradient(145deg,var(--g50),var(--white)); border-color:var(--g200); }
     .no-articles-placeholder { grid-column: 1/-1; text-align: center; color: var(--text4); padding: 40px; }
-    .article-cover-thumb-wrap { height:155px; overflow:hidden; border-bottom:1.5px solid var(--border); }
     .article-cover-thumb-img { width:100%; height:100%; object-fit:cover; }
     .author-av-img { object-fit:cover; }
 
@@ -864,6 +863,7 @@
               <!-- Slide 1 (Static Fallback / Primary Featured Card) -->
               <div class="carousel-slide active" id="bx-hero-card" onclick="window.location.href='post.html?id=6a1c06a60bf8bc1ea377b736'">
                 <div class="hero-main-img">
+                  <img class="article-cover-thumb-img" src="https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=600&auto=format&fit=crop" alt="CRISPR Prime Editing" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:0;"/>
                   <div class="hero-img-over"></div>
                   <svg class="hero-dna-svg" viewBox="0 0 65 130" fill="none">
                     <path d="M12 6 Q54 26 12 53 Q54 80 12 107 Q54 127 12 145" stroke="white" stroke-width="2.5" fill="none"/>
@@ -895,10 +895,10 @@
           <div class="carousel-indicators" id="bx-carousel-indicators"></div>
         </div>
         <div class="hero-stack">
-          <div class="stack-card" id="bx-stack-0"><div class="stack-thumb th-a">&#129514;</div><div class="stack-body"><span class="tag ta">Industry</span><div class="stack-title">Biocon mRNA Plant Goes Live</div><div class="stack-meta">May 6 - 5 min read</div></div></div>
-          <div class="stack-card" id="bx-stack-1"><div class="stack-thumb th-b">&#128300;</div><div class="stack-body"><span class="tag tb">Research</span><div class="stack-title">AlphaFold 3 vs RoseTTAFold Benchmark</div><div class="stack-meta">May 5 - 7 min read</div></div></div>
-          <div class="stack-card" id="bx-stack-2"><div class="stack-thumb th-p">&#127807;</div><div class="stack-body"><span class="tag tp">AgriTech</span><div class="stack-title">GM Mustard Gets Final Approval</div><div class="stack-meta">May 4 - 4 min read</div></div></div>
-          <div class="stack-card" id="bx-stack-3"><div class="stack-thumb th-r">&#128138;</div><div class="stack-body"><span class="tag tr">Medical</span><div class="stack-title">CAR-T Therapy Succeeds in Autoimmune Conditions</div><div class="stack-meta">May 3 - 6 min read</div></div></div>
+          <div class="stack-card" id="bx-stack-0"><div class="stack-thumb"><img src="https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=600&auto=format&fit=crop" alt="Biocon" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" /></div><div class="stack-body"><span class="tag ta">Industry</span><div class="stack-title">Biocon mRNA Plant Goes Live</div><div class="stack-meta">May 6 - 5 min read</div></div></div>
+          <div class="stack-card" id="bx-stack-1"><div class="stack-thumb"><img src="https://images.unsplash.com/photo-1507668077129-56e32842fceb?q=80&w=600&auto=format&fit=crop" alt="AlphaFold" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" /></div><div class="stack-body"><span class="tag tb">Research</span><div class="stack-title">AlphaFold 3 vs RoseTTAFold Benchmark</div><div class="stack-meta">May 5 - 7 min read</div></div></div>
+          <div class="stack-card" id="bx-stack-2"><div class="stack-thumb"><img src="https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?q=80&w=600&auto=format&fit=crop" alt="GM Mustard" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" /></div><div class="stack-body"><span class="tag tp">AgriTech</span><div class="stack-title">GM Mustard Gets Final Approval</div><div class="stack-meta">May 4 - 4 min read</div></div></div>
+          <div class="stack-card" id="bx-stack-3"><div class="stack-thumb"><img src="https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?q=80&w=600&auto=format&fit=crop" alt="CAR-T" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" /></div><div class="stack-body"><span class="tag tr">Medical</span><div class="stack-title">CAR-T Therapy Succeeds in Autoimmune Conditions</div><div class="stack-meta">May 3 - 6 min read</div></div></div>
         </div>
       </div>
     </div>
@@ -1131,7 +1131,8 @@
         category: 'Research',
         authorName: 'Dr. Deepa Rao',
         publishedAt: '2026-05-06',
-        readTimeMinutes: 9
+        readTimeMinutes: 9,
+        coverImageUrl: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=600&auto=format&fit=crop'
       },
       {
         _id: 'stack-0',
@@ -1140,7 +1141,8 @@
         category: 'Industry',
         authorName: 'Rohan Sharma',
         publishedAt: '2026-05-06',
-        readTimeMinutes: 5
+        readTimeMinutes: 5,
+        coverImageUrl: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=600&auto=format&fit=crop'
       },
       {
         _id: 'stack-1',
@@ -1149,7 +1151,8 @@
         category: 'Research',
         authorName: 'Sarah Jenkins',
         publishedAt: '2026-05-05',
-        readTimeMinutes: 7
+        readTimeMinutes: 7,
+        coverImageUrl: 'https://images.unsplash.com/photo-1507668077129-56e32842fceb?q=80&w=600&auto=format&fit=crop'
       },
       {
         _id: 'stack-2',
@@ -1158,7 +1161,8 @@
         category: 'AgriTech',
         authorName: 'Amit Patel',
         publishedAt: '2026-05-04',
-        readTimeMinutes: 4
+        readTimeMinutes: 4,
+        coverImageUrl: 'https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?q=80&w=600&auto=format&fit=crop'
       },
       {
         _id: 'stack-3',
@@ -1167,7 +1171,8 @@
         category: 'Medical',
         authorName: 'Dr. John Doe',
         publishedAt: '2026-05-03',
-        readTimeMinutes: 6
+        readTimeMinutes: 6,
+        coverImageUrl: 'https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?q=80&w=600&auto=format&fit=crop'
       },
       {
         _id: 'offline-5',
@@ -1176,7 +1181,8 @@
         category: 'Regulatory',
         authorName: 'Dr. Emily Vance',
         publishedAt: '2026-05-02',
-        readTimeMinutes: 8
+        readTimeMinutes: 8,
+        coverImageUrl: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=600&auto=format&fit=crop'
       }
     ];
 
@@ -1190,7 +1196,12 @@
       const paginatedPosts = OFFLINE_POSTS.slice(start, end);
 
       gridEl.innerHTML = paginatedPosts.map(p => {
-        let thumbHtml = `<div class="art-img ai1">🔬</div>`;
+        let thumbHtml = '';
+        if (p.coverImageUrl) {
+          thumbHtml = `<div class="article-cover-thumb-wrap"><img src="${p.coverImageUrl}" class="article-cover-thumb-img" alt="${p.title}"/></div>`;
+        } else {
+          thumbHtml = `<div class="art-img ai1">🔬</div>`;
+        }
         return `
           <div class="art-card" onclick="window.location.href='post.html?id=${p._id}'">
             ${thumbHtml}
@@ -1333,8 +1344,24 @@
           if(el) el.textContent = hero[k==='author'?'authorName':k]||'';
         });
         const card = document.getElementById('bx-hero-card');
-        if (card && hero._id) {
-          card.onclick = () => window.location.href = `post.html?id=${hero._id}`;
+        if (card) {
+          if (hero._id) {
+            card.onclick = () => window.location.href = `post.html?id=${hero._id}`;
+          }
+          const imgWrap = card.querySelector('.hero-main-img');
+          if (imgWrap) {
+            const existingImg = imgWrap.querySelector('.article-cover-thumb-img');
+            if (existingImg) existingImg.remove();
+            
+            if (hero.coverImageUrl) {
+              const img = document.createElement('img');
+              img.className = 'article-cover-thumb-img';
+              img.src = hero.coverImageUrl;
+              img.alt = hero.title || 'Featured';
+              img.style.cssText = 'width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:0;';
+              imgWrap.insertBefore(img, imgWrap.firstChild);
+            }
+          }
         }
       }
       if (stack && stack.items) stack.items.forEach((item,i)=>{
@@ -1344,8 +1371,21 @@
         if(t) t.textContent=item.title||'';
         if(m) m.textContent=item.meta||'';
         if(tag) tag.textContent=item.tagText||'';
-        if(thumb&&item.emoji) thumb.textContent=item.emoji;
-        if(thumb&&item.themeClass) thumb.className='stack-thumb '+item.themeClass;
+        if(thumb) {
+          thumb.innerHTML = '';
+          const isUrl = item.emoji && (item.emoji.startsWith('http') || item.emoji.startsWith('/') || item.emoji.includes('.'));
+          const imgUrl = isUrl ? item.emoji : (item.coverImageUrl || null);
+          
+          if (imgUrl) {
+            thumb.innerHTML = `<img src="${imgUrl}" alt="${item.title || 'image'}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />`;
+            thumb.className = 'stack-thumb'; // Remove th-* classes to avoid bg overlap
+          } else {
+            thumb.textContent = item.emoji || '🔬';
+            if (item.themeClass) {
+              thumb.className = 'stack-thumb ' + item.themeClass;
+            }
+          }
+        }
         if (item.postId) {
           card.onclick = () => window.location.href = `post.html?id=${item.postId}`;
         }

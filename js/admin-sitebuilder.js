@@ -81,6 +81,10 @@ function heroSection(hero, stack) {
           <input class="form-input" id="hero-date" value="${hero?.date||''}" placeholder="May 7, 2026"/>
         </div>
       </div>
+      <div class="form-group">
+        <label class="form-label">Cover Image URL</label>
+        <input class="form-input" id="hero-cover" value="${hero?.coverImageUrl||''}" placeholder="https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=600&auto=format&fit=crop"/>
+      </div>
     </div>
     <div style="font-weight:600;font-size:13.5px;margin-bottom:12px">Right Stack (4 cards)</div>
     ${(stack?.items || [{},{},{},{}]).map((item,i)=>`
@@ -451,7 +455,8 @@ async function saveHero() {
     excerpt:    document.getElementById('hero-excerpt')?.value||'',
     authorName: document.getElementById('hero-author')?.value||'',
     category:   document.getElementById('hero-category')?.value||'',
-    date:       document.getElementById('hero-date')?.value||''
+    date:       document.getElementById('hero-date')?.value||'',
+    coverImageUrl: document.getElementById('hero-cover')?.value||''
   };
   const stackItems = [0,1,2,3].map(i => ({
     title:      document.getElementById(`stack-title-${i}`)?.value||'',
