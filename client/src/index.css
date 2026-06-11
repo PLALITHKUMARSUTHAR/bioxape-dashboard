@@ -271,9 +271,15 @@ button, input, select, textarea {
 
 /* Category Cards */
 .category-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .cat-card-link {
@@ -282,71 +288,61 @@ button, input, select, textarea {
 
 .cat-card {
   background: var(--white);
-  border-left: 5px solid var(--accent);
+  border-top: 4px solid var(--accent);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 16px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  text-align: center;
+  aspect-ratio: 1.05 / 1;
   box-shadow: var(--shadow);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--border);
-  border-left-width: 5px;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .cat-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
   border-color: var(--border2);
 }
 
-.cat-card-left {
-  display: flex;
-  align-items: flex-start;
-  gap: 20px;
-}
-
 .cat-icon {
-  font-size: 32px;
+  font-size: 26px;
   background: var(--off);
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 50%;
   border: 1px solid var(--border);
+  margin-bottom: 8px;
 }
 
 .cat-info h2 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text1);
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cat-info p {
   font-size: 14px;
-  color: var(--text3);
+  font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 0px;
+  line-height: 1.3;
 }
 
 .cat-stats {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  margin-top: 8px;
 }
 
 .cat-badge-count {
-  background: var(--surface);
-  color: var(--text2);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
+  background: var(--g50);
+  color: var(--accent-d);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 12px;
+  border: 1px solid var(--border2);
 }
 
 /* Sidebar Widgets */
