@@ -955,7 +955,7 @@
       <div class="with-sidebar">
         <div>
           <div class="sec-head">
-            <div class="sec-title"><div class="sec-line"></div>Latest <span class="sec-title-acc">Articles</span></div>
+            <div class="sec-title" id="bx-latest-articles-title"><div class="sec-line"></div>Latest <span class="sec-title-acc">Articles</span></div>
           </div>
 
           <!-- DYNAMIC LATEST ARTICLES GRID -->
@@ -1112,7 +1112,7 @@
     }
 
     function renderLatestArticlesConfig(data) {
-      const titleEl = document.querySelector('.sec-title');
+      const titleEl = document.getElementById('bx-latest-articles-title');
       if (titleEl && data.title) {
         titleEl.innerHTML = `<div class='sec-line'></div>${data.title.replace('Articles', `<span class='sec-title-acc'>Articles</span>`)}`;
       }
