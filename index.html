@@ -826,8 +826,9 @@
               <a href="category.html?name=Cancer%20Research">Cancer Research</a>
             </div>
           </div>
-          <a href="research.html">Research</a>
+          <a href="research.html">Tools</a>
           <a href="store.html">Store</a>
+          <a href="#">Forum</a>
           <a href="public-pages/write-for-us.html">Write for Us</a>
         </div>
         <div class="nav-right">
@@ -909,6 +910,44 @@
       </div>
     </div>
   </div>
+
+  <!-- RESEARCH SPOTLIGHT -->
+  <section class="bx-sec-alt" id="bx-research-section">
+    <div class="bx-wrap">
+      <div class="sec-head">
+        <div class="sec-title"><div class="sec-line"></div>Research <span class="sec-title-acc">Spotlight</span></div>
+      </div>
+      <div class="research-grid">
+        <div class="res-hero">
+          <div>
+            <div class="journal-row"><div class="jdot"></div><div class="journal-name" id="bx-res-hero-journal">Nature Biotechnology</div></div>
+            <div class="res-title" id="bx-res-hero-title">In Vivo Epigenome Editing Restores Vision</div>
+            <div class="res-exc" id="bx-res-hero-excerpt">A breakthrough epigenome editing tool successfully reverses cellular aging hallmarks in ocular tissues.</div>
+            <div class="res-foot">
+              <div class="if-badge"><div class="if-dot"></div>Impact Factor <strong id="bx-res-hero-if">54.9</strong></div>
+              <button class="btn-paper">Read Full Paper ↗</button>
+            </div>
+          </div>
+          <div class="res-stats">
+            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-0">8.2×</div><div class="res-stat-lab" id="bx-res-stat-lab-0">Increased efficacy</div></div>
+            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-1">0</div><div class="res-stat-lab" id="bx-res-stat-lab-1">Off-target effects</div></div>
+            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-2">12m</div><div class="res-stat-lab" id="bx-res-stat-lab-2">Therapeutic retention</div></div>
+            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-3">FDA</div><div class="res-stat-lab" id="bx-res-stat-lab-3">Fast-track status</div></div>
+          </div>
+        </div>
+        <div class="res-card">
+          <div class="journal-row"><div class="jdot"></div><div class="journal-name" id="bx-res-card-journal-0">Science</div></div>
+          <div class="res-title" id="bx-res-card-title-0">Synthetic Genomes Created from Scratch</div>
+          <div class="res-exc" id="bx-res-card-excerpt-0">Researchers synthesize the entire chromosome structure of yeast, paving the way for custom biological manufacturing.</div>
+        </div>
+        <div class="res-card">
+          <div class="journal-row"><div class="jdot"></div><div class="journal-name" id="bx-res-card-journal-1">Cell</div></div>
+          <div class="res-title" id="bx-res-card-title-1">CAR-T Cells Programmed to Target Cancer Stealth Vectors</div>
+          <div class="res-exc" id="bx-res-card-excerpt-1">Newly engineered receptors bypass solid tumour shield barriers to trigger complete elimination.</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- MAIN CONTENT + SIDEBAR -->
   <section class="bx-sec">
@@ -1060,6 +1099,7 @@
         fetchLatestArticles(1);
         
         if (cfg.news_strip)           renderNewsStrip(cfg.news_strip);
+        if (cfg.research_spotlight)   renderResearch(cfg.research_spotlight);
         if (cfg.trending)             renderTrending(cfg.trending);
         if (cfg.interviews)           renderInterviews(cfg.interviews);
         if (cfg.subscription_plans)   renderPlans(cfg.subscription_plans);
