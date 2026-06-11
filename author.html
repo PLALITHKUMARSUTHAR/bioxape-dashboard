@@ -650,7 +650,7 @@ async function editPost(id) {
     document.getElementById('post-notes').value = `EDITOR FEEDBACK: ${p.editorComment}`;
   }
   if (p.docxFileUrl) {
-    previewDocxUrl(p.docxFileUrl, document.getElementById('docx-preview-area'));
+    previewDocxUrl(p.docxFileUrl, document.getElementById('docx-preview-area'), p.coverImageUrl);
     document.getElementById('remove-docx-btn').style.display = 'inline-block';
   } else {
     document.getElementById('remove-docx-btn').style.display = 'none';
@@ -761,7 +761,7 @@ async function openPreview(postId, title, docxUrl, status, category, contentType
   
   const area = document.getElementById('preview-preview-area');
   if (docxUrl) {
-    await previewDocxUrl(docxUrl, area);
+    await previewDocxUrl(docxUrl, area, coverImageUrl);
   } else {
     area.innerHTML = '<div class="alert alert-info">No document preview available.</div>';
   }

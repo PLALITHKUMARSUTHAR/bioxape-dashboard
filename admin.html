@@ -614,7 +614,7 @@ async function openApproveModal(postId, title, docxUrl, categories, coverImageUr
     coverContainer.classList.add('d-none');
   }
 
-  if (docxUrl) await previewDocxUrl(docxUrl, document.getElementById('approve-preview-area'));
+  if (docxUrl) await previewDocxUrl(docxUrl, document.getElementById('approve-preview-area'), coverImageUrl);
   else document.getElementById('approve-preview-area').innerHTML='<div class="alert alert-info">No preview available. Download file to review.</div>';
 }
 
@@ -1019,7 +1019,7 @@ async function openPreview(postId, title, docxUrl, status, category, contentType
   
   const area = document.getElementById('preview-preview-area');
   if (docxUrl) {
-    await previewDocxUrl(docxUrl, area);
+    await previewDocxUrl(docxUrl, area, coverImageUrl);
   } else {
     area.innerHTML = '<div class="alert alert-info">No document preview available.</div>';
   }

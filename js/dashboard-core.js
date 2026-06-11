@@ -376,7 +376,7 @@ async function previewDocxFile(file, targetEl) {
   }
 }
 
-async function previewDocxUrl(url, targetEl) {
+async function previewDocxUrl(url, targetEl, coverImageUrl = null) {
   if (!url || !targetEl) return;
   targetEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:24px;color:#7a9e8c;">
     <div class="spinner"></div><span>Loading document preview...</span></div>`;
@@ -391,13 +391,23 @@ async function previewDocxUrl(url, targetEl) {
     const wordCount = (result.value.replace(/<[^>]+>/g, ' ').match(/\S+/g) || []).length;
     const readTime  = Math.max(1, Math.ceil(wordCount / 200));
 
+    let coverHtml = '';
+    if (coverImageUrl) {
+      coverHtml = `<div style="text-align:center;margin-bottom:20px;">
+        <img src="${coverImageUrl}" style="max-width:100%;max-height:280px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border);"/>
+      </div>`;
+    }
+
     targetEl.innerHTML = `
       <div class="docx-preview-wrap">
         <div class="docx-preview-toolbar">
           <span>📄 Document Preview</span>
           <span>${wordCount.toLocaleString()} words · ~${readTime} min read</span>
         </div>
-        <div class="docx-preview-body">${result.value}</div>
+        <div class="docx-preview-body">
+          ${coverHtml}
+          ${result.value}
+        </div>
       </div>`;
 
     return { html: result.value, wordCount, readTime };
