@@ -9,8 +9,22 @@ import ForumCategoryPage from './pages/ForumCategoryPage';
 import ForumPostPage from './pages/ForumPostPage';
 import NewPostPage from './pages/NewPostPage';
 
+const SITE_API_URL = import.meta.env.VITE_API_URL 
+  ? import.meta.env.VITE_API_URL.replace('/forum', '') 
+  : (
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname
+      ? 'http://localhost:5000/api' 
+      : 'https://bioxape-backend.onrender.com/api'
+  );
+
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [tickerItems, setTickerItems] = useState([
+    { label: "BREAKING", text: "FDA approves first CRISPR-based therapy for sickle cell disease" },
+    { label: "RESEARCH", text: "AlphaFold 3 predicts protein-ligand interactions with 91% accuracy" },
+    { label: "INDUSTRY", text: "Biocon reports 34% YoY growth in biosimilar exports" },
+    { label: "FUNDING", text: "DBT allocates Rs 1,200 Cr for synthetic biology hubs across IITs" }
+  ]);
 
   useEffect(() => {
     // Read session from shared localStorage automatically
@@ -26,6 +40,21 @@ function App() {
         localStorage.removeItem('bioxape_user');
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchTicker = async () => {
+      try {
+        const response = await fetch(`${SITE_API_URL}/site/ticker`);
+        const result = await response.json();
+        if (result.success && result.data && result.data.items) {
+          setTickerItems(result.data.items.filter(i => i.active !== false));
+        }
+      } catch (err) {
+        console.warn('Could not fetch dynamic ticker config, using static defaults:', err.message);
+      }
+    };
+    fetchTicker();
   }, []);
 
   const handleLogout = () => {
@@ -50,9 +79,15 @@ function App() {
 
         {/* Ticker bar */}
         <div id="bx-ticker">
-          <div className="bx-wrap">
-            <span>🧬 <b>Science:</b> DNA synthesis breakthrough at BioXApe lab 🔬</span>
-            <span style={{ marginLeft: '40px' }}>📄 <b>Publications:</b> CRISPR-Cas12 structural dynamics report published</span>
+          <div className="bx-wrap" style={{ overflow: 'hidden' }}>
+            <div id="bx-ticker-track">
+              {tickerItems.map((item, idx) => (
+                <React.Fragment key={idx}>
+                  <b>{item.label}</b>
+                  <span>{item.text}</span>
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -67,6 +102,7 @@ function App() {
             </a>
 
             <nav className="nav-links">
+              <a href="/">Home</a>
               <div className="dropdown">
                 <a href="#" className="dropdown-trigger">Explore ▾</a>
                 <div className="dropdown-menu">

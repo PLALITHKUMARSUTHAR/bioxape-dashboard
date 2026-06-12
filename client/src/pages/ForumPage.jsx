@@ -60,6 +60,19 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
     <div className="bx-wrap">
       {/* Hero Section */}
       <div className="forum-hero">
+        <svg className="hero-dna-svg" viewBox="0 0 65 130" fill="none" style={{ position: 'absolute', top: '22px', right: '22px', opacity: 0.18, width: '65px', height: '130px' }}>
+          <path d="M12 6 Q54 26 12 53 Q54 80 12 107 Q54 127 12 145" stroke="white" strokeWidth="2.5" fill="none"/>
+          <path d="M53 6 Q11 26 53 53 Q11 80 53 107 Q11 127 53 145" stroke="#6ee7b7" strokeWidth="2.5" fill="none"/>
+          <line x1="12" y1="26" x2="53" y2="26" stroke="white" strokeWidth="1.5" opacity=".5"/>
+          <line x1="53" y1="53" x2="12" y2="53" stroke="white" strokeWidth="1.5" opacity=".5"/>
+          <line x1="12" y1="80" x2="53" y2="80" stroke="white" strokeWidth="1.5" opacity=".5"/>
+        </svg>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+          <div className="bx-brand-mark" style={{ width: '42px', height: '42px', background: 'var(--accent)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(39, 163, 99, 0.2)' }}>
+            <svg viewBox="0 0 24 24" style={{ width: '24px', height: '24px', fill: 'none', stroke: '#fff', strokeWidth: 2.5, strokeLinecap: 'round' }}><path d="m8 18.8 8.1-13.6"/><path d="M14 20h2"/><path d="m9 10 7.4-4"/><path d="m17 14.5-8-4.8"/><path d="M8 4h2"/><path d="m15.5 18-7.5-4.5"/><path d="m10 4 8 13.6"/></svg>
+          </div>
+          <span style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--g200)', fontFamily: 'var(--font-sans)' }}>BioXApe Portal</span>
+        </div>
         <h1>BioXape Community Forum</h1>
         <p>Engage with global experts, researchers, and enthusiasts. Share discoveries, discuss methodologies, and explore biotechnology together.</p>
       </div>
