@@ -67,13 +67,14 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
           <line x1="53" y1="53" x2="12" y2="53" stroke="white" strokeWidth="1.5" opacity=".5"/>
           <line x1="12" y1="80" x2="53" y2="80" stroke="white" strokeWidth="1.5" opacity=".5"/>
         </svg>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div className="bx-brand-mark" style={{ width: '42px', height: '42px', background: 'var(--accent)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(39, 163, 99, 0.2)' }}>
-            <svg viewBox="0 0 24 24" style={{ width: '24px', height: '24px', fill: 'none', stroke: '#fff', strokeWidth: 2.5, strokeLinecap: 'round' }}><path d="m8 18.8 8.1-13.6"/><path d="M14 20h2"/><path d="m9 10 7.4-4"/><path d="m17 14.5-8-4.8"/><path d="M8 4h2"/><path d="m15.5 18-7.5-4.5"/><path d="m10 4 8 13.6"/></svg>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
+          <div className="bx-brand-mark" style={{ width: '46px', height: '46px', background: 'var(--accent)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(39, 163, 99, 0.2)', flexShrink: 0 }}>
+            <svg viewBox="0 0 24 24" style={{ width: '26px', height: '26px', fill: 'none', stroke: '#fff', strokeWidth: 2.5, strokeLinecap: 'round' }}><path d="m8 18.8 8.1-13.6"/><path d="M14 20h2"/><path d="m9 10 7.4-4"/><path d="m17 14.5-8-4.8"/><path d="M8 4h2"/><path d="m15.5 18-7.5-4.5"/><path d="m10 4 8 13.6"/></svg>
           </div>
-          <span style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--g200)', fontFamily: 'var(--font-sans)' }}>BioXApe Portal</span>
+          <h1>
+            Bio<em><span className="brand-x">X</span>Ape</em> Community Forum
+          </h1>
         </div>
-        <h1>BioXape Community Forum</h1>
         <p>Engage with global experts, researchers, and enthusiasts. Share discoveries, discuss methodologies, and explore biotechnology together.</p>
       </div>
 
