@@ -1,0 +1,7 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/forum/(.*)", "destination": "/forum/index.html" },
+    { "source": "/forum", "destination": "/forum/index.html" }
+  ]
+}
