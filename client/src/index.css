@@ -271,49 +271,42 @@ button, input, select, textarea {
 
 /* Category Cards */
 .category-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-@media (max-width: 768px) {
-  .category-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .cat-card-link {
-  display: block;
+  display: inline-block;
 }
 
 .cat-card {
   background: var(--white);
-  border-top: 4px solid var(--accent);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  border-top: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 6px 12px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
-  text-align: left;
-  box-shadow: var(--shadow);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
 
 .cat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
   border-color: var(--border2);
 }
 
 .cat-icon {
-  font-size: 18px;
+  font-size: 14px;
   background: var(--off);
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -324,11 +317,11 @@ button, input, select, textarea {
 }
 
 .cat-info h2 {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--text1);
   margin-bottom: 0px;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .cat-stats {
