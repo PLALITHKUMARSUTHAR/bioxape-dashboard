@@ -138,7 +138,14 @@ function App() {
               </div>
               {currentUser ? (
                 <>
-                  <a className="btn-dash" href="/dashboard.html">
+                  <a 
+                    className="btn-dash" 
+                    href={
+                      currentUser.role === 'admin' ? '/admin.html' :
+                      currentUser.role === 'editor' ? '/editor.html' :
+                      currentUser.role === 'author' ? '/author.html' : '/login.html'
+                    }
+                  >
                     Dashboard ({currentUser.role})
                   </a>
                   <span className="btn-dash" onClick={handleLogout} style={{ cursor: 'pointer' }}>
