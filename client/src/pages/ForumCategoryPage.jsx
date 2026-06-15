@@ -78,7 +78,7 @@ export default function ForumCategoryPage({ currentUser, onPromptLogin }) {
     if (!currentUser) {
       onPromptLogin();
     } else {
-      navigate('/forum/new', { state: { defaultCategoryId: category?._id } });
+      navigate('/new', { state: { defaultCategoryId: category?._id } });
     }
   };
 
@@ -86,7 +86,7 @@ export default function ForumCategoryPage({ currentUser, onPromptLogin }) {
     return (
       <div className="bx-wrap" style={{ padding: '40px 0', textAlign: 'center' }}>
         <h2 style={{ color: 'var(--red)' }}>{error}</h2>
-        <Link to="/forum" style={{ marginTop: '20px', display: 'inline-block' }}>Back to Forum</Link>
+        <Link to="/" style={{ marginTop: '20px', display: 'inline-block' }}>Back to Forum</Link>
       </div>
     );
   }

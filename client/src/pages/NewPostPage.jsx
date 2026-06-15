@@ -19,7 +19,7 @@ export default function NewPostPage({ currentUser }) {
   useEffect(() => {
     // Redirect if not logged in
     if (!currentUser) {
-      navigate('/forum');
+      navigate('/');
       return;
     }
 
@@ -91,7 +91,7 @@ export default function NewPostPage({ currentUser }) {
       });
 
       if (res.data?.success) {
-        navigate(`/forum/post/${res.data.data._id}`);
+        navigate(`/post/${res.data.data._id}`);
       } else {
         setError(res.data?.message || 'Failed to publish discussion.');
       }

@@ -33,7 +33,7 @@ export default function PostCard({ post }) {
         <div>
           <h3 className="post-card-title">
             {isPinned && <span style={{ marginRight: '8px', color: 'var(--amber)' }} title="Pinned">📌</span>}
-            <Link to={`/forum/post/${_id}`}>{title}</Link>
+            <Link to={`/post/${_id}`}>{title}</Link>
             {isLocked && <span style={{ marginLeft: '8px', color: 'var(--red)', fontSize: '14px' }} title="Locked">🔒</span>}
           </h3>
           <div style={{ marginTop: '8px' }} className="tags-cloud">

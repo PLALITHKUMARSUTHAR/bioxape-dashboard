@@ -122,7 +122,7 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
     try {
       const res = await deletePost(postId);
       if (res.data?.success) {
-        navigate('/forum');
+        navigate('/');
       }
     } catch (err) {
       console.error('Error deleting post:', err);
@@ -163,7 +163,7 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
     return (
       <div className="bx-wrap" style={{ padding: '40px 0', textAlign: 'center' }}>
         <h2 style={{ color: 'var(--red)' }}>{error || 'Discussion not found.'}</h2>
-        <Link to="/forum" style={{ marginTop: '20px', display: 'inline-block' }}>Back to Forum</Link>
+        <Link to="/" style={{ marginTop: '20px', display: 'inline-block' }}>Back to Forum</Link>
       </div>
     );
   }
