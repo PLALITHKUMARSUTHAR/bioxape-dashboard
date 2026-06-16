@@ -62,6 +62,22 @@ export default function PostCard({ post }) {
         <div className="post-card-author">
           <div className="user-avatar">{authorInitial}</div>
           <span>{authorName}</span>
+          {author?.role && ['admin', 'editor', 'author'].includes(author.role) && (
+            <span style={{ 
+              fontSize: '10px', 
+              background: author.role === 'admin' ? 'var(--red-l)' : author.role === 'editor' ? 'var(--blue-l)' : 'var(--accent-l)', 
+              color: author.role === 'admin' ? 'var(--red)' : author.role === 'editor' ? 'var(--blue)' : 'var(--accent)', 
+              padding: '2px 6px', 
+              borderRadius: '4px', 
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              marginLeft: '6px',
+              display: 'inline-block',
+              lineHeight: '1.2'
+            }}>
+              {author.role}
+            </span>
+          )}
         </div>
         <span>•</span>
         <span>{formattedDate}</span>

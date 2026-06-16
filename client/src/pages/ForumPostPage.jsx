@@ -230,6 +230,22 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
               <div className="post-card-author">
                 <div className="user-avatar">{(post.author?.name || 'Anonymous').charAt(0).toUpperCase()}</div>
                 <span>{post.author?.name || 'Anonymous'}</span>
+                {post.author?.role && ['admin', 'editor', 'author'].includes(post.author.role) && (
+                  <span style={{ 
+                    fontSize: '10px', 
+                    background: post.author.role === 'admin' ? 'var(--red-l)' : post.author.role === 'editor' ? 'var(--blue-l)' : 'var(--accent-l)', 
+                    color: post.author.role === 'admin' ? 'var(--red)' : post.author.role === 'editor' ? 'var(--blue)' : 'var(--accent)', 
+                    padding: '2px 6px', 
+                    borderRadius: '4px', 
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    marginLeft: '6px',
+                    display: 'inline-block',
+                    lineHeight: '1.2'
+                  }}>
+                    {post.author.role}
+                  </span>
+                )}
               </div>
               <span>•</span>
               <span>Asked {new Date(post.createdAt).toLocaleDateString()}</span>
