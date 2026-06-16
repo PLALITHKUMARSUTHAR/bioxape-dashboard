@@ -18,7 +18,7 @@ const SITE_API_URL = import.meta.env.VITE_API_URL
   );
 
 const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const dashPrefix = isDev ? '/forum' : '';
+const routerBasename = isDev ? '/' : '/forum';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -71,12 +71,12 @@ function App() {
     // Direct link to the main site's login page
     toast('Redirecting you to Login page...', { icon: '🔑' });
     setTimeout(() => {
-      window.location.href = `${dashPrefix}/login.html`;
+      window.location.href = '/login.html';
     }, 1000);
   };
 
   return (
-    <Router basename="/forum">
+    <Router basename={routerBasename}>
       <div className="app-container">
         <Toaster position="top-right" />
 
@@ -144,9 +144,9 @@ function App() {
                   <a 
                     className="btn-dash" 
                     href={
-                      currentUser.role === 'admin' ? `${dashPrefix}/admin.html` :
-                      currentUser.role === 'editor' ? `${dashPrefix}/editor.html` :
-                      currentUser.role === 'author' ? `${dashPrefix}/author.html` : `${dashPrefix}/login.html`
+                      currentUser.role === 'admin' ? '/admin.html' :
+                      currentUser.role === 'editor' ? '/editor.html' :
+                      currentUser.role === 'author' ? '/author.html' : '/login.html'
                     }
                   >
                     Dashboard ({currentUser.role})

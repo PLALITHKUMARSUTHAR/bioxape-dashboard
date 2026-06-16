@@ -4,7 +4,7 @@ import { resolve } from 'path'
 import fs from 'fs'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     {
@@ -13,13 +13,10 @@ export default defineConfig({
         server.middlewares.use((req, res, next) => {
           const url = new URL(req.url, 'http://localhost');
           const pathname = url.pathname;
-          
-          // Get the path without the /forum prefix if it exists
-          const cleanPath = pathname.startsWith('/forum') ? pathname.slice(6) : pathname;
 
           // Serve parent-level HTML files
-          if (cleanPath.endsWith('.html') || ['/login', '/register', '/admin', '/editor', '/author', '/store', '/research', '/post'].includes(cleanPath)) {
-            let filename = cleanPath;
+          if (pathname.endsWith('.html') || ['/login', '/register', '/admin', '/editor', '/author', '/store', '/research', '/post'].includes(pathname)) {
+            let filename = pathname;
             if (!filename.endsWith('.html')) {
               filename += '.html';
             }
@@ -32,10 +29,10 @@ export default defineConfig({
           }
 
           // Serve parent-level CSS/JS and assets
-          if (cleanPath.startsWith('/css/') || cleanPath.startsWith('/js/') || cleanPath.startsWith('/assets/')) {
-            const filePath = resolve(__dirname, '..', cleanPath.replace(/^\//, ''));
+          if (pathname.startsWith('/css/') || pathname.startsWith('/js/') || pathname.startsWith('/assets/')) {
+            const filePath = resolve(__dirname, '..', pathname.replace(/^\//, ''));
             if (fs.existsSync(filePath)) {
-              const ext = cleanPath.split('.').pop().split('?')[0]; // Strip query params like ?v=1.0.1
+              const ext = pathname.split('.').pop().split('?')[0]; // Strip query params like ?v=1.0.1
               const mimeTypes = {
                 css: 'text/css',
                 js: 'application/javascript',
@@ -57,9 +54,9 @@ export default defineConfig({
       }
     }
   ],
-  base: '/forum/',
+  base: mode === 'production' ? '/forum/' : '/',
   build: {
     outDir: resolve(__dirname, '../forum'),
     emptyOutDir: true
   }
-})
+}))
