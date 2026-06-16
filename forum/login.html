@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en"> <!-- BioXape Standard Logo Live -->
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sign In — BioXApe Dashboard</title>
+<link rel="stylesheet" href="css/dashboard.css"/>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  .login-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+  @media(max-width:768px){.login-page{grid-template-columns:1fr}.login-left{display:none}}
+
+  /* Class replacements for inline styles */
+  .relative-z1 { position: relative; z-index: 1; }
+  .flex-align-center-gap-10-mb-32 { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+  .login-heading { font-size: 32px; font-family: 'Playfair Display', serif; color: #fff; font-weight: 700; line-height: 1.2; margin-bottom: 14px; }
+  .login-subheading { font-size: 15px; color: rgba(255, 255, 255, 0.7); line-height: 1.65; max-width: 380px; }
+  .flex-between-mb-20 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .remember-label { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #4a7060; cursor: pointer; }
+  .remember-checkbox { accent-color: #27a363; }
+  .forgot-link { font-size: 13px; color: #27a363; }
+  .register-text { text-align: center; margin-top: 22px; font-size: 13px; color: #7a9e8c; }
+  .register-link { color: #27a363; font-weight: 500; }
+  .modal-width-400 { max-width: 400px !important; }
+  .modal-width-420 { max-width: 420px !important; }
+  .modal-desc { font-size: 13.5px; color: #4a7060; margin-bottom: 18px; }
+</style>
+</head>
+<body data-page="login">
+
+<div class="login-page">
+
+  <!-- LEFT PANEL -->
+  <div class="login-left">
+    <div class="relative-z1">
+      <div class="flex-align-center-gap-10-mb-32">
+        <div class="sidebar-brand-mark">
+          <svg viewBox="0 0 24 24"><path d="m8 18.8 8.1-13.6"/><path d="M14 20h2"/><path d="m9 10 7.4-4"/><path d="m17 14.5-8-4.8"/><path d="M8 4h2"/><path d="m15.5 18-7.5-4.5"/><path d="m10 4 8 13.6"/></svg>
+        </div>
+        <div class="login-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
+      </div>
+      <div class="login-heading">
+        The World's Best<br>Biotech Publishing<br>Platform
+      </div>
+      <div class="login-subheading">
+        A complete ecosystem for biotech content — from author submission to editorial review to global publishing.
+      </div>
+      <div class="login-features">
+        <div class="login-feature"><div class="login-feature-icon">✍️</div>Authors submit Word documents directly</div>
+        <div class="login-feature"><div class="login-feature-icon">🔍</div>Editors review with inline comments</div>
+        <div class="login-feature"><div class="login-feature-icon">✅</div>Admin approves and auto-publishes</div>
+        <div class="login-feature"><div class="login-feature-icon">🌍</div>Posts go live on bioxape.com instantly</div>
+        <div class="login-feature"><div class="login-feature-icon">🔔</div>Real-time notifications via email + WhatsApp</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="login-right">
+    <div class="login-box">
+
+      <div class="login-box-title">Welcome Back</div>
+      <div class="login-box-sub">Sign in to your BioXApe dashboard</div>
+
+      <!-- Google Sign In -->
+      <div id="google-signin-btn"></div>
+      <div class="divider-text">or continue with email</div>
+
+      <!-- Email Login Form -->
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email Address</label>
+          <input class="form-input" type="email" id="login-email" placeholder="you@example.com" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input class="form-input" type="password" id="login-password" placeholder="Enter your password" required/>
+        </div>
+        <div class="flex-between-mb-20">
+          <label class="remember-label">
+            <input type="checkbox" class="remember-checkbox"/> Remember me
+          </label>
+          <a href="#" class="forgot-link" onclick="showForgotPassword()">Forgot password?</a>
+        </div>
+        <button class="btn btn-primary btn-full" id="login-btn" type="submit">Sign In</button>
+      </form>
+
+      <div class="register-text">
+        Don't have an account?
+        <a href="#" class="register-link" onclick="showRequestAccess()">Request Access</a>
+      </div>
+
+      <!-- Forgot Password Modal -->
+      <div id="forgot-modal" class="modal-overlay">
+        <div class="modal modal-width-400">
+          <div class="modal-head">
+            <div class="modal-title">Reset Password</div>
+            <button class="modal-close" onclick="document.getElementById('forgot-modal').classList.remove('open')">✕</button>
+          </div>
+          <p class="modal-desc">Enter your email and we will send you a reset link.</p>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input class="form-input" type="email" id="forgot-email" placeholder="you@example.com"/>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="handleForgotPassword()">Send Reset Link</button>
+        </div>
+      </div>
+
+      <!-- Request Access Modal -->
+      <div id="access-modal" class="modal-overlay">
+        <div class="modal modal-width-420">
+          <div class="modal-head">
+            <div class="modal-title">Request Author Access</div>
+            <button class="modal-close" onclick="document.getElementById('access-modal').classList.remove('open')">✕</button>
+          </div>
+          <p class="modal-desc">
+            Author accounts are invitation-only. Fill this form and the admin will review your request.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Full Name <span>*</span></label>
+            <input class="form-input" type="text" id="req-name" placeholder="Dr. Jane Smith"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email <span>*</span></label>
+            <input class="form-input" type="email" id="req-email" placeholder="you@university.edu"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Expertise Area</label>
+            <input class="form-input" type="text" id="req-expertise" placeholder="CRISPR, Genomics, etc."/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Brief Bio</label>
+            <textarea class="form-textarea" id="req-bio" placeholder="Tell us about your background..." rows="3"></textarea>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="handleRequestAccess()">Submit Request</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/dashboard-core.js?v=1.0.1"></script>
+<script>
+  function showForgotPassword() { document.getElementById('forgot-modal').classList.add('open'); }
+  function showRequestAccess()  { document.getElementById('access-modal').classList.add('open'); }
+
+  async function handleForgotPassword() {
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email) { showToast('Enter your email', 'error'); return; }
+    const result = await apiCall('/auth/forgot-password', 'POST', { email });
+    if (result?.success) {
+      showToast('Reset link sent to your email', 'success');
+      document.getElementById('forgot-modal').classList.remove('open');
+    } else {
+      showToast(result?.message || 'Failed to send reset link', 'error');
+    }
+  }
+
+  async function handleRequestAccess() {
+    const name  = document.getElementById('req-name').value.trim();
+    const email = document.getElementById('req-email').value.trim();
+    const expertise = document.getElementById('req-expertise').value.trim();
+    const bio   = document.getElementById('req-bio').value.trim();
+    if (!name || !email) { showToast('Name and email are required', 'error'); return; }
+    const result = await apiCall('/users/request-access', 'POST', { name, email, expertise, bio });
+    if (result?.success) {
+      showToast('Request submitted! Admin will contact you.', 'success');
+      document.getElementById('access-modal').classList.remove('open');
+    } else {
+      showToast(result?.message || 'Failed to submit request', 'error');
+    }
+  }
+</script>
+</body>
+</html>
