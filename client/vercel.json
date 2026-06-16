@@ -2,16 +2,11 @@
   "cleanUrls": false,
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin.html", "destination": "/admin.html" },
     { "source": "/author", "destination": "/author.html" },
-    { "source": "/author.html", "destination": "/author.html" },
     { "source": "/editor", "destination": "/editor.html" },
-    { "source": "/editor.html", "destination": "/editor.html" },
     { "source": "/login", "destination": "/login.html" },
-    { "source": "/login.html", "destination": "/login.html" },
     { "source": "/register", "destination": "/register.html" },
-    { "source": "/register.html", "destination": "/register.html" },
-    { "source": "/forum/(.*)", "destination": "/index.html" },
-    { "source": "/forum", "destination": "/index.html" }
+    { "source": "/forum/(.*)", "destination": "/forum/index.html" },
+    { "source": "/forum", "destination": "/forum/index.html" }
   ]
 }

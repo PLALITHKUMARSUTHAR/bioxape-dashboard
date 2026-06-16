@@ -56,7 +56,7 @@ export default defineConfig(({ mode }) => ({
   ],
   base: mode === 'production' ? '/forum/' : '/',
   build: {
-    outDir: resolve(__dirname, '../forum'),
+    outDir: resolve(__dirname, 'dist/forum'),
     emptyOutDir: true
   }
 }))
