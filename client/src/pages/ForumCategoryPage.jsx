@@ -21,58 +21,46 @@ export default function ForumCategoryPage({ currentUser, onPromptLogin }) {
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
-    // Load category details
-    const loadCategory = async () => {
+    const loadData = async () => {
+      setLoading(true);
       try {
-        const catRes = await getCategories();
+        const [catRes, postsRes] = await Promise.all([
+          getCategories(),
+          getPosts({
+            category: slug,
+            page,
+            limit: 15,
+            sort,
+            tag: selectedTag
+          })
+        ]);
+
         const found = catRes.data?.data?.find(c => c.slug === slug);
         if (found) {
           setCategory(found);
         } else {
           setError('Category not found');
         }
-      } catch (err) {
-        console.error('Error fetching categories:', err);
-      }
-    };
-    loadCategory();
-  }, [slug]);
 
-  useEffect(() => {
-    if (!category) return;
-
-    const loadPosts = async () => {
-      setLoading(true);
-      try {
-        const res = await getPosts({
-          category: category._id,
-          page,
-          limit: 15,
-          sort,
-          tag: selectedTag
-        });
-        
-        setPosts(res.data?.data || []);
-        setTotalPages(res.data?.totalPages || 1);
+        setPosts(postsRes.data?.data || []);
+        setTotalPages(postsRes.data?.totalPages || 1);
 
         // Collect tags from posts for filter chips
         const postTags = new Set();
-        (res.data?.data || []).forEach(p => {
+        (postsRes.data?.data || []).forEach(p => {
           if (p.tags) p.tags.forEach(t => postTags.add(t));
         });
-        if (tags.length === 0) {
-          setTags(Array.from(postTags));
-        }
+        setTags(Array.from(postTags));
       } catch (err) {
-        console.error('Error loading posts:', err);
-        setError('Failed to load posts.');
+        console.error('Error loading category data:', err);
+        setError('Failed to load category data.');
       } finally {
         setLoading(false);
       }
     };
 
-    loadPosts();
-  }, [category, page, sort, selectedTag]);
+    loadData();
+  }, [slug, page, sort, selectedTag]);
 
   const handleStartDiscussion = () => {
     if (!currentUser) {

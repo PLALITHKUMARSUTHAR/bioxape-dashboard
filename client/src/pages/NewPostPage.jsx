@@ -13,6 +13,7 @@ export default function NewPostPage({ currentUser }) {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState([]);
+  const [characterisation, setCharacterisation] = useState('Discussion');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -87,7 +88,7 @@ export default function NewPostPage({ currentUser }) {
         title: title.trim(),
         body: body.trim(),
         category: selectedCategory,
-        tags
+        tags: [characterisation, ...tags]
       });
 
       if (res.data?.success) {
@@ -130,8 +131,24 @@ export default function NewPostPage({ currentUser }) {
             <div className="char-counter">{title.length} / 150 characters</div>
           </div>
 
-          <div className="form-group" style={{ display: 'flex', gap: '20px' }}>
-            <div style={{ flex: 1 }}>
+          <div className="form-group" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <label htmlFor="characterisation">Discussion Type</label>
+              <select
+                id="characterisation"
+                className="form-control"
+                value={characterisation}
+                onChange={(e) => setCharacterisation(e.target.value)}
+                required
+              >
+                <option value="Discussion">💬 General Discussion</option>
+                <option value="Question">❓ Scientific Question</option>
+                <option value="Research Update">🔬 Research Update</option>
+                <option value="Announcement">📢 Announcement</option>
+              </select>
+            </div>
+
+            <div style={{ flex: 1, minWidth: '200px' }}>
               <label htmlFor="category">Category</label>
               <select
                 id="category"
@@ -149,7 +166,7 @@ export default function NewPostPage({ currentUser }) {
               </select>
             </div>
 
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
               <label htmlFor="tags">Tags (Max 5, Press Enter to add)</label>
               <input
                 type="text"

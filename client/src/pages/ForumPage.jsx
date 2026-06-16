@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getCategories, getTrending, getPosts } from '../api/forum';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { getCategories, getTrending, getPosts, searchPosts } from '../api/forum';
 import CategoryCard from '../components/forum/CategoryCard';
 import PostCard from '../components/forum/PostCard';
 import SearchBar from '../components/forum/SearchBar';
@@ -9,51 +9,40 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
   const [categories, setCategories] = useState([]);
   const [trending, setTrending] = useState([]);
   const [latestPosts, setLatestPosts] = useState([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-  const [loadingTrending, setLoadingTrending] = useState(true);
-  const [loadingLatestPosts, setLoadingLatestPosts] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const searchQuery = searchParams.get('search') || '';
+  const tagQuery = searchParams.get('tag') || '';
 
   useEffect(() => {
-    // Load categories
-    getCategories()
-      .then((res) => {
-        setCategories(res.data?.data || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching categories:', err);
-        setError('Could not load forum categories.');
-      })
-      .finally(() => {
-        setLoadingCategories(false);
-      });
+    const loadData = async () => {
+      try {
+        const postsPromise = searchQuery 
+          ? searchPosts(searchQuery) 
+          : getPosts({ sort: 'latest', limit: 10, tag: tagQuery });
 
-    // Load trending
-    getTrending()
-      .then((res) => {
-        setTrending(res.data?.data || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching trending:', err);
-      })
-      .finally(() => {
-        setLoadingTrending(false);
-      });
+        const [catRes, trendRes, postsRes] = await Promise.all([
+          getCategories(),
+          getTrending(),
+          postsPromise
+        ]);
 
-    // Load latest posts
-    getPosts({ sort: 'latest', limit: 10 })
-      .then((res) => {
-        setLatestPosts(res.data?.data || []);
-      })
-      .catch((err) => {
-        console.error('Error fetching latest posts:', err);
-        setError('Could not load latest posts.');
-      })
-      .finally(() => {
-        setLoadingLatestPosts(false);
-      });
-  }, []);
+        setCategories(catRes.data?.data || []);
+        setTrending(trendRes.data?.data || []);
+        setLatestPosts(postsRes.data?.data || []);
+      } catch (err) {
+        console.error('Error fetching forum home data:', err);
+        setError('Could not load forum data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [location.search]);
 
   const handleStartDiscussion = () => {
     if (!currentUser) {
@@ -98,12 +87,9 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px' }}>Forum Categories</h2>
           </div>
           {error && <div style={{ color: 'var(--red)', marginBottom: '20px' }}>{error}</div>}
-          
           <div className="category-grid" style={{ marginBottom: '40px' }}>
-            {loadingCategories ? (
-              Array.from({ length: 4 }).map((_, idx) => (
-                <div key={idx} className="skeleton-item skeleton-category-card" />
-              ))
+            {loading ? (
+              <p style={{ color: 'var(--text3)' }}>Loading categories...</p>
             ) : (
               categories.map((cat) => (
                 <CategoryCard key={cat._id} category={cat} />
@@ -114,12 +100,9 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
           <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px' }}>Latest Discussions</h2>
           </div>
-          
           <div className="posts-list">
-            {loadingLatestPosts ? (
-              Array.from({ length: 3 }).map((_, idx) => (
-                <div key={idx} className="skeleton-item skeleton-post-card" />
-              ))
+            {loading ? (
+              <p style={{ color: 'var(--text3)' }}>Loading discussions...</p>
             ) : latestPosts.length === 0 ? (
               <p style={{ color: 'var(--text4)' }}>No discussions found.</p>
             ) : (
@@ -144,10 +127,8 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
           <div className="sidebar-widget">
             <h3>Trending This Week</h3>
             <div className="trending-list">
-              {loadingTrending ? (
-                Array.from({ length: 3 }).map((_, idx) => (
-                  <div key={idx} className="skeleton-item skeleton-trending-item" />
-                ))
+              {loading ? (
+                <p style={{ fontSize: '13px', color: 'var(--text4)' }}>Loading...</p>
               ) : trending.length === 0 ? (
                 <p style={{ fontSize: '13px', color: 'var(--text4)' }}>No trending posts this week.</p>
               ) : (
@@ -178,4 +159,3 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
     </div>
   );
 }
-

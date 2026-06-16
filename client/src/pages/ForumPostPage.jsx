@@ -32,10 +32,11 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
 
   const loadPostDetails = async () => {
     try {
-      const postRes = await getPostById(postId);
+      const [postRes, commentsRes] = await Promise.all([
+        getPostById(postId),
+        getComments(postId)
+      ]);
       setPost(postRes.data?.data || null);
-
-      const commentsRes = await getComments(postId);
       setComments(commentsRes.data?.data || []);
     } catch (err) {
       console.error('Error loading post details:', err);
