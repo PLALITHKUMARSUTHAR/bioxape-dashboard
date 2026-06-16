@@ -65,4 +65,18 @@ if (fs.existsSync(srcForum)) {
   console.log('Copied built forum to root forum/');
 }
 
+// Copy dist to ../dist (for root-level Vercel build deployments expecting dist/ folder)
+console.log('Copying client/dist to root dist/ directory...');
+const destRootDirDist = path.join(rootDir, 'dist');
+
+if (fs.existsSync(destRootDirDist)) {
+  fs.rmSync(destRootDirDist, { recursive: true, force: true });
+}
+fs.mkdirSync(destRootDirDist, { recursive: true });
+
+if (fs.existsSync(distDir)) {
+  fs.cpSync(distDir, destRootDirDist, { recursive: true });
+  console.log('Copied built client/dist to root dist/');
+}
+
 console.log('Build and copy finished successfully!');

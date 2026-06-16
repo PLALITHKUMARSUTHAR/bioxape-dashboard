@@ -6,6 +6,10 @@
     { "source": "/editor", "destination": "/editor.html" },
     { "source": "/login", "destination": "/login.html" },
     { "source": "/register", "destination": "/register.html" },
+    { "source": "/store", "destination": "/store.html" },
+    { "source": "/research", "destination": "/research.html" },
+    { "source": "/category", "destination": "/category.html" },
+    { "source": "/post", "destination": "/post.html" },
     { "source": "/forum/(.*)", "destination": "/forum/index.html" },
     { "source": "/forum", "destination": "/forum/index.html" }
   ]
