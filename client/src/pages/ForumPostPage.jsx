@@ -228,8 +228,8 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
 
             <div className="post-card-meta" style={{ border: 'none', padding: 0 }}>
               <div className="post-card-author">
-                <div className="user-avatar">{post.author?.name?.charAt(0).toUpperCase()}</div>
-                <span>{post.author?.name}</span>
+                <div className="user-avatar">{(post.author?.name || 'Anonymous').charAt(0).toUpperCase()}</div>
+                <span>{post.author?.name || 'Anonymous'}</span>
               </div>
               <span>•</span>
               <span>Asked {new Date(post.createdAt).toLocaleDateString()}</span>

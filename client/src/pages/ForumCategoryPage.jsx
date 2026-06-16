@@ -63,11 +63,7 @@ export default function ForumCategoryPage({ currentUser, onPromptLogin }) {
   }, [slug, page, sort, selectedTag]);
 
   const handleStartDiscussion = () => {
-    if (!currentUser) {
-      onPromptLogin();
-    } else {
-      navigate('/new', { state: { defaultCategoryId: category?._id } });
-    }
+    navigate('/new', { state: { defaultCategoryId: category?._id } });
   };
 
   if (error) {

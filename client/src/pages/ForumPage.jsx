@@ -45,11 +45,7 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
   }, [location.search]);
 
   const handleStartDiscussion = () => {
-    if (!currentUser) {
-      onPromptLogin();
-    } else {
-      navigate('/new');
-    }
+    navigate('/new');
   };
 
   const handleSearch = (query) => {

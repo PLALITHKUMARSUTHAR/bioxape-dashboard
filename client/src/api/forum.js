@@ -19,7 +19,14 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const getCategories = () => api.get('/categories');
+let categoriesCache = null;
+export const getCategories = async () => {
+  if (categoriesCache) {
+    return categoriesCache;
+  }
+  categoriesCache = await api.get('/categories');
+  return categoriesCache;
+};
 export const getPosts = (params) => api.get('/posts', { params });
 export const getPostById = (id) => api.get(`/posts/${id}`);
 export const createPost = (data) => api.post('/posts', data);

@@ -18,12 +18,6 @@ export default function NewPostPage({ currentUser }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Redirect if not logged in
-    if (!currentUser) {
-      navigate('/');
-      return;
-    }
-
     const loadCategories = async () => {
       try {
         const res = await getCategories();
@@ -43,7 +37,7 @@ export default function NewPostPage({ currentUser }) {
     };
 
     loadCategories();
-  }, [currentUser, navigate, location.state]);
+  }, [navigate, location.state]);
 
   const handleAddTag = (e) => {
     if (e.key === 'Enter' || e.key === ',') {
