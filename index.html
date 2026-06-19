@@ -1254,15 +1254,8 @@
         const gridEl = document.getElementById('bx-latest-articles-grid');
         if (!gridEl) return;
 
-        // Check if manual mode is enabled
-        if (siteConfig?.latest_articles?.mode === 'manual') {
-          const manualItems = siteConfig.latest_articles.items || [];
-          if (manualItems.length === 0) {
-            gridEl.innerHTML = '<div style="text-align:center;color:#7a9e8c;padding:28px">No manual articles configured.</div>';
-            renderPagination(0, page);
-            return;
-          }
-          
+        const manualItems = siteConfig?.latest_articles?.items || [];
+        if (manualItems.length > 0) {
           // Pagination in memory
           const total = manualItems.length;
           const start = (page - 1) * latestArticlesLimit;

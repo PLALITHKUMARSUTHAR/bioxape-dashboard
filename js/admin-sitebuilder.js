@@ -3,13 +3,54 @@
 //  Controls every editable section of the public blog
 // ============================================================
 
+let allPublishedPosts = [];
+let activeArticles = [];
+let latestArticlesLimit = 6;
+let latestArticlesShowCover = true;
+let otherArticlesPage = 1;
+const OTHER_PAGE_SIZE = 5;
+
+// Drag and drop helper indices
+let draggedItemIndex = null;
+
 async function loadSiteBuilder() {
   const el = document.getElementById('site-builder-sections');
   if (!el) return;
   el.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:20px;color:#7a9e8c"><div class="spinner"></div>Loading site builder...</div>`;
-  const result = await apiCall('/site/all');
-  if (!result?.success) { el.innerHTML = '<div class="alert alert-error">Failed to load site config</div>'; return; }
-  const cfg = result.data;
+  
+  const [siteResult, postsResult] = await Promise.all([
+    apiCall('/site/all'),
+    apiCall('/posts/all?status=published')
+  ]);
+  
+  if (!siteResult?.success) { el.innerHTML = '<div class="alert alert-error">Failed to load site config</div>'; return; }
+  const cfg = siteResult.data;
+  
+  // Store all published posts globally
+  allPublishedPosts = postsResult?.success ? (postsResult.data || []) : [];
+  // Sort by publication date descending
+  allPublishedPosts.sort((a,b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt));
+  
+  // Initialize activeArticles
+  const laData = cfg.latest_articles;
+  const savedItems = laData?.items || [];
+  
+  if (savedItems.length > 0) {
+    // Map saved items to full post objects from allPublishedPosts, fallback to the saved data
+    activeArticles = savedItems.map(saved => {
+      const match = allPublishedPosts.find(p => p._id === saved._id);
+      return match || saved;
+    });
+  } else {
+    // Fallback to first N posts from allPublishedPosts where N is the limit
+    const limit = laData?.limit || 6;
+    activeArticles = allPublishedPosts.slice(0, limit);
+  }
+  
+  latestArticlesLimit = laData?.limit || 6;
+  latestArticlesShowCover = laData?.showCoverImage !== false;
+  otherArticlesPage = 1;
+  
   el.innerHTML = `
     ${tickerSection(cfg.ticker)}
     ${heroSection(cfg.hero_featured, cfg.hero_stack)}
@@ -24,6 +65,9 @@ async function loadSiteBuilder() {
     ${footerSection(cfg.footer)}
   `;
   attachBuilderListeners();
+  
+  // Render the latest articles lists
+  renderLatestArticlesUI();
 }
 
 // ── Section Renderers ────────────────────────────────────────
@@ -121,9 +165,6 @@ function heroSection(hero, stack) {
 }
 
 function latestArticlesSection(data) {
-  const items = data?.items || [];
-  const mode = data?.mode || 'auto';
-  
   return builderSection('latest-articles', '📰 Latest Articles Section', `
     <div class="form-row">
       <div class="form-group">
@@ -131,31 +172,33 @@ function latestArticlesSection(data) {
         <input class="form-input" id="la-title" value="${data?.title||'Latest Articles'}" placeholder="Latest Articles"/>
       </div>
       <div class="form-group">
-        <label class="form-label">Number of Articles to Show (Auto Mode)</label>
-        <input class="form-input" type="number" id="la-limit" value="${data?.limit||6}"/>
+        <label class="form-label">Number of Articles to Show on Main Page</label>
+        <input class="form-input" type="number" id="la-limit" value="${data?.limit||6}" onchange="updateLatestArticlesLimit(this.value)"/>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Mode</label>
-        <select class="form-select" id="la-mode" onchange="toggleLatestArticlesMode(this.value)" title="Choose feed source mode">
-          <option value="auto" ${mode === 'auto' ? 'selected' : ''}>Auto — Pull latest from CMS</option>
-          <option value="manual" ${mode === 'manual' ? 'selected' : ''}>Manual — I pick/create the posts</option>
-        </select>
-      </div>
-      <div class="form-group" style="display:flex;align-items:center;padding-top:24px;">
+      <div class="form-group" style="display:flex;align-items:center;">
         <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
           <input type="checkbox" id="la-show-cover" ${data?.showCoverImage!==false?'checked':''} style="accent-color:var(--accent)"/> Show Cover Image
         </label>
       </div>
     </div>
     
-    <div id="la-manual-container" style="display: ${mode === 'manual' ? 'block' : 'none'}; margin-top: 15px;">
-      <div style="font-weight:600;font-size:13.5px;margin-bottom:12px">Manual Articles List</div>
-      <div id="la-manual-items">
-        ${items.map((item, idx) => manualArticleRow(item, idx)).join('')}
+    <div style="margin-top: 15px;">
+      <div style="font-weight:600;font-size:13.5px;margin-bottom:12px">Main Page Articles (Drag to rearrange, or use ▲/▼)</div>
+      <div id="la-active-items">
+        <!-- Rendered dynamically -->
       </div>
-      <button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="addManualArticle()">+ Add Article</button>
+    </div>
+    
+    <div style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
+      <div style="font-weight:600;font-size:13.5px;margin-bottom:12px">Other Articles (Not shown on Main Page)</div>
+      <div id="la-other-items">
+        <!-- Rendered dynamically -->
+      </div>
+      <div id="la-other-pagination" style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:14px;">
+        <!-- Rendered dynamically -->
+      </div>
     </div>
     
     <div class="modal-footer"><button class="btn btn-primary" onclick="saveLatestArticles()">Save Latest Articles</button></div>
@@ -163,31 +206,11 @@ function latestArticlesSection(data) {
 }
 
 async function saveLatestArticles() {
-  const mode = document.getElementById('la-mode')?.value || 'auto';
-  const items = [];
-  
-  if (mode === 'manual') {
-    document.querySelectorAll('[id^="la-item-title-"]').forEach(el => {
-      const idx = el.id.split('-').pop();
-      items.push({
-        title: el.value,
-        authorName: document.getElementById(`la-item-author-${idx}`)?.value || '',
-        excerpt: document.getElementById(`la-item-excerpt-${idx}`)?.value || '',
-        category: document.getElementById(`la-item-category-${idx}`)?.value || '',
-        readTimeMinutes: parseInt(document.getElementById(`la-item-readtime-${idx}`)?.value) || 5,
-        publishedAt: document.getElementById(`la-item-date-${idx}`)?.value || '',
-        coverImageUrl: document.getElementById(`la-item-cover-${idx}`)?.value || '',
-        _id: document.getElementById(`la-item-link-${idx}`)?.value || ''
-      });
-    });
-  }
-
   const data = {
     title: document.getElementById('la-title')?.value || 'Latest Articles',
-    limit: parseInt(document.getElementById('la-limit')?.value) || 6,
+    limit: latestArticlesLimit,
     showCoverImage: document.getElementById('la-show-cover')?.checked ?? true,
-    mode,
-    items
+    items: activeArticles
   };
   
   const result = await apiCall('/site/config/latest_articles', 'PUT', { data });
@@ -360,7 +383,7 @@ function courseRow(c, i) {
     </div>
     <div class="form-group"><label class="form-label">Enroll Link / URL</label>
       <input class="form-input" id="course-url-${i}" value="${c.enrollUrl||''}" placeholder="https://..."/></div>
-    <button class="btn btn-danger btn-sm btn-icon" onclick="removeCourseRow(${i})" style="margin-top:4px">✕ Remove</button>
+    <button class="btn btn-danger btn-sm" onclick="removeCourseRow(${i})" style="margin-top:4px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">✕ Remove</button>
   </div>`;
 }
 
@@ -395,7 +418,7 @@ function storeRow(p, i) {
       <div class="form-group"><label class="form-label">Cart / Buy URL</label>
         <input class="form-input" id="store-url-${i}" value="${p.cartUrl||''}" placeholder="https://rzp.io/..."/></div>
     </div>
-    <button class="btn btn-danger btn-sm btn-icon" onclick="removeStoreRow(${i})">✕ Remove</button>
+    <button class="btn btn-danger btn-sm" onclick="removeStoreRow(${i})" style="white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">✕ Remove</button>
   </div>`;
 }
 
@@ -639,89 +662,149 @@ async function saveFooter() {
   result?.success ? showToast('Footer saved!','success') : showToast('Save failed','error');
 }
 
-// ── LATEST ARTICLES MANUAL CONFIG HELPERS ──────────────────────
-function toggleLatestArticlesMode(mode) {
-  const container = document.getElementById('la-manual-container');
-  if (container) {
-    container.style.display = mode === 'manual' ? 'block' : 'none';
-  }
+// ── LATEST ARTICLES SORTING & PAGINATION HELPERS ───────────────
+function renderLatestArticlesUI() {
+  renderActiveArticles();
+  renderOtherArticles();
 }
 
-let manualArticleCount = Date.now();
-function addManualArticle() {
-  manualArticleCount++;
-  const wrap = document.getElementById('la-manual-items');
-  if (!wrap) return;
-  const div = document.createElement('div');
-  div.innerHTML = manualArticleRow({}, manualArticleCount);
-  wrap.appendChild(div.firstElementChild);
+function renderActiveArticles() {
+  const container = document.getElementById('la-active-items');
+  if (!container) return;
   
-  // Re-index titles/numbers dynamically
-  reindexManualArticles();
+  if (activeArticles.length === 0) {
+    container.innerHTML = `<div style="text-align:center;color:var(--text4);padding:14px;border:2px dashed var(--border2);border-radius:9px;">No articles on the Main Page yet. Add some from the list below!</div>`;
+    return;
+  }
+  
+  container.innerHTML = activeArticles.map((item, idx) => {
+    const dateStr = item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : (item.date || '—');
+    
+    return `
+      <div class="draggable-item-vertical" id="la-active-${idx}" draggable="true" 
+           ondragstart="handleDragStart(event, ${idx})" 
+           ondragover="handleDragOver(event)" 
+           ondrop="handleDrop(event, ${idx})"
+           style="border:2px solid var(--border2);border-radius:9px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;background:var(--white);cursor:grab;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="drag-handle" style="font-size:16px;color:var(--text4);cursor:grab;">⋮⋮</span>
+            <span style="font-size:12.5px;font-weight:600;color:var(--text3)">Article #${idx + 1}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="moveArticleUp(${idx})">▲</button>
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="moveArticleDown(${idx})">▼</button>
+            <button class="btn btn-danger btn-sm" style="white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;" onclick="removeActiveArticle(${idx})">✕ Remove</button>
+          </div>
+        </div>
+        <div style="font-weight:600;font-size:13.5px;color:var(--text1);">${item.title}</div>
+        <div style="font-size:11.5px;color:var(--text4);">By ${item.authorName || 'Author'} · ${item.category || 'Science'} · ${dateStr}</div>
+      </div>
+    `;
+  }).join('');
 }
 
-function removeManualArticle(idx) {
-  const el = document.getElementById(`la-item-${idx}`);
-  if (el) {
-    el.remove();
-    reindexManualArticles();
+function renderOtherArticles() {
+  const container = document.getElementById('la-other-items');
+  const paginationContainer = document.getElementById('la-other-pagination');
+  if (!container || !paginationContainer) return;
+  
+  const otherArticles = allPublishedPosts.filter(p => !activeArticles.some(active => active._id === p._id));
+  
+  if (otherArticles.length === 0) {
+    container.innerHTML = `<div style="text-align:center;color:var(--text4);padding:14px;border:2px dashed var(--border2);border-radius:9px;">All available posts are currently on the Main Page!</div>`;
+    paginationContainer.innerHTML = '';
+    return;
+  }
+  
+  const total = otherArticles.length;
+  const totalPages = Math.ceil(total / OTHER_PAGE_SIZE);
+  if (otherArticlesPage > totalPages) {
+    otherArticlesPage = Math.max(1, totalPages);
+  }
+  
+  const start = (otherArticlesPage - 1) * OTHER_PAGE_SIZE;
+  const end = start + OTHER_PAGE_SIZE;
+  const paginated = otherArticles.slice(start, end);
+  
+  container.innerHTML = paginated.map(item => {
+    const dateStr = item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : (item.date || '—');
+    return `
+      <div style="border:2px solid var(--border2);border-radius:9px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;background:var(--off)">
+        <div style="flex: 1; padding-right: 12px;">
+          <div style="font-weight:600;font-size:13.5px;color:var(--text1);">${item.title}</div>
+          <div style="font-size:11.5px;color:var(--text4);margin-top:4px;">By ${item.authorName || 'Author'} · ${item.category || 'Science'} · ${dateStr}</div>
+        </div>
+        <button class="btn btn-primary btn-sm" style="white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;" onclick="addArticleToActive('${item._id}')">➕ Pin to Main Page</button>
+      </div>
+    `;
+  }).join('');
+  
+  const prevDisabled = otherArticlesPage <= 1 ? 'disabled' : '';
+  const nextDisabled = otherArticlesPage >= totalPages ? 'disabled' : '';
+  
+  paginationContainer.innerHTML = `
+    <button class="btn btn-secondary btn-sm" ${prevDisabled} onclick="changeOtherPage(${otherArticlesPage - 1})">← Prev</button>
+    <span style="font-size:12.5px;color:var(--text3)">Page ${otherArticlesPage} of ${totalPages}</span>
+    <button class="btn btn-secondary btn-sm" ${nextDisabled} onclick="changeOtherPage(${otherArticlesPage + 1})">Next →</button>
+  `;
+}
+
+function changeOtherPage(newPage) {
+  otherArticlesPage = newPage;
+  renderOtherArticles();
+}
+
+function addArticleToActive(postId) {
+  const post = allPublishedPosts.find(p => p._id === postId);
+  if (post && !activeArticles.some(active => active._id === postId)) {
+    activeArticles.push(post);
+    renderLatestArticlesUI();
   }
 }
 
-function reindexManualArticles() {
-  document.querySelectorAll('[id^="la-item-"]').forEach((el, idx) => {
-    const titleSpan = el.querySelector('span');
-    if (titleSpan) {
-      titleSpan.textContent = `Article #${idx + 1}`;
-    }
-  });
+function removeActiveArticle(idx) {
+  activeArticles.splice(idx, 1);
+  renderLatestArticlesUI();
 }
 
-function manualArticleRow(item, i) {
-  return `
-    <div class="draggable-item-vertical" id="la-item-${i}" style="border:2px solid var(--border2);border-radius:9px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;background:var(--off)">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12.5px;font-weight:600;color:var(--text3)">Article #${i+1}</span>
-        <button class="btn btn-danger btn-sm" style="padding: 2px 6px;" onclick="removeManualArticle(${i})">✕ Remove</button>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" style="font-size:11px;">Title</label>
-          <input class="form-input" type="text" id="la-item-title-${i}" value="${item.title||''}" placeholder="Article title..." style="font-size:12px;padding:5px 8px;"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:11px;">Author Name</label>
-          <input class="form-input" type="text" id="la-item-author-${i}" value="${item.authorName||''}" placeholder="Dr. Deepa Rao" style="font-size:12px;padding:5px 8px;"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label" style="font-size:11px;">Excerpt</label>
-        <textarea class="form-textarea" id="la-item-excerpt-${i}" rows="1" placeholder="Brief summary..." style="font-size:12px;padding:5px 8px;">${item.excerpt||''}</textarea>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" style="font-size:11px;">Category</label>
-          <input class="form-input" type="text" id="la-item-category-${i}" value="${item.category||''}" placeholder="Research" style="font-size:12px;padding:5px 8px;"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:11px;">Read Time (min)</label>
-          <input class="form-input" type="number" id="la-item-readtime-${i}" value="${item.readTimeMinutes||item.readTime||5}" style="font-size:12px;padding:5px 8px;"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:11px;">Date (YYYY-MM-DD)</label>
-          <input class="form-input" type="text" id="la-item-date-${i}" value="${item.publishedAt||item.date||''}" placeholder="2026-05-06" style="font-size:12px;padding:5px 8px;"/>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" style="font-size:11px;">Cover Image URL</label>
-          <input class="form-input" type="text" id="la-item-cover-${i}" value="${item.coverImageUrl||''}" placeholder="https://..." style="font-size:12px;padding:5px 8px;"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:11px;">Post Link/ID (optional)</label>
-          <input class="form-input" type="text" id="la-item-link-${i}" value="${item._id||item.postId||item.link||''}" placeholder="Post ID or URL..." style="font-size:12px;padding:5px 8px;"/>
-        </div>
-      </div>
-    </div>
-  `;
+function updateLatestArticlesLimit(val) {
+  const num = parseInt(val) || 6;
+  latestArticlesLimit = num;
+}
+
+function moveArticleUp(idx) {
+  if (idx === 0) return;
+  const temp = activeArticles[idx];
+  activeArticles[idx] = activeArticles[idx - 1];
+  activeArticles[idx - 1] = temp;
+  renderLatestArticlesUI();
+}
+
+function moveArticleDown(idx) {
+  if (idx === activeArticles.length - 1) return;
+  const temp = activeArticles[idx];
+  activeArticles[idx] = activeArticles[idx + 1];
+  activeArticles[idx + 1] = temp;
+  renderLatestArticlesUI();
+}
+
+function handleDragStart(e, idx) {
+  draggedItemIndex = idx;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  return false;
+}
+
+function handleDrop(e, targetIdx) {
+  e.preventDefault();
+  if (draggedItemIndex !== null && draggedItemIndex !== targetIdx) {
+    const draggedItem = activeArticles[draggedItemIndex];
+    activeArticles.splice(draggedItemIndex, 1);
+    activeArticles.splice(targetIdx, 0, draggedItem);
+    renderLatestArticlesUI();
+  }
 }
