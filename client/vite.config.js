@@ -7,6 +7,21 @@ import fs from 'fs'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+// Recursive directory copy helper for compatibility
+function copyFolderSync(from, to) {
+  if (!fs.existsSync(from)) return;
+  fs.mkdirSync(to, { recursive: true });
+  fs.readdirSync(from).forEach(element => {
+    const fromPath = join(from, element);
+    const toPath = join(to, element);
+    if (fs.lstatSync(fromPath).isDirectory()) {
+      copyFolderSync(fromPath, toPath);
+    } else {
+      fs.copyFileSync(fromPath, toPath);
+    }
+  });
+}
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const rootDir = resolve(__dirname, '..');
@@ -93,7 +108,7 @@ export default defineConfig(({ mode }) => {
             const src = join(rootDir, dir);
             const dest = join(distDir, dir);
             if (fs.existsSync(src)) {
-              fs.cpSync(src, dest, { recursive: true });
+              copyFolderSync(src, dest);
               console.log(`Copied ${dir} directory to dist/`);
             }
           });
@@ -108,7 +123,7 @@ export default defineConfig(({ mode }) => {
           fs.mkdirSync(destForum, { recursive: true });
 
           if (fs.existsSync(srcForum)) {
-            fs.cpSync(srcForum, destForum, { recursive: true });
+            copyFolderSync(srcForum, destForum);
             console.log('Copied built forum to root forum/');
           }
 
@@ -121,7 +136,7 @@ export default defineConfig(({ mode }) => {
           fs.mkdirSync(destRootDirDist, { recursive: true });
 
           if (fs.existsSync(distDir)) {
-            fs.cpSync(distDir, destRootDirDist, { recursive: true });
+            copyFolderSync(distDir, destRootDirDist);
             console.log('Copied built client/dist to root dist/');
           }
           console.log('Post-build copy finished successfully!');
