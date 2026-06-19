@@ -768,7 +768,7 @@ tr:hover td { background: var(--g50); }
   gap: 10px;
   padding: 10px 12px;
   background: var(--off);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border2);
   border-radius: 9px;
   margin-bottom: 8px;
   cursor: grab;

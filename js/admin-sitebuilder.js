@@ -88,7 +88,7 @@ function heroSection(hero, stack) {
     </div>
     <div style="font-weight:600;font-size:13.5px;margin-bottom:12px">Right Stack (4 cards)</div>
     ${(stack?.items || [{},{},{},{}]).map((item,i)=>`
-      <div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px">
+      <div style="border:2px solid var(--border2);border-radius:9px;padding:14px;margin-bottom:10px">
         <div style="font-size:12px;font-weight:600;color:#7a9e8c;margin-bottom:8px">Card ${i+1}</div>
         <div class="form-row">
           <div class="form-group">
@@ -198,7 +198,7 @@ function newsStripSection(data) {
   const items = data?.items || [{},{},{}];
   return builderSection('news-strip', '📡 Latest News Strip', `
     ${items.map((item,i)=>`
-      <div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px">
+      <div style="border:2px solid var(--border2);border-radius:9px;padding:14px;margin-bottom:10px">
         <div style="font-size:12px;font-weight:600;color:#7a9e8c;margin-bottom:8px">News Item ${i+1}</div>
         <div class="form-group"><label class="form-label">News Text</label>
           <input class="form-input" id="news-text-${i}" value="${item.text||''}" placeholder="News headline..."/></div>
@@ -224,7 +224,7 @@ function trendingSection(data) {
       </select>
     </div>
     ${items.map((item,i)=>`
-      <div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px">
+      <div style="border:2px solid var(--border2);border-radius:9px;padding:14px;margin-bottom:10px">
         <div style="font-size:12px;font-weight:600;color:#7a9e8c;margin-bottom:8px">Trending #${i+1}</div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Title</label>
@@ -269,7 +269,7 @@ function researchSection(data) {
     </div>
     <div style="font-weight:600;font-size:13.5px;margin:16px 0 10px">Side Cards (2)</div>
     ${cards.map((c,i)=>`
-      <div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px">
+      <div style="border:2px solid var(--border2);border-radius:9px;padding:14px;margin-bottom:10px">
         <div class="form-group"><label class="form-label">Journal</label>
           <input class="form-input" id="res-card-journal-${i}" value="${c.journal||''}" placeholder="Science · April 2026"/></div>
         <div class="form-group"><label class="form-label">Title</label>
@@ -291,7 +291,7 @@ function interviewsSection(data) {
   const items = data?.items || [{},{}];
   return builderSection('interviews', '🎙️ Expert Interviews', `
     ${items.map((item,i)=>`
-      <div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px">
+      <div style="border:2px solid var(--border2);border-radius:9px;padding:14px;margin-bottom:10px">
         <div style="font-size:12px;font-weight:600;color:#7a9e8c;margin-bottom:8px">Interview Card ${i+1}</div>
         <div class="form-row">
           <div class="form-group" style="flex:1"><label class="form-label">Emoji / Photo URL</label>
@@ -314,7 +314,7 @@ function plansSection(data) {
   const plans = data?.plans || [];
   return builderSection('plans', '💳 Subscription Plans', `
     ${plans.map((plan,i)=>`
-      <div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px">
+      <div style="border:2px solid var(--border2);border-radius:9px;padding:14px;margin-bottom:10px">
         <div style="font-size:12px;font-weight:600;color:#7a9e8c;margin-bottom:8px">Plan: ${plan.name||i+1}</div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Plan Name</label>
@@ -345,7 +345,7 @@ function coursesSection(data) {
 }
 
 function courseRow(c, i) {
-  return `<div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px" id="course-row-${i}">
+  return `<div style="border:2px solid var(--border2);border-radius:9px;padding:14px;margin-bottom:10px" id="course-row-${i}">
     <div class="form-row">
       <div class="form-group"><label class="form-label">Title</label>
         <input class="form-input" id="course-title-${i}" value="${c.title||''}" placeholder="Course title..."/></div>
@@ -376,7 +376,7 @@ function storeSection(data) {
 }
 
 function storeRow(p, i) {
-  return `<div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px" id="store-row-${i}">
+  return `<div style="border:2px solid var(--border2);border-radius:9px;padding:14px;margin-bottom:10px" id="store-row-${i}">
     <div class="form-row">
       <div class="form-group"><label class="form-label">Product Name</label>
         <input class="form-input" id="store-name-${i}" value="${p.name||''}" placeholder="BioXApe Lab Notebook"/></div>
@@ -450,32 +450,32 @@ function attachBuilderListeners() {
 }
 
 // ── Dynamic row helpers ──────────────────────────────────────
-let tickerCount = 0;
+let tickerCount = Date.now();
 function addTickerItem() {
   tickerCount++;
   const wrap = document.getElementById('ticker-items');
   const div  = document.createElement('div');
-  div.innerHTML = tickerItemRow({ label:'BREAKING', text:'', active:true }, tickerCount + 10);
+  div.innerHTML = tickerItemRow({ label:'BREAKING', text:'', active:true }, tickerCount);
   wrap.appendChild(div.firstElementChild);
 }
 function removeTickerItem(i) { document.getElementById(`ticker-item-${i}`)?.remove(); }
 
-let courseCount = 0;
+let courseCount = Date.now();
 function addCourseRow() {
   courseCount++;
   const wrap = document.getElementById('courses-list');
   const div  = document.createElement('div');
-  div.innerHTML = courseRow({}, courseCount + 10);
+  div.innerHTML = courseRow({}, courseCount);
   wrap.appendChild(div.firstElementChild);
 }
 function removeCourseRow(i) { document.getElementById(`course-row-${i}`)?.remove(); }
 
-let storeCount = 0;
+let storeCount = Date.now();
 function addStoreRow() {
   storeCount++;
   const wrap = document.getElementById('store-list');
   const div  = document.createElement('div');
-  div.innerHTML = storeRow({}, storeCount + 10);
+  div.innerHTML = storeRow({}, storeCount);
   wrap.appendChild(div.firstElementChild);
 }
 function removeStoreRow(i) { document.getElementById(`store-row-${i}`)?.remove(); }
@@ -647,7 +647,7 @@ function toggleLatestArticlesMode(mode) {
   }
 }
 
-let manualArticleCount = 100;
+let manualArticleCount = Date.now();
 function addManualArticle() {
   manualArticleCount++;
   const wrap = document.getElementById('la-manual-items');
@@ -679,7 +679,7 @@ function reindexManualArticles() {
 
 function manualArticleRow(item, i) {
   return `
-    <div class="draggable-item-vertical" id="la-item-${i}" style="border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;background:var(--off)">
+    <div class="draggable-item-vertical" id="la-item-${i}" style="border:2px solid var(--border2);border-radius:9px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;background:var(--off)">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12.5px;font-weight:600;color:var(--text3)">Article #${i+1}</span>
         <button class="btn btn-danger btn-sm" style="padding: 2px 6px;" onclick="removeManualArticle(${i})">✕ Remove</button>
