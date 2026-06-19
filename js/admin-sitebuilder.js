@@ -106,9 +106,9 @@ function heroSection(hero, stack) {
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Emoji Icon</label>
-            <input class="form-input" id="stack-emoji-${i}" value="${item.emoji||'🔬'}" style="width:80px"/>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Emoji / Icon Image URL</label>
+            <input class="form-input" id="stack-emoji-${i}" value="${item.emoji||'🔬'}" style="width:100%" placeholder="Emoji or Image URL..."/>
           </div>
           <div class="form-group">
             <label class="form-label">Meta (date · read time)</label>
@@ -121,6 +121,9 @@ function heroSection(hero, stack) {
 }
 
 function latestArticlesSection(data) {
+  const items = data?.items || [];
+  const mode = data?.mode || 'auto';
+  
   return builderSection('latest-articles', '📰 Latest Articles Section', `
     <div class="form-row">
       <div class="form-group">
@@ -128,27 +131,67 @@ function latestArticlesSection(data) {
         <input class="form-input" id="la-title" value="${data?.title||'Latest Articles'}" placeholder="Latest Articles"/>
       </div>
       <div class="form-group">
-        <label class="form-label">Number of Articles to Show</label>
+        <label class="form-label">Number of Articles to Show (Auto Mode)</label>
         <input class="form-input" type="number" id="la-limit" value="${data?.limit||6}"/>
       </div>
     </div>
-    <div class="form-group">
-      <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
-        <input type="checkbox" id="la-show-cover" ${data?.showCoverImage!==false?'checked':''} style="accent-color:var(--accent)"/> Show Cover Image
-      </label>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Mode</label>
+        <select class="form-select" id="la-mode" onchange="toggleLatestArticlesMode(this.value)" title="Choose feed source mode">
+          <option value="auto" ${mode === 'auto' ? 'selected' : ''}>Auto — Pull latest from CMS</option>
+          <option value="manual" ${mode === 'manual' ? 'selected' : ''}>Manual — I pick/create the posts</option>
+        </select>
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;padding-top:24px;">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+          <input type="checkbox" id="la-show-cover" ${data?.showCoverImage!==false?'checked':''} style="accent-color:var(--accent)"/> Show Cover Image
+        </label>
+      </div>
     </div>
+    
+    <div id="la-manual-container" style="display: ${mode === 'manual' ? 'block' : 'none'}; margin-top: 15px;">
+      <div style="font-weight:600;font-size:13.5px;margin-bottom:12px">Manual Articles List</div>
+      <div id="la-manual-items">
+        ${items.map((item, idx) => manualArticleRow(item, idx)).join('')}
+      </div>
+      <button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="addManualArticle()">+ Add Article</button>
+    </div>
+    
     <div class="modal-footer"><button class="btn btn-primary" onclick="saveLatestArticles()">Save Latest Articles</button></div>
   `);
 }
 
 async function saveLatestArticles() {
+  const mode = document.getElementById('la-mode')?.value || 'auto';
+  const items = [];
+  
+  if (mode === 'manual') {
+    document.querySelectorAll('[id^="la-item-title-"]').forEach(el => {
+      const idx = el.id.split('-').pop();
+      items.push({
+        title: el.value,
+        authorName: document.getElementById(`la-item-author-${idx}`)?.value || '',
+        excerpt: document.getElementById(`la-item-excerpt-${idx}`)?.value || '',
+        category: document.getElementById(`la-item-category-${idx}`)?.value || '',
+        readTimeMinutes: parseInt(document.getElementById(`la-item-readtime-${idx}`)?.value) || 5,
+        publishedAt: document.getElementById(`la-item-date-${idx}`)?.value || '',
+        coverImageUrl: document.getElementById(`la-item-cover-${idx}`)?.value || '',
+        _id: document.getElementById(`la-item-link-${idx}`)?.value || ''
+      });
+    });
+  }
+
   const data = {
-    title: document.getElementById('la-title')?.value||'Latest Articles',
-    limit: parseInt(document.getElementById('la-limit')?.value)||6,
-    showCoverImage: document.getElementById('la-show-cover')?.checked ?? true
+    title: document.getElementById('la-title')?.value || 'Latest Articles',
+    limit: parseInt(document.getElementById('la-limit')?.value) || 6,
+    showCoverImage: document.getElementById('la-show-cover')?.checked ?? true,
+    mode,
+    items
   };
-  const result = await apiCall('/site/config/latest_articles','PUT',{ data });
-  result?.success ? showToast('Latest articles config saved!','success') : showToast('Save failed','error');
+  
+  const result = await apiCall('/site/config/latest_articles', 'PUT', { data });
+  result?.success ? showToast('Latest articles config saved!', 'success') : showToast('Save failed', 'error');
 }
 
 function newsStripSection(data) {
@@ -251,8 +294,8 @@ function interviewsSection(data) {
       <div style="border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px">
         <div style="font-size:12px;font-weight:600;color:#7a9e8c;margin-bottom:8px">Interview Card ${i+1}</div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Emoji Photo</label>
-            <input class="form-input" id="int-emoji-${i}" value="${item.emoji||'👩‍🔬'}" style="width:80px"/></div>
+          <div class="form-group" style="flex:1"><label class="form-label">Emoji / Photo URL</label>
+            <input class="form-input" id="int-emoji-${i}" value="${item.emoji||'👩‍🔬'}" style="width:100%" placeholder="Emoji or Image URL..."/></div>
           <div class="form-group"><label class="form-label">Eyebrow Label</label>
             <input class="form-input" id="int-eyebrow-${i}" value="${item.eyebrow||''}" placeholder="Featured Interview"/></div>
         </div>
@@ -347,8 +390,8 @@ function storeRow(p, i) {
         <input class="form-input" id="store-oldprice-${i}" value="${p.oldPrice||''}"/></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Emoji</label>
-        <input class="form-input" id="store-emoji-${i}" value="${p.emoji||'📦'}" style="width:80px"/></div>
+      <div class="form-group" style="flex:1"><label class="form-label">Emoji / Product Image URL</label>
+        <input class="form-input" id="store-emoji-${i}" value="${p.emoji||'📦'}" style="width:100%" placeholder="Emoji or Image URL..."/></div>
       <div class="form-group"><label class="form-label">Cart / Buy URL</label>
         <input class="form-input" id="store-url-${i}" value="${p.cartUrl||''}" placeholder="https://rzp.io/..."/></div>
     </div>
@@ -594,4 +637,91 @@ async function saveFooter() {
   };
   const result = await apiCall('/site/config/footer','PUT',{ data });
   result?.success ? showToast('Footer saved!','success') : showToast('Save failed','error');
+}
+
+// ── LATEST ARTICLES MANUAL CONFIG HELPERS ──────────────────────
+function toggleLatestArticlesMode(mode) {
+  const container = document.getElementById('la-manual-container');
+  if (container) {
+    container.style.display = mode === 'manual' ? 'block' : 'none';
+  }
+}
+
+let manualArticleCount = 100;
+function addManualArticle() {
+  manualArticleCount++;
+  const wrap = document.getElementById('la-manual-items');
+  if (!wrap) return;
+  const div = document.createElement('div');
+  div.innerHTML = manualArticleRow({}, manualArticleCount);
+  wrap.appendChild(div.firstElementChild);
+  
+  // Re-index titles/numbers dynamically
+  reindexManualArticles();
+}
+
+function removeManualArticle(idx) {
+  const el = document.getElementById(`la-item-${idx}`);
+  if (el) {
+    el.remove();
+    reindexManualArticles();
+  }
+}
+
+function reindexManualArticles() {
+  document.querySelectorAll('[id^="la-item-"]').forEach((el, idx) => {
+    const titleSpan = el.querySelector('span');
+    if (titleSpan) {
+      titleSpan.textContent = `Article #${idx + 1}`;
+    }
+  });
+}
+
+function manualArticleRow(item, i) {
+  return `
+    <div class="draggable-item-vertical" id="la-item-${i}" style="border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;background:var(--off)">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12.5px;font-weight:600;color:var(--text3)">Article #${i+1}</span>
+        <button class="btn btn-danger btn-sm" style="padding: 2px 6px;" onclick="removeManualArticle(${i})">✕ Remove</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" style="font-size:11px;">Title</label>
+          <input class="form-input" type="text" id="la-item-title-${i}" value="${item.title||''}" placeholder="Article title..." style="font-size:12px;padding:5px 8px;"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:11px;">Author Name</label>
+          <input class="form-input" type="text" id="la-item-author-${i}" value="${item.authorName||''}" placeholder="Dr. Deepa Rao" style="font-size:12px;padding:5px 8px;"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size:11px;">Excerpt</label>
+        <textarea class="form-textarea" id="la-item-excerpt-${i}" rows="1" placeholder="Brief summary..." style="font-size:12px;padding:5px 8px;">${item.excerpt||''}</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" style="font-size:11px;">Category</label>
+          <input class="form-input" type="text" id="la-item-category-${i}" value="${item.category||''}" placeholder="Research" style="font-size:12px;padding:5px 8px;"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:11px;">Read Time (min)</label>
+          <input class="form-input" type="number" id="la-item-readtime-${i}" value="${item.readTimeMinutes||item.readTime||5}" style="font-size:12px;padding:5px 8px;"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:11px;">Date (YYYY-MM-DD)</label>
+          <input class="form-input" type="text" id="la-item-date-${i}" value="${item.publishedAt||item.date||''}" placeholder="2026-05-06" style="font-size:12px;padding:5px 8px;"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" style="font-size:11px;">Cover Image URL</label>
+          <input class="form-input" type="text" id="la-item-cover-${i}" value="${item.coverImageUrl||''}" placeholder="https://..." style="font-size:12px;padding:5px 8px;"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:11px;">Post Link/ID (optional)</label>
+          <input class="form-input" type="text" id="la-item-link-${i}" value="${item._id||item.postId||item.link||''}" placeholder="Post ID or URL..." style="font-size:12px;padding:5px 8px;"/>
+        </div>
+      </div>
+    </div>
+  `;
 }

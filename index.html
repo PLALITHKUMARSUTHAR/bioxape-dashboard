@@ -1107,12 +1107,14 @@
     let latestArticlesPage = 1;
     const latestArticlesLimit = 10; // Limit to 10 to demonstrate pagination
     let latestArticlesShowCover = true;
+    let siteConfig = null;
 
     async function fetchSiteConfig() {
       try {
         const res  = await fetch(CMS_API + '/site/all');
         const data = await res.json();
         if (!data.success) return;
+        siteConfig = data.data;
         const cfg = data.data;
         if (cfg.ticker)               renderTicker(cfg.ticker);
         if (cfg.category_nav)         renderCategoryNav(cfg.category_nav);
@@ -1249,12 +1251,66 @@
     async function fetchLatestArticles(page = 1) {
       try {
         latestArticlesPage = page;
-        let url = `${CMS_API}/posts/public/feed?limit=${latestArticlesLimit}&page=${page}`;
-        
-        const res = await fetch(url);
-        const data = await res.json();
         const gridEl = document.getElementById('bx-latest-articles-grid');
         if (!gridEl) return;
+
+        // Check if manual mode is enabled
+        if (siteConfig?.latest_articles?.mode === 'manual') {
+          const manualItems = siteConfig.latest_articles.items || [];
+          if (manualItems.length === 0) {
+            gridEl.innerHTML = '<div style="text-align:center;color:#7a9e8c;padding:28px">No manual articles configured.</div>';
+            renderPagination(0, page);
+            return;
+          }
+          
+          // Pagination in memory
+          const total = manualItems.length;
+          const start = (page - 1) * latestArticlesLimit;
+          const end = start + latestArticlesLimit;
+          const paginated = manualItems.slice(start, end);
+          
+          gridEl.innerHTML = paginated.map(p => {
+            let thumbHtml = '';
+            if (p.coverImageUrl) {
+              thumbHtml = `<div class="article-cover-thumb-wrap"><img src="${p.coverImageUrl}" class="article-cover-thumb-img" alt="${p.title}"/></div>`;
+            } else {
+              thumbHtml = `<div class="art-img ai1">🔬</div>`;
+            }
+            
+            const postLink = p._id || p.postId || p.link || '#';
+            const clickHandler = postLink.startsWith('http') || postLink.includes('.html')
+              ? `window.open('${postLink}', '_blank')`
+              : `window.location.href='post.html?id=${postLink}'`;
+              
+            return `
+              <div class="art-card" onclick="${clickHandler}">
+                ${thumbHtml}
+                <div class="art-body">
+                  <span class="tag tg">${p.category || 'Science'}</span>
+                  <div class="art-title">${p.title}</div>
+                  <div class="art-exc">${p.excerpt || ''}</div>
+                  <div class="art-meta">
+                    <div class="art-meta-left">
+                      <div class="av">${p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU'}</div>
+                      <span>${p.authorName || 'Author'}</span>
+                    </div>
+                    <span>${p.readTimeMinutes || 1} min read</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          renderPagination(total, page);
+          if (page === 1) {
+            initCarousel(manualItems);
+          }
+          return;
+        }
+
+        let url = `${CMS_API}/posts/public/feed?limit=${latestArticlesLimit}&page=${page}`;
+        const res = await fetch(url);
+        const data = await res.json();
 
         if (!data.success || !data.posts || data.posts.length === 0) {
           console.warn('No articles from CMS feed, using offline fallback');
