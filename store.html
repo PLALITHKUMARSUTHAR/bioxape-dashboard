@@ -1339,6 +1339,27 @@
       } catch(e) { alert('Please try again.'); }
     }
 
+    async function fetchExternalNews() {
+      try {
+        const res = await fetch(CMS_API + '/site/news-feed?limit=30');
+        const data = await res.json();
+        if (!data.success || !data.data || data.data.length === 0) return;
+
+        const articles = data.data;
+
+        // 1. Render Ticker
+        const tickerEl = document.getElementById('bx-ticker-track');
+        if (tickerEl) {
+          tickerEl.innerHTML = articles.map(item => {
+            const catLabel = item.category.toUpperCase();
+            return `<b>${catLabel}</b><span>${item.title}</span>`;
+          }).join('');
+        }
+      } catch (err) {
+        console.warn('Failed to fetch external news feed:', err.message);
+      }
+    }
+
     function executeSearch() {
       const query = document.getElementById('nav-search-input').value.trim();
       if (query) {
@@ -1349,6 +1370,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       setupFallbackStore();
       fetchSiteConfig();
+      fetchExternalNews();
       
       const searchInput = document.getElementById('nav-search-input');
       if (searchInput) {
