@@ -438,22 +438,21 @@
     }
     
     /* RESEARCH SPOTLIGHT SECTION */
-    .research-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
+    .research-carousel-container {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      padding: 6px 0;
+    }
+    .research-carousel-track {
+      display: flex;
       gap: 22px;
-      margin-top: 10px;
+      transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      width: 100%;
     }
-    .res-hero {
-      background: var(--white);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 24px;
-    }
-    .res-card {
+    .research-card-slide {
+      width: calc(33.333% - 15px);
+      flex-shrink: 0;
       background: var(--white);
       border: 1.5px solid var(--border);
       border-radius: 16px;
@@ -461,6 +460,59 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      min-height: 250px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-sizing: border-box;
+    }
+    .research-card-slide:hover {
+      border-color: var(--accent);
+      box-shadow: 0 6px 20px rgba(39, 163, 99, 0.06);
+      transform: translateY(-2px);
+    }
+    .research-nav-btn {
+      position: absolute;
+      top: 55%;
+      transform: translateY(-50%);
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      color: var(--text2);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .research-nav-btn:hover {
+      background: var(--accent);
+      color: var(--white);
+      border-color: var(--accent);
+      box-shadow: 0 6px 16px rgba(39, 163, 99, 0.2);
+    }
+    .research-nav-btn.prev-res-btn {
+      left: -22px;
+    }
+    .research-nav-btn.next-res-btn {
+      right: -22px;
+    }
+    
+    @media(max-width: 1024px) {
+      .research-card-slide {
+        width: calc(50% - 11px);
+      }
+      .research-nav-btn.prev-res-btn { left: 4px; }
+      .research-nav-btn.next-res-btn { right: 4px; }
+    }
+    @media(max-width: 640px) {
+      .research-card-slide {
+        width: 100%;
+      }
     }
     .journal-row {
       display: flex;
@@ -1023,40 +1075,22 @@
   </div>
 
   <!-- RESEARCH SPOTLIGHT -->
-  <section class="bx-sec-alt" id="bx-research-section">
-    <div class="bx-wrap">
+  <section class="bx-sec-alt" id="bx-research-section" style="position: relative;">
+    <div class="bx-wrap" style="position: relative;">
       <div class="sec-head">
         <div class="sec-title"><div class="sec-line"></div>Research <span class="sec-title-acc">Spotlight</span></div>
       </div>
-      <div class="research-grid">
-        <div class="res-hero">
-          <div>
-            <div class="journal-row"><div class="jdot"></div><div class="journal-name" id="bx-res-hero-journal">Nature Biotechnology</div></div>
-            <div class="res-title" id="bx-res-hero-title">In Vivo Epigenome Editing Restores Vision</div>
-            <div class="res-exc" id="bx-res-hero-excerpt">A breakthrough epigenome editing tool successfully reverses cellular aging hallmarks in ocular tissues.</div>
-            <div class="res-foot">
-              <div class="if-badge"><div class="if-dot"></div>Impact Factor <strong id="bx-res-hero-if">54.9</strong></div>
-              <button class="btn-paper">Read Full Paper ↗</button>
-            </div>
-          </div>
-          <div class="res-stats">
-            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-0">8.2×</div><div class="res-stat-lab" id="bx-res-stat-lab-0">Increased efficacy</div></div>
-            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-1">0</div><div class="res-stat-lab" id="bx-res-stat-lab-1">Off-target effects</div></div>
-            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-2">12m</div><div class="res-stat-lab" id="bx-res-stat-lab-2">Therapeutic retention</div></div>
-            <div class="res-stat"><div class="res-stat-val" id="bx-res-stat-val-3">FDA</div><div class="res-stat-lab" id="bx-res-stat-lab-3">Fast-track status</div></div>
-          </div>
-        </div>
-        <div class="res-card">
-          <div class="journal-row"><div class="jdot"></div><div class="journal-name" id="bx-res-card-journal-0">Science</div></div>
-          <div class="res-title" id="bx-res-card-title-0">Synthetic Genomes Created from Scratch</div>
-          <div class="res-exc" id="bx-res-card-excerpt-0">Researchers synthesize the entire chromosome structure of yeast, paving the way for custom biological manufacturing.</div>
-        </div>
-        <div class="res-card">
-          <div class="journal-row"><div class="jdot"></div><div class="journal-name" id="bx-res-card-journal-1">Cell</div></div>
-          <div class="res-title" id="bx-res-card-title-1">CAR-T Cells Programmed to Target Cancer Stealth Vectors</div>
-          <div class="res-exc" id="bx-res-card-excerpt-1">Newly engineered receptors bypass solid tumour shield barriers to trigger complete elimination.</div>
+      
+      <!-- Carousel Wrapper -->
+      <div class="research-carousel-container">
+        <div class="research-carousel-track" id="bx-research-carousel-track">
+          <!-- 10 Research Cards populated dynamically via JS -->
         </div>
       </div>
+      
+      <!-- Nav Buttons -->
+      <button class="research-nav-btn prev-res-btn" type="button" aria-label="Previous research" onclick="moveResearchCarousel(-1)">&lsaquo;</button>
+      <button class="research-nav-btn next-res-btn" type="button" aria-label="Next research" onclick="moveResearchCarousel(1)">&rsaquo;</button>
     </div>
   </section>
 
@@ -1219,6 +1253,33 @@
       return topKeywords.some(kw => text.includes(kw));
     }
 
+    let currentResearchIndex = 0;
+    let researchArticles = [];
+
+    function updateResearchCarousel() {
+      const track = document.getElementById('bx-research-carousel-track');
+      if (!track || !track.firstElementChild) return;
+      
+      let visible = 3;
+      if (window.innerWidth <= 640) visible = 1;
+      else if (window.innerWidth <= 1024) visible = 2;
+      
+      const maxIndex = Math.max(0, researchArticles.length - visible);
+      if (currentResearchIndex > maxIndex) currentResearchIndex = maxIndex;
+      if (currentResearchIndex < 0) currentResearchIndex = 0;
+      
+      const cardWidth = track.firstElementChild.offsetWidth;
+      const offset = currentResearchIndex * (cardWidth + 22); // 22px is gap
+      track.style.transform = `translateX(-${offset}px)`;
+    }
+
+    function moveResearchCarousel(dir) {
+      currentResearchIndex += dir;
+      updateResearchCarousel();
+    }
+
+    window.addEventListener('resize', updateResearchCarousel);
+
     async function fetchResearchSpotlight() {
       try {
         const res = await fetch(CMS_API + '/site/news-feed?category=research&limit=50');
@@ -1234,116 +1295,120 @@
           });
         }
         
-        if (articles.length < 3) {
+        if (articles.length < 10) {
           const defaults = [
             {
               source: "Google Scholar",
               title: "Next-generation CRISPR base editors: precision, efficiency, and safety in therapeutics",
               excerpt: "A comprehensive analysis of base editing and prime editing developments for targeting genetic disorders with minimal off-target effects.",
               link: "https://scholar.google.com/scholar?q=CRISPR+base+editors+precision+efficiency",
-              publishedAt: new Date().toISOString()
+              publishedAt: new Date(Date.now() - 1 * 8.64e7).toISOString()
             },
             {
               source: "Nature Biotechnology",
               title: "In Vivo Epigenome Editing Restores Vision in Mammalian Models",
               excerpt: "A breakthrough epigenome editing tool successfully reverses cellular aging hallmarks and restores functions in ocular tissues.",
               link: "https://www.nature.com/nbt",
-              publishedAt: new Date().toISOString()
+              publishedAt: new Date(Date.now() - 2 * 8.64e7).toISOString()
             },
             {
               source: "Science",
               title: "Complete Synthesis of a Functional Yeast Eukaryotic Chromosome",
               excerpt: "Researchers synthesize a fully active eukaryotic chromosome from scratch, opening new avenues for synthetic biology and custom engineering.",
               link: "https://www.science.org",
-              publishedAt: new Date().toISOString()
+              publishedAt: new Date(Date.now() - 3 * 8.64e7).toISOString()
             },
             {
               source: "Cell",
               title: "Chimeric Antigen Receptor T Cells Re-programmed for Autoimmune Diseases",
               excerpt: "Clinical trials demonstrate long-term remission in refractory lupus patients using engineered CD19-targeting CAR-T cells.",
               link: "https://www.cell.com",
-              publishedAt: new Date().toISOString()
+              publishedAt: new Date(Date.now() - 4 * 8.64e7).toISOString()
+            },
+            {
+              source: "Nature Medicine",
+              title: "AI-based diagnosis of multi-organ cancer from whole-slide imaging pathology",
+              excerpt: "A deep learning framework achieves expert-level diagnostics across 14 cancer types using routine pathology slides.",
+              link: "https://www.nature.com/nm",
+              publishedAt: new Date(Date.now() - 5 * 8.64e7).toISOString()
+            },
+            {
+              source: "PubMed",
+              title: "Mitochondrial DNA replacement therapy: efficacy and safety in human oocytes",
+              excerpt: "A clinical study evaluating genetic carryover and development rates in mitochondrial donation cycles.",
+              link: "https://pubmed.ncbi.nlm.nih.gov/?term=mitochondrial+DNA+replacement+therapy",
+              publishedAt: new Date(Date.now() - 6 * 8.64e7).toISOString()
+            },
+            {
+              source: "Nature Biotechnology",
+              title: "De novo design of protein logic gates for programming cellular decisions",
+              excerpt: "Synthetic protein-based logic gates enable precise control over CAR-T cell activation and safety profiles in vivo.",
+              link: "https://www.nature.com/nbt",
+              publishedAt: new Date(Date.now() - 7 * 8.64e7).toISOString()
+            },
+            {
+              source: "Science",
+              title: "Structure-guided engineering of highly active Cas9 variants",
+              excerpt: "Directed evolution and structural analyses reveal mutation hot-spots that enhance targeting precision and reduce off-targets.",
+              link: "https://www.science.org",
+              publishedAt: new Date(Date.now() - 8 * 8.64e7).toISOString()
+            },
+            {
+              source: "Cell",
+              title: "Single-cell atlas of human lung development and cellular lineage progression",
+              excerpt: "A high-resolution temporal map of lung morphogenesis, tracking cellular state transitions from embryonic to postnatal stages.",
+              link: "https://www.cell.com",
+              publishedAt: new Date(Date.now() - 9 * 8.64e7).toISOString()
+            },
+            {
+              source: "PLOS Biology",
+              title: "Genome-wide screen reveals metabolic dependencies in drug-resistant malaria",
+              excerpt: "CRISPR-based genetic screening identifies vital enzymatic pathways that can be targeted to overcome artemisinin resistance.",
+              link: "https://journals.plos.org/plosbiology",
+              publishedAt: new Date(Date.now() - 10 * 8.64e7).toISOString()
             }
           ];
           const extra = defaults.filter(d => !articles.some(a => a.title === d.title));
           articles = articles.concat(extra);
         }
         
+        // Rotate starting position once a day
         const dayIndex = Math.floor(new Date().setHours(0,0,0,0) / 8.64e7);
         const len = articles.length;
-        const idxHero = dayIndex % len;
-        let idxCard1 = (dayIndex + 1) % len;
-        let idxCard2 = (dayIndex + 2) % len;
-        
-        if (len >= 3) {
-          while (idxCard1 === idxHero) {
-            idxCard1 = (idxCard1 + 1) % len;
-          }
-          while (idxCard2 === idxHero || idxCard2 === idxCard1) {
-            idxCard2 = (idxCard2 + 1) % len;
-          }
+        researchArticles = [];
+        for (let i = 0; i < Math.min(10, len); i++) {
+          researchArticles.push(articles[(dayIndex + i) % len]);
         }
         
-        const hero = articles[idxHero];
-        const card1 = articles[idxCard1];
-        const card2 = articles[idxCard2];
-        
-        const hJournal = document.getElementById('bx-res-hero-journal');
-        const hTitle = document.getElementById('bx-res-hero-title');
-        const hExcerpt = document.getElementById('bx-res-hero-excerpt');
-        const hIf = document.getElementById('bx-res-hero-if');
-        const hBtn = document.querySelector('#bx-research-section .btn-paper');
-        
-        const heroPubDate = hero.publishedAt ? new Date(hero.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'May 2026';
-        if (hJournal) hJournal.textContent = `${hero.source} · ${heroPubDate}`;
-        if (hTitle) hTitle.textContent = hero.title;
-        if (hExcerpt) hExcerpt.textContent = hero.excerpt || hero.title;
-        if (hIf) hIf.textContent = getImpactFactor(hero.source);
-        if (hBtn) {
-          hBtn.onclick = () => window.open(hero.link, '_blank');
+        // Render 10 cards in track
+        const track = document.getElementById('bx-research-carousel-track');
+        if (track) {
+          track.innerHTML = researchArticles.map((item, idx) => {
+            const dateVal = item.publishedAt ? new Date(item.publishedAt) : new Date();
+            const pubDate = dateVal.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            return `
+              <div class="research-card-slide" onclick="window.open('${item.link}', '_blank')">
+                <div>
+                  <div class="journal-row">
+                    <div class="jdot"></div>
+                    <div class="journal-name">${item.source} · ${pubDate}</div>
+                  </div>
+                  <div class="res-title" style="font-size:15px; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${item.title}</div>
+                  <div class="res-exc" style="font-size:12.5px; line-height:1.55; margin-bottom:12px; display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; color:var(--text3);">${item.excerpt || item.title}</div>
+                </div>
+                <div class="res-foot" style="margin-top:auto; display:flex; align-items:center; justify-content:space-between; width:100%;">
+                  <div class="if-badge" style="font-size:10.5px; padding:3px 8px; margin-bottom:0;"><div class="if-dot"></div>IF <strong>${getImpactFactor(item.source)}</strong></div>
+                  <span style="font-size:11.5px; font-weight:600; color:var(--accent);">Read Paper ↗</span>
+                </div>
+              </div>
+            `;
+          }).join('');
         }
         
-        const stats = [
-          { value: "Peer", label: "Reviewed" },
-          { value: "Direct", label: "Journal Link" },
-          { value: "Impact", label: `IF ${getImpactFactor(hero.source)}` },
-          { value: "Scraped", label: "Real-time" }
-        ];
-        stats.forEach((s, idx) => {
-          const vEl = document.getElementById(`bx-res-stat-val-${idx}`);
-          const lEl = document.getElementById(`bx-res-stat-lab-${idx}`);
-          if (vEl) vEl.textContent = s.value;
-          if (lEl) lEl.textContent = s.label;
-        });
-        
-        const c1Journal = document.getElementById('bx-res-card-journal-0');
-        const c1Title = document.getElementById('bx-res-card-title-0');
-        const c1Excerpt = document.getElementById('bx-res-card-excerpt-0');
-        if (c1Journal) c1Journal.textContent = card1.source;
-        if (c1Title) c1Title.textContent = card1.title;
-        if (c1Excerpt) c1Excerpt.textContent = card1.excerpt || card1.title;
-        const card1El = c1Title?.closest('.res-card');
-        if (card1El) {
-          card1El.onclick = () => window.open(card1.link, '_blank');
-          card1El.style.cursor = 'pointer';
-        }
-        
-        const c2Journal = document.getElementById('bx-res-card-journal-1');
-        const c2Title = document.getElementById('bx-res-card-title-1');
-        const c2Excerpt = document.getElementById('bx-res-card-excerpt-1');
-        if (c2Journal) c2Journal.textContent = card2.source;
-        if (c2Title) c2Title.textContent = card2.title;
-        if (c2Excerpt) c2Excerpt.textContent = card2.excerpt || card2.title;
-        const card2El = c2Title?.closest('.res-card');
-        if (card2El) {
-          card2El.onclick = () => window.open(card2.link, '_blank');
-          card2El.style.cursor = 'pointer';
-        }
+        currentResearchIndex = 0;
+        updateResearchCarousel();
       } catch (err) {
         console.warn('Failed to fetch research spotlight feed:', err.message);
-        if (siteConfig && siteConfig.research_spotlight) {
-          renderResearch(siteConfig.research_spotlight);
-        }
       }
     }
 
@@ -1370,7 +1435,7 @@
           return ageDays <= 7;
         });
         
-        if (filtered.length < 4) {
+        if (filtered.length < 10) {
           const FALLBACK_EVENTS = [
             {
               title: "BIO International Convention 2026 - Global Biotech Conference",
@@ -1413,6 +1478,24 @@
               link: "https://bioasia.in",
               source: "BioAsia",
               publishedAt: new Date(Date.now() - 8 * 8.64e7).toISOString(),
+            },
+            {
+              title: "JP Morgan Healthcare Conference 2027: Global Biotech Finance",
+              link: "https://www.jpmorgan.com/solutions/cib/insights/health-care-conference",
+              source: "JPM Healthcare",
+              publishedAt: new Date(Date.now() - 9 * 8.64e7).toISOString(),
+            },
+            {
+              title: "BIO-Europe Spring 2027: European Biotech Partnering Event",
+              link: "https://informaconnect.com/bio-europe-spring/",
+              source: "BIO-Europe",
+              publishedAt: new Date(Date.now() - 10 * 8.64e7).toISOString(),
+            },
+            {
+              title: "Biomed Israel 2026: Life Science and HealthTech Expo",
+              link: "https://biomedisrael.com/",
+              source: "Biomed Israel",
+              publishedAt: new Date(Date.now() - 11 * 8.64e7).toISOString(),
             }
           ];
           const extra = FALLBACK_EVENTS.filter(f => !filtered.some(e => e.title === f.title || e.link === f.link));
@@ -1429,7 +1512,7 @@
         
         const el = document.getElementById('bx-upcoming-events-list');
         if (el) {
-          el.innerHTML = filtered.slice(0, 5).map(item => {
+          el.innerHTML = filtered.slice(0, 10).map(item => {
             const date = new Date(item.publishedAt);
             const eventDate = new Date(date.getTime() + 10 * 8.64e7);
             const day = String(eventDate.getDate()).padStart(2, '0');
