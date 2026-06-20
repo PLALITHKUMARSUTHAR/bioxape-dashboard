@@ -44,7 +44,7 @@
     /* TICKER */
     #bx-ticker{background:var(--g700);color:#fff;padding:7px 0;overflow:hidden;white-space:nowrap;font-size:12px}
     #bx-ticker-inner{overflow:hidden}
-    #bx-ticker-track{display:inline-block;animation:ticker-scroll 90s linear infinite}
+    #bx-ticker-track{display:inline-block;animation:ticker-scroll 60s linear infinite}
     @keyframes ticker-scroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
     #bx-ticker-track b{color:#a8dfc0;margin-right:8px}
     #bx-ticker-track span{margin-right:60px;opacity:.9}
@@ -984,14 +984,15 @@
         const data = await res.json();
         if (!data.success) return;
         const cfg = data.data;
-        if (cfg.ticker)               renderTicker(cfg.ticker);
         if (cfg.category_nav)         renderCategoryNav(cfg.category_nav);
         if (cfg.courses)              renderCourses(cfg.courses);
         if (cfg.store)                renderStore(cfg.store);
         if (cfg.footer)               renderFooter(cfg.footer);
+        await fetchExternalNews(cfg.ticker);
       } catch(e) { 
         console.warn('CMS sync failed - using static fallback', e.message); 
         setupFallbackStore();
+        await fetchExternalNews();
       }
     }
 
@@ -1339,24 +1340,29 @@
       } catch(e) { alert('Please try again.'); }
     }
 
-    async function fetchExternalNews() {
+    async function fetchExternalNews(tickerCfg) {
       try {
         const res = await fetch(CMS_API + '/site/news-feed?limit=30');
         const data = await res.json();
-        if (!data.success || !data.data || data.data.length === 0) return;
-
-        const articles = data.data;
-
+        
         // 1. Render Ticker
         const tickerEl = document.getElementById('bx-ticker-track');
         if (tickerEl) {
-          tickerEl.innerHTML = articles.map(item => {
-            const catLabel = item.category.toUpperCase();
-            return `<b>${catLabel}</b><span>${item.title}</span>`;
-          }).join('');
+          if (data.success && data.data && data.data.length > 0) {
+            tickerEl.innerHTML = data.data.map(item => {
+              const catLabel = item.category.toUpperCase();
+              return `<b>${catLabel}</b><span>${item.title}</span>`;
+            }).join('');
+          } else if (tickerCfg && tickerCfg.items) {
+            tickerEl.innerHTML = tickerCfg.items.filter(i=>i.active!==false).map(i=>'<b>'+i.label+'</b><span>'+i.text+'</span>').join('');
+          }
         }
       } catch (err) {
         console.warn('Failed to fetch external news feed:', err.message);
+        const tickerEl = document.getElementById('bx-ticker-track');
+        if (tickerEl && tickerCfg && tickerCfg.items) {
+          tickerEl.innerHTML = tickerCfg.items.filter(i=>i.active!==false).map(i=>'<b>'+i.label+'</b><span>'+i.text+'</span>').join('');
+        }
       }
     }
 
@@ -1370,7 +1376,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       setupFallbackStore();
       fetchSiteConfig();
-      fetchExternalNews();
       
       const searchInput = document.getElementById('nav-search-input');
       if (searchInput) {

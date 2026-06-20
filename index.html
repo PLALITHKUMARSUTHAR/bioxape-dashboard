@@ -44,7 +44,7 @@
     /* TICKER */
     #bx-ticker{background:var(--g700);color:#fff;padding:7px 0;overflow:hidden;white-space:nowrap;font-size:12px}
     #bx-ticker-inner{overflow:hidden}
-    #bx-ticker-track{display:inline-block;animation:ticker-scroll 90s linear infinite}
+    #bx-ticker-track{display:inline-block;animation:ticker-scroll 60s linear infinite}
     @keyframes ticker-scroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
     #bx-ticker-track b{color:#a8dfc0;margin-right:8px}
     #bx-ticker-track span{margin-right:60px;opacity:.9}
@@ -1145,7 +1145,6 @@
         if (!data.success) return;
         siteConfig = data.data;
         const cfg = data.data;
-        if (cfg.ticker)               renderTicker(cfg.ticker);
         if (cfg.category_nav)         renderCategoryNav(cfg.category_nav);
         if (cfg.hero_featured||cfg.hero_stack) renderHero(cfg.hero_featured, cfg.hero_stack);
         if (cfg.latest_articles)      renderLatestArticlesConfig(cfg.latest_articles);
@@ -1153,16 +1152,18 @@
         latestArticlesShowCover = cfg.latest_articles?.showCoverImage !== false;
         fetchLatestArticles(1);
         
-        if (cfg.news_strip)           renderNewsStrip(cfg.news_strip);
         if (cfg.research_spotlight)   renderResearch(cfg.research_spotlight);
         if (cfg.trending)             renderTrending(cfg.trending);
         if (cfg.interviews)           renderInterviews(cfg.interviews);
         if (cfg.subscription_plans)   renderPlans(cfg.subscription_plans);
         if (cfg.footer)               renderFooter(cfg.footer);
         renderAuthors();
+        
+        await fetchExternalNews(cfg.ticker, cfg.news_strip);
       } catch(e) { 
         console.warn('CMS sync failed - using static fallback', e.message); 
         fetchLatestArticles(1);
+        await fetchExternalNews();
       }
     }
 
@@ -1799,57 +1800,115 @@
       return 'just now';
     }
 
-    async function fetchExternalNews() {
+    async function fetchExternalNews(tickerCfg, newsStripCfg) {
       try {
         const res = await fetch(CMS_API + '/site/news-feed?limit=30');
         const data = await res.json();
-        if (!data.success || !data.data || data.data.length === 0) return;
-
-        const articles = data.data;
-
-        // 1. Render Ticker
+        
+        // 1. Render Ticker (displays live crawled news from all categories)
         const tickerEl = document.getElementById('bx-ticker-track');
         if (tickerEl) {
-          tickerEl.innerHTML = articles.map(item => {
-            const catLabel = item.category.toUpperCase();
-            return `<b>${catLabel}</b><span>${item.title}</span>`;
-          }).join('');
+          if (data.success && data.data && data.data.length > 0) {
+            tickerEl.innerHTML = data.data.map(item => {
+              const catLabel = item.category.toUpperCase();
+              return `<b>${catLabel}</b><span>${item.title}</span>`;
+            }).join('');
+          } else if (tickerCfg && tickerCfg.items) {
+            tickerEl.innerHTML = tickerCfg.items.filter(i=>i.active!==false).map(i=>'<b>'+i.label+'</b><span>'+i.text+'</span>').join('');
+          }
         }
 
-        // 2. Render Latest News (limit: 5)
+        // 2. Render Latest News (uses site config curated items if set, otherwise falls back to top 5 live crawled news)
         const newsItemsEl = document.getElementById('bx-news-items');
         if (newsItemsEl) {
-          const latest5 = articles.slice(0, 5);
-          newsItemsEl.innerHTML = latest5.map(item => {
-            const timeAgo = formatTimeAgo(new Date(item.publishedAt));
-            const catLabel = item.category.charAt(0).toUpperCase() + item.category.slice(1);
-            const sourceCredit = item.source ? `[${item.source}]` : '';
+          let articlesToRender = [];
+          
+          if (newsStripCfg && newsStripCfg.items && newsStripCfg.items.length > 0) {
+            articlesToRender = [...newsStripCfg.items];
+            if (articlesToRender.length < 5 && data.success && data.data && data.data.length > 0) {
+              const extra = data.data.filter(n => !articlesToRender.some(active => active.link === n.link || (active.title && active.title === n.title)));
+              articlesToRender = articlesToRender.concat(extra.slice(0, 5 - articlesToRender.length));
+            }
+          } else if (data.success && data.data && data.data.length > 0) {
+            articlesToRender = data.data.slice(0, 5);
+          }
+          
+          if (articlesToRender.length > 0) {
+            newsItemsEl.innerHTML = articlesToRender.slice(0, 5).map(item => {
+              const title = item.title || item.text || '';
+              const link = item.link || '#';
+              const source = item.source ? `[${item.source}]` : '';
+              const category = ((item.category || item.tagText || 'News')).charAt(0).toUpperCase() + ((item.category || item.tagText || 'News')).slice(1);
+              const timeAgo = item.publishedAt ? formatTimeAgo(new Date(item.publishedAt)) : (item.timeAgo || 'just now');
+
+              return `
+                <div class="news-item">
+                  <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
+                    <div class="news-dot"></div>
+                    <span class="news-source">${source}</span>
+                    <span class="tag tr news-tag-style" style="margin-right: 8px;">${category}</span>
+                    <div class="news-text">${title}</div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
+                    <span class="news-time">${timeAgo}</span>
+                    <a class="btn-news-link" href="${link}" target="_blank" rel="noopener noreferrer">Read Story ↗</a>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch external news feed:', err.message);
+        
+        // Fallback to static siteConfig if fetch errors out
+        const tickerEl = document.getElementById('bx-ticker-track');
+        if (tickerEl && tickerCfg && tickerCfg.items) {
+          tickerEl.innerHTML = tickerCfg.items.filter(i=>i.active!==false).map(i=>'<b>'+i.label+'</b><span>'+i.text+'</span>').join('');
+        }
+        const newsItemsEl = document.getElementById('bx-news-items');
+        if (newsItemsEl && newsStripCfg && newsStripCfg.items) {
+          let fallbackArticles = [...newsStripCfg.items];
+          if (fallbackArticles.length < 5) {
+            const defaults = [
+              { text: "WHO publishes updated Global Biosafety Framework impacting BSL-4 lab regulations worldwide", tagText: "Regulatory", timeAgo: "2h ago" },
+              { text: "India DBT allocates Rs 1200 Cr for synthetic biology research hubs across IITs and IISc", tagText: "Funding", timeAgo: "5h ago" },
+              { text: "Moderna personalised cancer mRNA vaccine shows 50% reduction in recurrence in Phase III", tagText: "Clinical", timeAgo: "8h ago" },
+              { text: "FDA approves first CRISPR-based therapy for sickle cell disease in paediatric patients", tagText: "Research", timeAgo: "1d ago" },
+              { text: "AlphaFold 3 update predicts protein-ligand interactions with 91% accuracy", tagText: "Research", timeAgo: "1d ago" }
+            ];
+            const extra = defaults.filter(d => !fallbackArticles.some(f => (f.title || f.text) === d.text));
+            fallbackArticles = fallbackArticles.concat(extra.slice(0, 5 - fallbackArticles.length));
+          }
+          newsItemsEl.innerHTML = fallbackArticles.slice(0, 5).map(item => {
+            const title = item.title || item.text || '';
+            const link = item.link || '#';
+            const source = item.source ? `[${item.source}]` : '';
+            const category = ((item.category || item.tagText || 'News')).charAt(0).toUpperCase() + ((item.category || item.tagText || 'News')).slice(1);
+            const timeAgo = item.timeAgo || 'just now';
 
             return `
               <div class="news-item">
                 <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
                   <div class="news-dot"></div>
-                  <span class="news-source">${sourceCredit}</span>
-                  <span class="tag tr news-tag-style" style="margin-right: 8px;">${catLabel}</span>
-                  <div class="news-text">${item.title}</div>
+                  <span class="news-source">${source}</span>
+                  <span class="tag tr news-tag-style" style="margin-right: 8px;">${category}</span>
+                  <div class="news-text">${title}</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
                   <span class="news-time">${timeAgo}</span>
-                  <a class="btn-news-link" href="${item.link}" target="_blank" rel="noopener noreferrer">Read Story ↗</a>
+                  <a class="btn-news-link" href="${link}" target="_blank" rel="noopener noreferrer">Read Story ↗</a>
                 </div>
               </div>
             `;
           }).join('');
         }
-      } catch (err) {
-        console.warn('Failed to fetch external news feed:', err.message);
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       setupFallbackCarousel();
       fetchSiteConfig();
-      fetchExternalNews();
       
       const searchInput = document.getElementById('nav-search-input');
       if (searchInput) {
