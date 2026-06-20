@@ -1225,35 +1225,48 @@
         const data = await res.json();
         
         let articles = [];
+        const BEST_JOURNALS = ['Nature Biotechnology', 'Nature Medicine', 'Nature', 'Science', 'Cell', 'PubMed', 'Google Scholar', 'PLOS Biology'];
+        
         if (data.success && data.data && data.data.length > 0) {
-          articles = data.data;
+          articles = data.data.filter(item => {
+            const src = (item.source || '').toLowerCase();
+            return BEST_JOURNALS.some(j => src.includes(j.toLowerCase()));
+          });
         }
         
         if (articles.length < 3) {
           const defaults = [
             {
+              source: "Google Scholar",
+              title: "Next-generation CRISPR base editors: precision, efficiency, and safety in therapeutics",
+              excerpt: "A comprehensive analysis of base editing and prime editing developments for targeting genetic disorders with minimal off-target effects.",
+              link: "https://scholar.google.com/scholar?q=CRISPR+base+editors+precision+efficiency",
+              publishedAt: new Date().toISOString()
+            },
+            {
               source: "Nature Biotechnology",
-              title: "In Vivo Epigenome Editing Restores Vision",
-              excerpt: "A breakthrough epigenome editing tool successfully reverses cellular aging hallmarks in ocular tissues.",
+              title: "In Vivo Epigenome Editing Restores Vision in Mammalian Models",
+              excerpt: "A breakthrough epigenome editing tool successfully reverses cellular aging hallmarks and restores functions in ocular tissues.",
               link: "https://www.nature.com/nbt",
               publishedAt: new Date().toISOString()
             },
             {
               source: "Science",
-              title: "Synthetic Genomes Created from Scratch",
-              excerpt: "Researchers synthesize the entire chromosome structure of yeast, paving the way for custom biological manufacturing.",
+              title: "Complete Synthesis of a Functional Yeast Eukaryotic Chromosome",
+              excerpt: "Researchers synthesize a fully active eukaryotic chromosome from scratch, opening new avenues for synthetic biology and custom engineering.",
               link: "https://www.science.org",
               publishedAt: new Date().toISOString()
             },
             {
               source: "Cell",
-              title: "CAR-T Cells Programmed to Target Cancer Stealth Vectors",
-              excerpt: "Newly engineered receptors bypass solid tumour shield barriers to trigger complete elimination.",
+              title: "Chimeric Antigen Receptor T Cells Re-programmed for Autoimmune Diseases",
+              excerpt: "Clinical trials demonstrate long-term remission in refractory lupus patients using engineered CD19-targeting CAR-T cells.",
               link: "https://www.cell.com",
               publishedAt: new Date().toISOString()
             }
           ];
-          articles = articles.concat(defaults);
+          const extra = defaults.filter(d => !articles.some(a => a.title === d.title));
+          articles = articles.concat(extra);
         }
         
         const dayIndex = Math.floor(new Date().setHours(0,0,0,0) / 8.64e7);
@@ -1345,6 +1358,11 @@
         }
         
         let filtered = rawEvents.filter(item => {
+          const text = `${item.title} ${item.source || ''}`.toLowerCase();
+          const eventKeywords = ['conference', 'summit', 'forum', 'symposium', 'congress', 'meeting', 'entrepreneur', 'startup', 'expo', 'pitch', 'convention', 'event', 'investor'];
+          const matchesEvent = eventKeywords.some(kw => text.includes(kw));
+          if (!matchesEvent) return false;
+          
           const ageDays = (new Date() - new Date(item.publishedAt)) / 8.64e7;
           if (isTopEvent(item)) {
             return ageDays <= 14;
@@ -1355,34 +1373,46 @@
         if (filtered.length < 4) {
           const FALLBACK_EVENTS = [
             {
-              title: "Nature Biotechnology Conference on CRISPR & Gene Editing 2026",
-              link: "https://www.nature.com/natureconferences",
-              source: "Nature",
+              title: "BIO International Convention 2026 - Global Biotech Conference",
+              link: "https://www.bio.org/events/bio-international-convention",
+              source: "BIO",
               publishedAt: new Date(Date.now() - 2 * 8.64e7).toISOString(),
             },
             {
-              title: "BIO International Convention 2026",
-              link: "https://www.bio.org/events/bio-international-convention",
-              source: "BIO",
+              title: "SynBioBeta 2026: The Global Synthetic Biology & Entrepreneurship Summit",
+              link: "https://www.synbiobeta.com/",
+              source: "SynBioBeta",
               publishedAt: new Date(Date.now() - 3 * 8.64e7).toISOString(),
             },
             {
-              title: "AACR Annual Meeting 2026 - American Association for Cancer Research",
-              link: "https://www.aacr.org/meeting/aacr-annual-meeting-2026/",
-              source: "AACR",
+              title: "Nature Gene Editing Conference 2026: Science & Clinical Application",
+              link: "https://www.nature.com/natureconferences",
+              source: "Nature",
               publishedAt: new Date(Date.now() - 4 * 8.64e7).toISOString(),
             },
             {
-              title: "ASGCT 29th Annual Meeting - Gene & Cell Therapy",
-              link: "https://annualmeeting.asgct.org/",
-              source: "ASGCT",
+              title: "Biotech Entrepreneurship & Venture Creation Forum 2026",
+              link: "https://entrepreneurship.mit.edu/",
+              source: "MIT Biotech",
               publishedAt: new Date(Date.now() - 5 * 8.64e7).toISOString(),
             },
             {
-              title: "SynBioBeta 2026: The Synthetic Biology Network",
-              link: "https://www.synbiobeta.com/",
-              source: "SynBioBeta",
+              title: "ASGCT 29th Annual Meeting - Gene & Cell Therapy Conference",
+              link: "https://annualmeeting.asgct.org/",
+              source: "ASGCT",
               publishedAt: new Date(Date.now() - 6 * 8.64e7).toISOString(),
+            },
+            {
+              title: "Biotech Showcase 2026: Investment & Corporate Partnerships",
+              link: "https://informaconnect.com/biotech-showcase/",
+              source: "Biotech Showcase",
+              publishedAt: new Date(Date.now() - 7 * 8.64e7).toISOString(),
+            },
+            {
+              title: "BioAsia 2026 Forum: Asia's Largest Biotech & Life Sciences Event",
+              link: "https://bioasia.in",
+              source: "BioAsia",
+              publishedAt: new Date(Date.now() - 8 * 8.64e7).toISOString(),
             }
           ];
           const extra = FALLBACK_EVENTS.filter(f => !filtered.some(e => e.title === f.title || e.link === f.link));
