@@ -10,6 +10,12 @@ let latestArticlesShowCover = true;
 let otherArticlesPage = 1;
 const OTHER_PAGE_SIZE = 5;
 
+let allScrapedNews = [];
+let activeNews = [];
+let otherNewsPage = 1;
+const NEWS_PAGE_SIZE = 5;
+let draggedNewsIndex = null;
+
 // Drag and drop helper indices
 let draggedItemIndex = null;
 
@@ -18,9 +24,10 @@ async function loadSiteBuilder() {
   if (!el) return;
   el.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:20px;color:#7a9e8c"><div class="spinner"></div>Loading site builder...</div>`;
   
-  const [siteResult, postsResult] = await Promise.all([
+  const [siteResult, postsResult, newsResult] = await Promise.all([
     apiCall('/site/all'),
-    apiCall('/posts/all?status=published')
+    apiCall('/posts/all?status=published'),
+    apiCall('/site/news-feed?limit=50')
   ]);
   
   if (!siteResult?.success) { el.innerHTML = '<div class="alert alert-error">Failed to load site config</div>'; return; }
@@ -30,6 +37,9 @@ async function loadSiteBuilder() {
   allPublishedPosts = postsResult?.success ? (postsResult.data || []) : [];
   // Sort by publication date descending
   allPublishedPosts.sort((a,b) => new Date(b.publishedAt || b.createdAt) - new Date(a.publishedAt || a.createdAt));
+  
+  // Store all scraped news globally
+  allScrapedNews = newsResult?.success ? (newsResult.data || []) : [];
   
   // Initialize activeArticles
   const laData = cfg.latest_articles;
@@ -50,6 +60,26 @@ async function loadSiteBuilder() {
   latestArticlesLimit = laData?.limit || 6;
   latestArticlesShowCover = laData?.showCoverImage !== false;
   otherArticlesPage = 1;
+
+  // Initialize activeNews
+  const nsData = cfg.news_strip;
+  const savedNewsItems = nsData?.items || [];
+  if (savedNewsItems.length > 0) {
+    activeNews = savedNewsItems.map(saved => {
+      const match = allScrapedNews.find(n => n.link === saved.link);
+      return match || saved;
+    });
+  } else {
+    activeNews = allScrapedNews.slice(0, 5);
+  }
+
+  // Ensure we have exactly 5 active news items if possible
+  if (activeNews.length < 5 && allScrapedNews.length > 0) {
+    const extra = allScrapedNews.filter(n => !activeNews.some(active => active.link === n.link));
+    activeNews = activeNews.concat(extra.slice(0, 5 - activeNews.length));
+  }
+
+  otherNewsPage = 1;
   
   el.innerHTML = `
     ${tickerSection(cfg.ticker)}
@@ -68,6 +98,8 @@ async function loadSiteBuilder() {
   
   // Render the latest articles lists
   renderLatestArticlesUI();
+  // Render the news strip lists
+  renderNewsStripUI();
 }
 
 // ── Section Renderers ────────────────────────────────────────
@@ -218,20 +250,23 @@ async function saveLatestArticles() {
 }
 
 function newsStripSection(data) {
-  const items = data?.items || [{},{},{}];
   return builderSection('news-strip', '📡 Latest News Strip', `
-    ${items.map((item,i)=>`
-      <div style="border:2px solid var(--border2);border-radius:9px;padding:14px;margin-bottom:10px">
-        <div style="font-size:12px;font-weight:600;color:#7a9e8c;margin-bottom:8px">News Item ${i+1}</div>
-        <div class="form-group"><label class="form-label">News Text</label>
-          <input class="form-input" id="news-text-${i}" value="${item.text||''}" placeholder="News headline..."/></div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Tag Label</label>
-            <input class="form-input" id="news-tag-${i}" value="${item.tagText||''}" placeholder="Regulatory"/></div>
-          <div class="form-group"><label class="form-label">Time Label</label>
-            <input class="form-input" id="news-time-${i}" value="${item.timeAgo||''}" placeholder="2h ago"/></div>
-        </div>
-      </div>`).join('')}
+    <div style="margin-top: 10px;">
+      <div style="font-weight:600;font-size:13.5px;margin-bottom:12px;color:var(--text2)">Main Page News Strip (Drag to rearrange, or use ▲/▼)</div>
+      <div id="ns-active-items">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+    
+    <div style="margin-top: 25px; border-top: 1.5px solid var(--border); padding-top: 20px;">
+      <div style="font-weight:600;font-size:13.5px;margin-bottom:12px;color:var(--text2)">Other News Feed (Not shown on Main Page News Strip)</div>
+      <div id="ns-other-items">
+        <!-- Rendered dynamically -->
+      </div>
+      <div id="ns-other-pagination" style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:14px;">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
     <div class="modal-footer"><button class="btn btn-primary" onclick="saveNewsStrip()">Save News Strip</button></div>
   `);
 }
@@ -539,14 +574,8 @@ async function saveHero() {
 }
 
 async function saveNewsStrip() {
-  const items = [0,1,2].map(i => ({
-    text:    document.getElementById(`news-text-${i}`)?.value||'',
-    tagText: document.getElementById(`news-tag-${i}`)?.value||'',
-    timeAgo: document.getElementById(`news-time-${i}`)?.value||'',
-    active:  true
-  }));
-  const result = await apiCall('/site/config/news_strip','PUT',{ data: { items } });
-  result?.success ? showToast('News strip saved!','success') : showToast('Save failed','error');
+  const result = await apiCall('/site/config/news_strip', 'PUT', { data: { items: activeNews } });
+  result?.success ? showToast('News strip saved!', 'success') : showToast('Save failed', 'error');
 }
 
 async function saveTrending() {
@@ -807,4 +836,170 @@ function handleDrop(e, targetIdx) {
     activeArticles.splice(targetIdx, 0, draggedItem);
     renderLatestArticlesUI();
   }
+}
+
+// ── LATEST NEWS SORTING & PAGINATION HELPERS ───────────────
+function renderNewsStripUI() {
+  renderActiveNews();
+  renderOtherNews();
+}
+
+function renderActiveNews() {
+  const container = document.getElementById('ns-active-items');
+  if (!container) return;
+
+  if (activeNews.length === 0) {
+    container.innerHTML = `<div style="text-align:center;color:var(--text4);padding:14px;border:2px dashed var(--border2);border-radius:9px;">No news items on the Main Page yet. Add some from the list below!</div>`;
+    return;
+  }
+
+  container.innerHTML = activeNews.map((item, idx) => {
+    const timeAgoStr = item.publishedAt ? formatNewsTimeAgo(new Date(item.publishedAt)) : (item.timeAgo || 'just now');
+    const sourceStr = item.source ? `[${item.source}]` : '';
+    const catLabel = item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : 'Industry';
+
+    return `
+      <div class="draggable-item-vertical" id="ns-active-${idx}" draggable="true" 
+           ondragstart="handleNewsDragStart(event, ${idx})" 
+           ondragover="handleNewsDragOver(event)" 
+           ondrop="handleNewsDrop(event, ${idx})"
+           style="border:2.5px solid var(--border2);border-radius:9px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;background:var(--white);cursor:grab;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="drag-handle" style="font-size:16px;color:var(--text4);cursor:grab;">⋮⋮</span>
+            <span style="font-size:12.5px;font-weight:700;color:var(--text3)">News Item #${idx + 1}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="moveNewsUp(${idx})">▲</button>
+            <button class="btn btn-secondary btn-sm" style="padding: 2px 6px;" onclick="moveNewsDown(${idx})">▼</button>
+            <button class="btn btn-danger btn-sm" style="white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;" onclick="removeActiveNews(${idx})">✕ Remove</button>
+          </div>
+        </div>
+        <div style="font-weight:600;font-size:13.5px;color:var(--text1);">${item.title}</div>
+        <div style="font-size:11.5px;color:var(--text4);">${sourceStr} · ${catLabel} · ${timeAgoStr}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderOtherNews() {
+  const container = document.getElementById('ns-other-items');
+  const paginationContainer = document.getElementById('ns-other-pagination');
+  if (!container || !paginationContainer) return;
+
+  const otherNews = allScrapedNews.filter(n => !activeNews.some(active => active.link === n.link));
+
+  if (otherNews.length === 0) {
+    container.innerHTML = `<div style="text-align:center;color:var(--text4);padding:14px;border:2px dashed var(--border2);border-radius:9px;">All scraped news items are currently on the Main Page!</div>`;
+    paginationContainer.innerHTML = '';
+    return;
+  }
+
+  const total = otherNews.length;
+  const totalPages = Math.ceil(total / NEWS_PAGE_SIZE);
+  if (otherNewsPage > totalPages) {
+    otherNewsPage = Math.max(1, totalPages);
+  }
+
+  const start = (otherNewsPage - 1) * NEWS_PAGE_SIZE;
+  const end = start + NEWS_PAGE_SIZE;
+  const paginated = otherNews.slice(start, end);
+
+  container.innerHTML = paginated.map(item => {
+    const timeAgoStr = item.publishedAt ? formatNewsTimeAgo(new Date(item.publishedAt)) : (item.timeAgo || 'just now');
+    const sourceStr = item.source ? `[${item.source}]` : '';
+    const catLabel = item.category ? item.category.charAt(0).toUpperCase() + item.category.slice(1) : 'Industry';
+
+    return `
+      <div style="border:2.5px solid var(--border2);border-radius:9px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;background:var(--off)">
+        <div style="flex: 1; padding-right: 12px;">
+          <div style="font-weight:600;font-size:13.5px;color:var(--text1);">${item.title}</div>
+          <div style="font-size:11.5px;color:var(--text4);margin-top:4px;">${sourceStr} · ${catLabel} · ${timeAgoStr}</div>
+        </div>
+        <button class="btn btn-primary btn-sm" style="white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;" onclick="addNewsToActive('${item.link}')">➕ Pin to News Strip</button>
+      </div>
+    `;
+  }).join('');
+
+  const prevDisabled = otherNewsPage <= 1 ? 'disabled' : '';
+  const nextDisabled = otherNewsPage >= totalPages ? 'disabled' : '';
+
+  paginationContainer.innerHTML = `
+    <button class="btn btn-secondary btn-sm" ${prevDisabled} onclick="changeOtherNewsPage(${otherNewsPage - 1})">← Prev</button>
+    <span style="font-size:12.5px;color:var(--text3)">Page ${otherNewsPage} of ${totalPages}</span>
+    <button class="btn btn-secondary btn-sm" ${nextDisabled} onclick="changeOtherNewsPage(${otherNewsPage + 1})">Next →</button>
+  `;
+}
+
+function changeOtherNewsPage(newPage) {
+  otherNewsPage = newPage;
+  renderOtherNews();
+}
+
+function addNewsToActive(link) {
+  const newsItem = allScrapedNews.find(n => n.link === link);
+  if (newsItem && !activeNews.some(active => active.link === link)) {
+    activeNews.push(newsItem);
+    renderNewsStripUI();
+  }
+}
+
+function removeActiveNews(idx) {
+  activeNews.splice(idx, 1);
+  const otherNews = allScrapedNews.filter(n => !activeNews.some(active => active.link === n.link));
+  if (otherNews.length > 0) {
+    activeNews.push(otherNews[0]);
+  }
+  renderNewsStripUI();
+}
+
+function moveNewsUp(idx) {
+  if (idx === 0) return;
+  const temp = activeNews[idx];
+  activeNews[idx] = activeNews[idx - 1];
+  activeNews[idx - 1] = temp;
+  renderNewsStripUI();
+}
+
+function moveNewsDown(idx) {
+  if (idx === activeNews.length - 1) return;
+  const temp = activeNews[idx];
+  activeNews[idx] = activeNews[idx + 1];
+  activeNews[idx + 1] = temp;
+  renderNewsStripUI();
+}
+
+function handleNewsDragStart(e, idx) {
+  draggedNewsIndex = idx;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleNewsDragOver(e) {
+  e.preventDefault();
+  return false;
+}
+
+function handleNewsDrop(e, targetIdx) {
+  e.preventDefault();
+  if (draggedNewsIndex !== null && draggedNewsIndex !== targetIdx) {
+    const draggedItem = activeNews[draggedNewsIndex];
+    activeNews.splice(draggedNewsIndex, 1);
+    activeNews.splice(targetIdx, 0, draggedItem);
+    renderNewsStripUI();
+  }
+}
+
+function formatNewsTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  let interval = Math.floor(seconds / 31536000);
+  if (interval >= 1) return interval + 'y ago';
+  interval = Math.floor(seconds / 2592000);
+  if (interval >= 1) return interval + 'mo ago';
+  interval = Math.floor(seconds / 86400);
+  if (interval >= 1) return interval + 'd ago';
+  interval = Math.floor(seconds / 3600);
+  if (interval >= 1) return interval + 'h ago';
+  interval = Math.floor(seconds / 60);
+  if (interval >= 1) return interval + 'm ago';
+  return 'just now';
 }
