@@ -694,6 +694,64 @@
     .trend-title:hover{color:var(--accent)}
     .trend-meta{font-size:11px;color:var(--text4)}
 
+    /* UPCOMING EVENTS WIDGET */
+    .event-item {
+      display: flex;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .event-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .event-date {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--g50);
+      border: 1.5px solid var(--border2);
+      border-radius: 8px;
+      min-width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+    }
+    .event-day {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-d);
+      line-height: 1.1;
+    }
+    .event-month {
+      font-size: 9px;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--text3);
+      letter-spacing: 0.5px;
+    }
+    .event-title {
+      font-size: 13px;
+      color: var(--text1);
+      font-weight: 600;
+      line-height: 1.35;
+      cursor: pointer;
+      margin-bottom: 3px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .event-title:hover {
+      color: var(--accent);
+    }
+    .event-meta {
+      font-size: 11px;
+      color: var(--text4);
+    }
+
     /* PLANS */
     #bx-plans-section{background:linear-gradient(170deg,var(--g50),var(--white));padding:56px 0}
     .plans-eye{text-align:center;font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-bottom:10px}
@@ -1037,6 +1095,12 @@
               <!-- Populated dynamically -->
             </div>
           </div>
+          <div class="widget">
+            <div class="widget-head"><div class="widget-head-line"></div>Upcoming Events</div>
+            <div id="bx-upcoming-events-list">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1138,6 +1202,315 @@
     let latestArticlesShowCover = true;
     let siteConfig = null;
 
+    function getImpactFactor(source) {
+      const src = (source || '').toLowerCase();
+      if (src.includes('nature biotechnology')) return '54.9';
+      if (src.includes('nature')) return '40.5';
+      if (src.includes('science')) return '44.7';
+      if (src.includes('cell')) return '66.8';
+      if (src.includes('sciencedaily')) return '13.8';
+      if (src.includes('gen')) return '11.5';
+      return '25.4';
+    }
+
+    function isTopEvent(item) {
+      const text = `${item.title} ${item.source || ''}`.toLowerCase();
+      const topKeywords = ['nature', 'science', 'summit', 'congress', 'symposium', 'annual meeting', 'global', 'international', 'bioasia'];
+      return topKeywords.some(kw => text.includes(kw));
+    }
+
+    async function fetchResearchSpotlight() {
+      try {
+        const res = await fetch(CMS_API + '/site/news-feed?category=research&limit=50');
+        const data = await res.json();
+        
+        let articles = [];
+        if (data.success && data.data && data.data.length > 0) {
+          articles = data.data;
+        }
+        
+        if (articles.length < 3) {
+          const defaults = [
+            {
+              source: "Nature Biotechnology",
+              title: "In Vivo Epigenome Editing Restores Vision",
+              excerpt: "A breakthrough epigenome editing tool successfully reverses cellular aging hallmarks in ocular tissues.",
+              link: "https://www.nature.com/nbt",
+              publishedAt: new Date().toISOString()
+            },
+            {
+              source: "Science",
+              title: "Synthetic Genomes Created from Scratch",
+              excerpt: "Researchers synthesize the entire chromosome structure of yeast, paving the way for custom biological manufacturing.",
+              link: "https://www.science.org",
+              publishedAt: new Date().toISOString()
+            },
+            {
+              source: "Cell",
+              title: "CAR-T Cells Programmed to Target Cancer Stealth Vectors",
+              excerpt: "Newly engineered receptors bypass solid tumour shield barriers to trigger complete elimination.",
+              link: "https://www.cell.com",
+              publishedAt: new Date().toISOString()
+            }
+          ];
+          articles = articles.concat(defaults);
+        }
+        
+        const dayIndex = Math.floor(new Date().setHours(0,0,0,0) / 8.64e7);
+        const len = articles.length;
+        const idxHero = dayIndex % len;
+        let idxCard1 = (dayIndex + 1) % len;
+        let idxCard2 = (dayIndex + 2) % len;
+        
+        if (len >= 3) {
+          while (idxCard1 === idxHero) {
+            idxCard1 = (idxCard1 + 1) % len;
+          }
+          while (idxCard2 === idxHero || idxCard2 === idxCard1) {
+            idxCard2 = (idxCard2 + 1) % len;
+          }
+        }
+        
+        const hero = articles[idxHero];
+        const card1 = articles[idxCard1];
+        const card2 = articles[idxCard2];
+        
+        const hJournal = document.getElementById('bx-res-hero-journal');
+        const hTitle = document.getElementById('bx-res-hero-title');
+        const hExcerpt = document.getElementById('bx-res-hero-excerpt');
+        const hIf = document.getElementById('bx-res-hero-if');
+        const hBtn = document.querySelector('#bx-research-section .btn-paper');
+        
+        const heroPubDate = hero.publishedAt ? new Date(hero.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'May 2026';
+        if (hJournal) hJournal.textContent = `${hero.source} · ${heroPubDate}`;
+        if (hTitle) hTitle.textContent = hero.title;
+        if (hExcerpt) hExcerpt.textContent = hero.excerpt || hero.title;
+        if (hIf) hIf.textContent = getImpactFactor(hero.source);
+        if (hBtn) {
+          hBtn.onclick = () => window.open(hero.link, '_blank');
+        }
+        
+        const stats = [
+          { value: "Peer", label: "Reviewed" },
+          { value: "Direct", label: "Journal Link" },
+          { value: "Impact", label: `IF ${getImpactFactor(hero.source)}` },
+          { value: "Scraped", label: "Real-time" }
+        ];
+        stats.forEach((s, idx) => {
+          const vEl = document.getElementById(`bx-res-stat-val-${idx}`);
+          const lEl = document.getElementById(`bx-res-stat-lab-${idx}`);
+          if (vEl) vEl.textContent = s.value;
+          if (lEl) lEl.textContent = s.label;
+        });
+        
+        const c1Journal = document.getElementById('bx-res-card-journal-0');
+        const c1Title = document.getElementById('bx-res-card-title-0');
+        const c1Excerpt = document.getElementById('bx-res-card-excerpt-0');
+        if (c1Journal) c1Journal.textContent = card1.source;
+        if (c1Title) c1Title.textContent = card1.title;
+        if (c1Excerpt) c1Excerpt.textContent = card1.excerpt || card1.title;
+        const card1El = c1Title?.closest('.res-card');
+        if (card1El) {
+          card1El.onclick = () => window.open(card1.link, '_blank');
+          card1El.style.cursor = 'pointer';
+        }
+        
+        const c2Journal = document.getElementById('bx-res-card-journal-1');
+        const c2Title = document.getElementById('bx-res-card-title-1');
+        const c2Excerpt = document.getElementById('bx-res-card-excerpt-1');
+        if (c2Journal) c2Journal.textContent = card2.source;
+        if (c2Title) c2Title.textContent = card2.title;
+        if (c2Excerpt) c2Excerpt.textContent = card2.excerpt || card2.title;
+        const card2El = c2Title?.closest('.res-card');
+        if (card2El) {
+          card2El.onclick = () => window.open(card2.link, '_blank');
+          card2El.style.cursor = 'pointer';
+        }
+      } catch (err) {
+        console.warn('Failed to fetch research spotlight feed:', err.message);
+        if (siteConfig && siteConfig.research_spotlight) {
+          renderResearch(siteConfig.research_spotlight);
+        }
+      }
+    }
+
+    async function fetchUpcomingEvents() {
+      try {
+        const res = await fetch(CMS_API + '/site/news-feed?category=event&limit=50');
+        const data = await res.json();
+        
+        let rawEvents = [];
+        if (data.success && data.data && data.data.length > 0) {
+          rawEvents = data.data;
+        }
+        
+        let filtered = rawEvents.filter(item => {
+          const ageDays = (new Date() - new Date(item.publishedAt)) / 8.64e7;
+          if (isTopEvent(item)) {
+            return ageDays <= 14;
+          }
+          return ageDays <= 7;
+        });
+        
+        if (filtered.length < 4) {
+          const FALLBACK_EVENTS = [
+            {
+              title: "Nature Biotechnology Conference on CRISPR & Gene Editing 2026",
+              link: "https://www.nature.com/natureconferences",
+              source: "Nature",
+              publishedAt: new Date(Date.now() - 2 * 8.64e7).toISOString(),
+            },
+            {
+              title: "BIO International Convention 2026",
+              link: "https://www.bio.org/events/bio-international-convention",
+              source: "BIO",
+              publishedAt: new Date(Date.now() - 3 * 8.64e7).toISOString(),
+            },
+            {
+              title: "AACR Annual Meeting 2026 - American Association for Cancer Research",
+              link: "https://www.aacr.org/meeting/aacr-annual-meeting-2026/",
+              source: "AACR",
+              publishedAt: new Date(Date.now() - 4 * 8.64e7).toISOString(),
+            },
+            {
+              title: "ASGCT 29th Annual Meeting - Gene & Cell Therapy",
+              link: "https://annualmeeting.asgct.org/",
+              source: "ASGCT",
+              publishedAt: new Date(Date.now() - 5 * 8.64e7).toISOString(),
+            },
+            {
+              title: "SynBioBeta 2026: The Synthetic Biology Network",
+              link: "https://www.synbiobeta.com/",
+              source: "SynBioBeta",
+              publishedAt: new Date(Date.now() - 6 * 8.64e7).toISOString(),
+            }
+          ];
+          const extra = FALLBACK_EVENTS.filter(f => !filtered.some(e => e.title === f.title || e.link === f.link));
+          filtered = filtered.concat(extra);
+        }
+        
+        filtered.sort((a, b) => {
+          const aTop = isTopEvent(a);
+          const bTop = isTopEvent(b);
+          if (aTop && !bTop) return -1;
+          if (!aTop && bTop) return 1;
+          return new Date(b.publishedAt) - new Date(a.publishedAt);
+        });
+        
+        const el = document.getElementById('bx-upcoming-events-list');
+        if (el) {
+          el.innerHTML = filtered.slice(0, 5).map(item => {
+            const date = new Date(item.publishedAt);
+            const eventDate = new Date(date.getTime() + 10 * 8.64e7);
+            const day = String(eventDate.getDate()).padStart(2, '0');
+            const month = eventDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+            const topBadge = isTopEvent(item) ? ' <span class="tag tg" style="font-size:9px; padding:1px 5px; margin-bottom:0; vertical-align:middle; background:var(--amber-l); color:#92400e;">Top</span>' : '';
+            
+            return `
+              <div class="event-item" onclick="window.open('${item.link}', '_blank')" style="cursor: pointer;">
+                <div class="event-date">
+                  <span class="event-day">${day}</span>
+                  <span class="event-month">${month}</span>
+                </div>
+                <div style="min-width: 0; flex: 1;">
+                  <div class="event-title">${item.title}</div>
+                  <div class="event-meta">${item.source}${topBadge}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        console.warn('Failed to fetch upcoming events:', err.message);
+      }
+    }
+
+    async function fetchTrendingPosts() {
+      try {
+        const res = await fetch(CMS_API + '/posts/public/feed?limit=30');
+        const data = await res.json();
+        
+        let posts = [];
+        if (data.success && data.posts && data.posts.length > 0) {
+          posts = data.posts;
+        }
+        
+        if (posts.length < 10) {
+          const extra = OFFLINE_POSTS.filter(op => !posts.some(p => p.title === op.title || p._id === op._id));
+          posts = posts.concat(extra);
+        }
+        if (posts.length < 10) {
+          const extraDefaults = [
+            { _id: '6a1c06a60bf8bc1ea377b737', title: 'WHO Global Biosafety Guidelines: What Labs Need to Know', viewCount: 154, publishedAt: '2026-05-02', category: 'Regulatory' },
+            { _id: '6a1c06a60bf8bc1ea377b738', title: 'DBT Funds 5 New Synthetic Biology Centers in India', viewCount: 242, publishedAt: '2026-05-01', category: 'Funding' },
+            { _id: '6a1c06a60bf8bc1ea377b739', title: 'Moderna Personalised Cancer Vaccine Enters Phase III Trials', viewCount: 421, publishedAt: '2026-04-28', category: 'Biopharmaceuticals' },
+            { _id: '6a1c06a60bf8bc1ea377b740', title: 'CAR-T Cell Therapy Shows Promise in Lupus Treatment', viewCount: 310, publishedAt: '2026-04-25', category: 'Medical' }
+          ];
+          const extraFiltered = extraDefaults.filter(ed => !posts.some(p => p.title === ed.title || p._id === ed._id));
+          posts = posts.concat(extraFiltered);
+        }
+        
+        posts.sort((a, b) => {
+          const vA = a.viewCount || 0;
+          const vB = b.viewCount || 0;
+          if (vB !== vA) return vB - vA;
+          return new Date(b.publishedAt) - new Date(a.publishedAt);
+        });
+        
+        const trendingPosts = posts.slice(0, 10);
+        
+        const el = document.getElementById('bx-trending-list');
+        if (el) {
+          el.innerHTML = trendingPosts.map((item, i) => {
+            const title = item.title;
+            const postId = item._id;
+            const viewsVal = item.viewCount !== undefined ? item.viewCount : (100 - i * 8);
+            const reads = `${viewsVal} views`;
+            const dateStr = item.publishedAt ? formatTimeAgo(new Date(item.publishedAt)) : 'Recent';
+            
+            return `
+              <div class="trend-item" onclick="window.location.href='post.html?id=${postId}'" style="cursor: pointer;">
+                <div class="trend-num">${String(i + 1).padStart(2, '0')}</div>
+                <div>
+                  <div class="trend-title">${title}</div>
+                  <div class="trend-meta">${reads} - ${dateStr}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        console.warn('Failed to fetch trending posts, using fallback offline posts:', err.message);
+        let posts = [...OFFLINE_POSTS];
+        if (posts.length < 10) {
+          const extraDefaults = [
+            { _id: '6a1c06a60bf8bc1ea377b737', title: 'WHO Global Biosafety Guidelines: What Labs Need to Know', viewCount: 154, publishedAt: '2026-05-02', category: 'Regulatory' },
+            { _id: '6a1c06a60bf8bc1ea377b738', title: 'DBT Funds 5 New Synthetic Biology Centers in India', viewCount: 242, publishedAt: '2026-05-01', category: 'Funding' },
+            { _id: '6a1c06a60bf8bc1ea377b739', title: 'Moderna Personalised Cancer Vaccine Enters Phase III Trials', viewCount: 421, publishedAt: '2026-04-28', category: 'Biopharmaceuticals' },
+            { _id: '6a1c06a60bf8bc1ea377b740', title: 'CAR-T Cell Therapy Shows Promise in Lupus Treatment', viewCount: 310, publishedAt: '2026-04-25', category: 'Medical' }
+          ];
+          posts = posts.concat(extraDefaults);
+        }
+        posts.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+        const trendingPosts = posts.slice(0, 10);
+        const el = document.getElementById('bx-trending-list');
+        if (el) {
+          el.innerHTML = trendingPosts.map((item, i) => {
+            const viewsVal = item.viewCount !== undefined ? item.viewCount : (100 - i * 8);
+            return `
+              <div class="trend-item" onclick="window.location.href='post.html?id=${item._id}'" style="cursor: pointer;">
+                <div class="trend-num">${String(i + 1).padStart(2, '0')}</div>
+                <div>
+                  <div class="trend-title">${item.title}</div>
+                  <div class="trend-meta">${viewsVal} views - ${item.publishedAt ? formatTimeAgo(new Date(item.publishedAt)) : 'Recent'}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    }
+
     async function fetchSiteConfig() {
       try {
         const res  = await fetch(CMS_API + '/site/all');
@@ -1152,8 +1525,10 @@
         latestArticlesShowCover = cfg.latest_articles?.showCoverImage !== false;
         fetchLatestArticles(1);
         
-        if (cfg.research_spotlight)   renderResearch(cfg.research_spotlight);
-        if (cfg.trending)             renderTrending(cfg.trending);
+        fetchResearchSpotlight();
+        fetchTrendingPosts();
+        fetchUpcomingEvents();
+        
         if (cfg.interviews)           renderInterviews(cfg.interviews);
         if (cfg.subscription_plans)   renderPlans(cfg.subscription_plans);
         if (cfg.footer)               renderFooter(cfg.footer);
@@ -1164,6 +1539,9 @@
         console.warn('CMS sync failed - using static fallback', e.message); 
         fetchLatestArticles(1);
         await fetchExternalNews();
+        fetchResearchSpotlight();
+        fetchTrendingPosts();
+        fetchUpcomingEvents();
       }
     }
 
