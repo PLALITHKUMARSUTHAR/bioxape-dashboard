@@ -73,12 +73,6 @@ async function loadSiteBuilder() {
     activeNews = allScrapedNews.slice(0, 5);
   }
 
-  // Ensure we have exactly 5 active news items if possible
-  if (activeNews.length < 5 && allScrapedNews.length > 0) {
-    const extra = allScrapedNews.filter(n => !activeNews.some(active => active.link === n.link));
-    activeNews = activeNews.concat(extra.slice(0, 5 - activeNews.length));
-  }
-
   otherNewsPage = 1;
   
   el.innerHTML = `
@@ -946,10 +940,6 @@ function addNewsToActive(link) {
 
 function removeActiveNews(idx) {
   activeNews.splice(idx, 1);
-  const otherNews = allScrapedNews.filter(n => !activeNews.some(active => active.link === n.link));
-  if (otherNews.length > 0) {
-    activeNews.push(otherNews[0]);
-  }
   renderNewsStripUI();
 }
 
