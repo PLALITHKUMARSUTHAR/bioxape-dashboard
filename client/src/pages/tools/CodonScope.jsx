@@ -1,121 +1,133 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ToolShell, { CopyButton, ExportButton } from '../../components/tools/ToolShell';
 import { cleanSequence, STANDARD_GENETIC_CODE, CODON_USAGE_TABLES } from '../../utils/bioutils';
-import useDebouncedValue from '../../hooks/useDebouncedValue';
 
 export default function CodonScope() {
+  const [activeStep, setActiveStep] = useState(1);
   const [rawSeq, setRawSeq] = useState('');
   const [hostOrganism, setHostOrganism] = useState('E. coli K12');
   const [mode, setMode] = useState('analyze'); // 'analyze' or 'optimize'
 
-  const debouncedSeq = useDebouncedValue(rawSeq, 250);
   const [validationError, setValidationError] = useState('');
   const [results, setResults] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  useEffect(() => {
-    const clean = cleanSequence(debouncedSeq);
+  const steps = [
+    { number: 1, title: 'Sequence & Host' },
+    { number: 2, title: 'Mode settings' },
+    { number: 3, title: 'Run Analysis' },
+    { number: 4, title: 'CAI Report' }
+  ];
+
+  const loadSampleCodons = () => {
+    setRawSeq('ATGGCCAGCATGCTGCAGCTGAGCGTGTTCGCCGTGCTGGCCGTGGCCCTGGCCGTGACGGAAAGGTAA');
+    setValidationError('');
+  };
+
+  const handleNextFromStep1 = () => {
+    const clean = cleanSequence(rawSeq);
     if (!clean) {
-      setResults(null);
-      setValidationError('');
+      setValidationError('Please enter a coding sequence.');
       return;
     }
-
-    // 1. Length validation (must be divisible by 3)
     if (clean.length % 3 !== 0) {
       setValidationError(`Sequence length (${clean.length}bp) is not divisible by 3 — please ensure this is a complete coding sequence.`);
-      setResults(null);
       return;
     }
-    
-    // Check characters
     const invalidChars = clean.replace(/[ACGTU]/g, '');
     if (invalidChars.length > 0) {
       setValidationError(`Invalid base(s) detected: ${invalidChars.substring(0, 10)}. Please use ACGT.`);
-      setResults(null);
       return;
     }
     setValidationError('');
+    setActiveStep(2);
+  };
 
-    const hostTable = CODON_USAGE_TABLES[hostOrganism];
-    if (!hostTable) return;
-
-    // Split sequence into codons
-    const codons = [];
-    for (let i = 0; i < clean.length; i += 3) {
-      codons.push(clean.substring(i, i + 3).replace(/U/g, 'T'));
+  const runCodonAnalysis = () => {
+    const clean = cleanSequence(rawSeq);
+    if (!clean) {
+      setValidationError('Please enter a coding sequence.');
+      setActiveStep(1);
+      return;
     }
 
-    // Precompute max frequencies for host organism amino acids
-    const maxFreqs = {};
-    const optimalCodons = {};
-    Object.entries(STANDARD_GENETIC_CODE).forEach(([codon, aaInfo]) => {
-      const freq = hostTable[codon] || 0;
-      const symbol = aaInfo.symbol;
-      if (!maxFreqs[symbol] || freq > maxFreqs[symbol]) {
-        maxFreqs[symbol] = freq;
-        optimalCodons[symbol] = codon;
-      }
-    });
+    setIsAnalyzing(true);
+    setTimeout(() => {
+      setIsAnalyzing(false);
 
-    // Calculations: CAI, Rare Codons, GC per position
-    let sumLnW = 0;
-    let rareCodonCount = 0;
-    const codonAnalysis = [];
-    let gc1 = 0, gc2 = 0, gc3 = 0;
-    let hasPrematureStop = false;
-    let stopIndex = -1;
-
-    codons.forEach((codon, idx) => {
-      const aaInfo = STANDARD_GENETIC_CODE[codon];
-      const symbol = aaInfo ? aaInfo.symbol : 'X';
-      const name = aaInfo ? aaInfo.name : 'Unknown';
-
-      // Check premature stop
-      if (symbol === '*' && idx < codons.length - 1) {
-        hasPrematureStop = true;
-        if (stopIndex === -1) stopIndex = idx * 3;
+      const hostTable = CODON_USAGE_TABLES[hostOrganism];
+      if (!hostTable) {
+        setValidationError('Invalid host table configuration.');
+        return;
       }
 
-      // GC at codon positions
-      if (codon[0] === 'G' || codon[0] === 'C') gc1++;
-      if (codon[1] === 'G' || codon[1] === 'C') gc2++;
-      if (codon[2] === 'G' || codon[2] === 'C') gc3++;
+      const codons = [];
+      for (let i = 0; i < clean.length; i += 3) {
+        codons.push(clean.substring(i, i + 3).replace(/U/g, 'T'));
+      }
 
-      const freq = hostTable[codon] || 0;
-      const maxFreq = maxFreqs[symbol] || 1;
-      // Clamp w parameter to 0.01 to avoid ln(0) infinity
-      const w = Math.max(0.01, freq / maxFreq);
-      sumLnW += Math.log(w);
-
-      const isRare = freq < 10.0;
-      if (isRare) rareCodonCount++;
-
-      codonAnalysis.push({
-        position: idx * 3 + 1,
-        codon,
-        aminoAcid: `${name} (${symbol})`,
-        freq,
-        w,
-        isRare
+      const maxFreqs = {};
+      const optimalCodons = {};
+      Object.entries(STANDARD_GENETIC_CODE).forEach(([codon, aaInfo]) => {
+        const freq = hostTable[codon] || 0;
+        const symbol = aaInfo.symbol;
+        if (!maxFreqs[symbol] || freq > maxFreqs[symbol]) {
+          maxFreqs[symbol] = freq;
+          optimalCodons[symbol] = codon;
+        }
       });
-    });
 
-    // CAI = geometric mean
-    const cai = codons.length > 0 ? Math.exp(sumLnW / codons.length) : 0;
+      let sumLnW = 0;
+      let rareCodonCount = 0;
+      const codonAnalysis = [];
+      let gc1 = 0, gc2 = 0, gc3 = 0;
+      let hasPrematureStop = false;
+      let stopIndex = -1;
 
-    // Positional GC Content percentages
-    const gc1Pct = (gc1 / codons.length) * 100;
-    const gc2Pct = (gc2 / codons.length) * 100;
-    const gc3Pct = (gc3 / codons.length) * 100;
-    const overallGcPct = ((gc1 + gc2 + gc3) / clean.length) * 100;
+      codons.forEach((codon, idx) => {
+        const aaInfo = STANDARD_GENETIC_CODE[codon];
+        const symbol = aaInfo ? aaInfo.symbol : 'X';
+        const name = aaInfo ? aaInfo.name : 'Unknown';
 
-    // Optimization path
-    let optimizedSeq = '';
-    let optimizedCodonAnalysis = [];
-    let optSumLnW = 0;
-    let optRareCount = 0;
+        if (symbol === '*' && idx < codons.length - 1) {
+          hasPrematureStop = true;
+          if (stopIndex === -1) stopIndex = idx * 3;
+        }
 
-    if (mode === 'optimize') {
+        if (codon[0] === 'G' || codon[0] === 'C') gc1++;
+        if (codon[1] === 'G' || codon[1] === 'C') gc2++;
+        if (codon[2] === 'G' || codon[2] === 'C') gc3++;
+
+        const freq = hostTable[codon] || 0;
+        const maxFreq = maxFreqs[symbol] || 1;
+        const w = Math.max(0.01, freq / maxFreq);
+        sumLnW += Math.log(w);
+
+        const isRare = freq < 10.0;
+        if (isRare) rareCodonCount++;
+
+        codonAnalysis.push({
+          position: idx * 3 + 1,
+          codon,
+          aminoAcid: `${name} (${symbol})`,
+          freq,
+          w,
+          isRare
+        });
+      });
+
+      const cai = codons.length > 0 ? Math.exp(sumLnW / codons.length) : 0;
+
+      const gc1Pct = (gc1 / codons.length) * 100;
+      const gc2Pct = (gc2 / codons.length) * 100;
+      const gc3Pct = (gc3 / codons.length) * 100;
+      const overallGcPct = ((gc1 + gc2 + gc3) / clean.length) * 100;
+
+      let optimizedSeq = '';
+      let optimizedCodonAnalysis = [];
+      let optSumLnW = 0;
+      let optRareCount = 0;
+
       codons.forEach((codon, idx) => {
         const aaInfo = STANDARD_GENETIC_CODE[codon];
         const symbol = aaInfo ? aaInfo.symbol : '*';
@@ -139,37 +151,33 @@ export default function CodonScope() {
           isRare
         });
       });
-    }
-    const optCai = codons.length > 0 ? Math.exp(optSumLnW / codons.length) : 0;
+      const optCai = codons.length > 0 ? Math.exp(optSumLnW / codons.length) : 0;
 
-    // Amino Acid Composition Count
-    const aaCounts = {};
-    codons.forEach((codon) => {
-      const aa = STANDARD_GENETIC_CODE[codon]?.symbol || 'X';
-      aaCounts[aa] = (aaCounts[aa] || 0) + 1;
-    });
+      const aaCounts = {};
+      codons.forEach((codon) => {
+        const aa = STANDARD_GENETIC_CODE[codon]?.symbol || 'X';
+        aaCounts[aa] = (aaCounts[aa] || 0) + 1;
+      });
 
-    setResults({
-      cai: cai.toFixed(3),
-      optCai: optCai.toFixed(3),
-      rareCodonCount,
-      optRareCount,
-      gc1: gc1Pct.toFixed(1),
-      gc2: gc2Pct.toFixed(1),
-      gc3: gc3Pct.toFixed(1),
-      overallGc: overallGcPct.toFixed(1),
-      codonAnalysis,
-      optimizedCodonAnalysis,
-      optimizedSeq,
-      hasPrematureStop,
-      stopIndex,
-      aaCounts
-    });
+      setResults({
+        cai: cai.toFixed(3),
+        optCai: optCai.toFixed(3),
+        rareCodonCount,
+        optRareCount,
+        gc1: gc1Pct.toFixed(1),
+        gc2: gc2Pct.toFixed(1),
+        gc3: gc3Pct.toFixed(1),
+        overallGc: overallGcPct.toFixed(1),
+        codonAnalysis,
+        optimizedCodonAnalysis,
+        optimizedSeq,
+        hasPrematureStop,
+        stopIndex,
+        aaCounts
+      });
 
-  }, [debouncedSeq, hostOrganism, mode]);
-
-  const loadSampleCodons = () => {
-    setRawSeq('ATGGCCAGCATGCTGCAGCTGAGCGTGTTCGCCGTGCTGGCCGTGGCCCTGGCCGTGACGGAAAGGTAA');
+      setActiveStep(4);
+    }, 850);
   };
 
   const getExportFasta = () => {
@@ -188,203 +196,299 @@ export default function CodonScope() {
     return csv;
   };
 
-  // Interpolate color from Amber (low usage) to Emerald (high usage)
   const getCodonColor = (w) => {
-    // Interpolate between HSL 35 (Amber) and HSL 142 (Emerald)
     const hue = 35 + w * (142 - 35);
     const sat = 85 - w * 15;
     const light = 50 + w * 2;
     return `hsl(${hue}, ${sat}%, ${light}%)`;
   };
 
+  const resetAnalysis = () => {
+    setResults(null);
+    setActiveStep(1);
+  };
+
+  const renderStepTracker = () => (
+    <div className="bx-step-tracker">
+      {steps.map((s) => {
+        const isCompleted = s.number < activeStep;
+        const isActive = s.number === activeStep;
+        const isDisabled = s.number > activeStep && !results;
+        return (
+          <div
+            key={s.number}
+            className={`bx-step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isDisabled ? 'disabled' : ''}`}
+            onClick={() => !isDisabled && setActiveStep(s.number)}
+          >
+            <span className="bx-step-circle">{s.number}</span>
+            <span>{s.title}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <ToolShell slug="codonscope">
-      <div className="bx-tools-grid">
-        {/* Left column: Controls & inputs */}
-        <div className="tool-pane-card">
-          <div className="tool-pane-title">
-            <span>Inputs & Host</span>
-            <button type="button" className="mock-sample-btn" onClick={loadSampleCodons}>Load Sample CDS</button>
-          </div>
+      {renderStepTracker()}
 
-          <div className="mock-field-group">
-            <label className="mock-label" htmlFor="host-select">Target Expression Host</label>
-            <select
-              id="host-select"
-              className="form-control"
-              value={hostOrganism}
-              onChange={(e) => setHostOrganism(e.target.value)}
+      <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+        {/* Step 1: Sequence & Host */}
+        {activeStep === 1 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 1</span>
+              <h3 className="bx-step-title">Select Host & Enter CDS</h3>
+            </div>
+
+            <div className="bx-field-group">
+              <label htmlFor="host-select" className="bx-label">Target Expression Host</label>
+              <select
+                id="host-select"
+                className="bx-select"
+                value={hostOrganism}
+                onChange={(e) => setHostOrganism(e.target.value)}
+              >
+                <option value="E. coli K12">Escherichia coli K12</option>
+                <option value="S. cerevisiae">Saccharomyces cerevisiae (Yeast)</option>
+                <option value="Homo sapiens">Homo sapiens (Human)</option>
+                <option value="CHO cells">CHO Cells (Hamster)</option>
+                <option value="Spodoptera frugiperda">Spodoptera frugiperda (Sf9 Insect)</option>
+              </select>
+            </div>
+
+            <div className="bx-field-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label htmlFor="codonscope-seq" className="bx-label">Coding Sequence (Length must be divisible by 3)</label>
+                <button type="button" className="bx-btn-sample" onClick={loadSampleCodons}>Load Sample CDS</button>
+              </div>
+              <textarea
+                id="codonscope-seq"
+                className="bx-textarea"
+                style={{ height: '140px' }}
+                placeholder="Paste DNA coding sequence e.g., ATGGCC..."
+                value={rawSeq}
+                onChange={(e) => {
+                  setRawSeq(e.target.value);
+                  setValidationError('');
+                }}
+              />
+              {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={handleNextFromStep1}
+                disabled={!rawSeq.trim()}
+              >
+                Next: Choose Mode Settings →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Mode Settings */}
+        {activeStep === 2 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 2</span>
+              <h3 className="bx-step-title">Choose Analysis Mode Settings</h3>
+            </div>
+
+            <div className="bx-field-group">
+              <label className="bx-label">Optimization Mode</label>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  className={`bx-tool-btn ${mode === 'analyze' ? 'copied' : ''}`}
+                  onClick={() => setMode('analyze')}
+                  style={{ flex: 1, padding: '12px' }}
+                >
+                  <strong style={{ display: 'block', fontSize: '14px', marginBottom: '2px' }}>Analyze Only</strong>
+                  Evaluate current codon adaptiveness & GC bias
+                </button>
+                <button
+                  type="button"
+                  className={`bx-tool-btn ${mode === 'optimize' ? 'copied' : ''}`}
+                  onClick={() => setMode('optimize')}
+                  style={{ flex: 1, padding: '12px' }}
+                >
+                  <strong style={{ display: 'block', fontSize: '14px', marginBottom: '2px' }}>Optimize Codons</strong>
+                  Replace rare codons with host-preferred synonymous codons
+                </button>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
+              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Analysis →</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Run Analysis */}
+        {activeStep === 3 && (
+          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
+            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
+              <span className="bx-step-badge">Step 3</span>
+              <h3 className="bx-step-title">Run Codon Compatibility Engine</h3>
+            </div>
+
+            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
+              Ready to evaluate coding sequence against the <strong>{hostOrganism}</strong> codon usage reference.
+            </p>
+
+            <button
+              type="button"
+              className="bx-btn-primary"
+              style={{ width: '100%', padding: '12px' }}
+              onClick={runCodonAnalysis}
+              disabled={isAnalyzing}
             >
-              <option value="E. coli K12">Escherichia coli K12</option>
-              <option value="S. cerevisiae">Saccharomyces cerevisiae (Yeast)</option>
-              <option value="Homo sapiens">Homo sapiens (Human)</option>
-              <option value="CHO cells">CHO Cells (Hamster)</option>
-              <option value="Spodoptera frugiperda">Spodoptera frugiperda (Sf9 Insect)</option>
-            </select>
-          </div>
-
-          <div className="mock-field-group">
-            <label className="mock-label">Mode Settings</label>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-              <button
-                type="button"
-                className={`bx-tool-btn ${mode === 'analyze' ? 'copied' : ''}`}
-                onClick={() => setMode('analyze')}
-                style={{ flex: 1 }}
-              >
-                Analyze Only
-              </button>
-              <button
-                type="button"
-                className={`bx-tool-btn ${mode === 'optimize' ? 'copied' : ''}`}
-                onClick={() => setMode('optimize')}
-                style={{ flex: 1 }}
-              >
-                Optimize Codons
-              </button>
-            </div>
-          </div>
-
-          <div className="mock-field-group">
-            <label className="mock-label" htmlFor="codonscope-seq">Coding Sequence (CDS - length must be divisible by 3)</label>
-            <textarea
-              id="codonscope-seq"
-              className="mock-textarea"
-              style={{ height: '160px' }}
-              placeholder="Paste coding DNA sequence..."
-              value={rawSeq}
-              onChange={(e) => setRawSeq(e.target.value)}
-            />
-            {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
-          </div>
-        </div>
-
-        {/* Right column: Charts & stats */}
-        <div className="tool-pane-card">
-          <div className="tool-pane-title">Optimization Report</div>
-
-          {results ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              
-              {/* CAI Score visualization circle */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'var(--off)', border: '1px solid var(--border)', borderRadius: '8px', padding: '16px' }}>
-                <div style={{ width: '80px', height: '80px', position: 'relative' }}>
-                  <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
-                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--border)" strokeWidth="3" />
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="15.915"
-                      fill="none"
-                      stroke="var(--accent)"
-                      strokeWidth="3.2"
-                      strokeDasharray="100"
-                      strokeDashoffset={100 - (parseFloat(mode === 'optimize' ? results.optCai : results.cai) * 100)}
-                      strokeLinecap="round"
-                      style={{ transition: 'stroke-dashoffset 0.4s ease' }}
-                    />
-                  </svg>
-                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '15px', fontWeight: '800' }}>
-                    {mode === 'optimize' ? results.optCai : results.cai}
-                  </div>
-                </div>
-                <div>
-                  <span style={{ fontSize: '15px', fontWeight: 'bold', display: 'block' }}>Codon Adaptation Index (CAI)</span>
-                  <span style={{ fontSize: '12px', color: 'var(--text3)' }}>
-                    {parseFloat(mode === 'optimize' ? results.optCai : results.cai) >= 0.8
-                      ? '✓ Strong expression compatibility index.'
-                      : '⚠ Rare codon density may reduce expression levels.'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Rare Codons and GC Stats */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div className="mock-result-box">
-                  <div className="mock-result-value">
-                    {mode === 'optimize' ? results.optRareCount : results.rareCodonCount}
-                  </div>
-                  <div className="mock-result-label">Rare Codons (&lt;10/1000)</div>
-                </div>
-                <div className="mock-result-box">
-                  <div className="mock-result-value">{results.overallGc}%</div>
-                  <div className="mock-result-label">Overall GC Content</div>
-                </div>
-              </div>
-
-              {/* GC codon position breakdown */}
-              <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '12px' }}>
-                <span className="mock-label" style={{ display: 'block', marginBottom: '8px' }}>GC Content by Codon Position</span>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>1st Position GC</span>
-                    <strong>{results.gc1}%</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>2nd Position GC</span>
-                    <strong>{results.gc2}%</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>3rd Position GC</span>
-                    <strong>{results.gc3}%</strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Premature Stop Alert */}
-              {results.hasPrematureStop && (
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: 'var(--red-l)', border: '1px solid var(--red)', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', color: 'var(--red)' }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: '18px', height: '18px', flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <span>Warning: Premature STOP codon found at position {results.stopIndex + 1}bp.</span>
-                </div>
+              {isAnalyzing ? (
+                <>
+                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
+                  Mapping Host Codon Frequencies...
+                </>
+              ) : (
+                'Run Codon Optimization & Analysis'
               )}
+            </button>
 
-              {/* Codon Heatmap Grid */}
-              <div>
-                <span className="mock-label" style={{ display: 'block', marginBottom: '6px' }}>Codon Adaptation Heatmap</span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', maxHeight: '110px', overflowY: 'auto', padding: '8px', border: '1px solid var(--border)', borderRadius: '6px', backgroundColor: 'var(--off)' }}>
-                  {(mode === 'optimize' ? results.optimizedCodonAnalysis : results.codonAnalysis).map((cod, i) => (
-                    <div
-                      key={i}
-                      title={`Pos ${cod.position}: ${cod.codon} (${cod.aminoAcid}) w=${cod.w.toFixed(2)}`}
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '3px',
-                        backgroundColor: getCodonColor(cod.w),
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#fff',
-                        fontWeight: 'bold',
-                        fontSize: '9px',
-                        fontFamily: 'var(--font-mono)',
-                        cursor: 'help'
-                      }}
-                    >
-                      {cod.codon}
-                    </div>
-                  ))}
+            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
+              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: CAI Report */}
+        {activeStep === 4 && results && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 4</span>
+              <h3 className="bx-step-title">Codon Scope report</h3>
+            </div>
+
+            {/* Score Ring */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: 'var(--off)', border: '1px solid var(--border)', borderRadius: '8px', padding: '16px' }}>
+              <div style={{ width: '80px', height: '80px', position: 'relative', flexShrink: 0 }}>
+                <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
+                  <circle cx="18" cy="18" r="15.915" fill="none" stroke="var(--border)" strokeWidth="3.5" />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15.915"
+                    fill="none"
+                    stroke="var(--accent)"
+                    strokeWidth="3.5"
+                    strokeDasharray="100"
+                    strokeDashoffset={100 - (parseFloat(mode === 'optimize' ? results.optCai : results.cai) * 100)}
+                    strokeLinecap="round"
+                    style={{ transition: 'stroke-dashoffset 0.4s ease' }}
+                  />
+                </svg>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '15px', fontWeight: '800', color: 'var(--accent-d)' }}>
+                  {mode === 'optimize' ? results.optCai : results.cai}
                 </div>
               </div>
-
-              {/* Actions row */}
-              <div className="mock-actions-row">
-                <CopyButton text={mode === 'optimize' ? results.optimizedSeq : cleanSequence(rawSeq)} />
-                <ExportButton data={getExportFasta()} filename={`codonscope_${hostOrganism.replace(/\s+/g, '_')}_optimized.fasta`} format="fasta" />
+              <div>
+                <span style={{ fontSize: '15px', fontWeight: 'bold', display: 'block', color: 'var(--text1)' }}>Codon Adaptation Index (CAI)</span>
+                <span style={{ fontSize: '12px', color: 'var(--text3)' }}>
+                  {parseFloat(mode === 'optimize' ? results.optCai : results.cai) >= 0.8
+                    ? '✓ High host translation compatibility score.'
+                    : '⚠ Expression levels might be bottlenecked by rare codons.'}
+                </span>
               </div>
+            </div>
 
+            {/* Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="bx-result-box">
+                <div className="bx-result-val">{mode === 'optimize' ? results.optRareCount : results.rareCodonCount}</div>
+                <div className="bx-result-lbl">Rare Codons (&lt;10/1000)</div>
+              </div>
+              <div className="bx-result-box">
+                <div className="bx-result-val">{results.overallGc}%</div>
+                <div className="bx-result-lbl">Overall GC Content</div>
+              </div>
             </div>
-          ) : (
-            <div className="mock-empty-results">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '48px', height: '48px', color: 'var(--text4)', marginBottom: '12px' }}>
-                <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/>
-              </svg>
-              <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text2)', marginBottom: '4px' }}>No Sequence Analyzed</p>
-              <p style={{ fontSize: '13px', lineHeight: 1.4 }}>Enter or paste target coding DNA to map codon frequencies against host tables.</p>
+
+            {/* GC Breakdowns */}
+            <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', background: 'var(--white)' }}>
+              <span className="bx-label" style={{ display: 'block', marginBottom: '8px' }}>GC Content by Codon Position</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px', color: 'var(--text2)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>1st Position GC</span>
+                  <strong>{results.gc1}%</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>2nd Position GC</span>
+                  <strong>{results.gc2}%</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>3rd Position GC</span>
+                  <strong>{results.gc3}%</strong>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Premature STOP */}
+            {results.hasPrematureStop && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--red)', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', color: 'var(--red)' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: '18px', height: '18px', flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Warning: Premature STOP codon found at index position {results.stopIndex + 1}bp.</span>
+              </div>
+            )}
+
+            {/* Codon Heatmap Grid */}
+            <div>
+              <span className="bx-label" style={{ display: 'block', marginBottom: '6px' }}>Codon Adaptation Heatmap</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxHeight: '110px', overflowY: 'auto', padding: '8px', border: '1px solid var(--border)', borderRadius: '6px', backgroundColor: 'var(--off)' }}>
+                {(mode === 'optimize' ? results.optimizedCodonAnalysis : results.codonAnalysis).map((cod, i) => (
+                  <div
+                    key={i}
+                    title={`Pos ${cod.position}: ${cod.codon} (${cod.aminoAcid}) w=${cod.w.toFixed(2)}`}
+                    style={{
+                      width: '26px',
+                      height: '26px',
+                      borderRadius: '4px',
+                      backgroundColor: getCodonColor(cod.w),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: 'bold',
+                      fontSize: '9.5px',
+                      fontFamily: 'var(--font-mono)',
+                      cursor: 'help'
+                    }}
+                  >
+                    {cod.codon}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '8px' }}>
+              <CopyButton text={mode === 'optimize' ? results.optimizedSeq : cleanSequence(rawSeq)} />
+              <ExportButton data={getExportFasta()} filename={`codonscope_${hostOrganism.replace(/\s+/g, '_')}_optimized.fasta`} format="fasta" />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={resetAnalysis}
+                style={{ background: 'var(--text2)', boxShadow: 'none' }}
+              >
+                ← Analyze Another Sequence
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </ToolShell>
   );

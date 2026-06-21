@@ -1,24 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ToolShell, { CopyButton, ExportButton } from '../../components/tools/ToolShell';
 import { cleanSequence, reverseComplement, NN_THERMODYNAMICS } from '../../utils/bioutils';
-import useDebouncedValue from '../../hooks/useDebouncedValue';
 
 export default function PrimerCheck() {
+  const [activeStep, setActiveStep] = useState(1);
   const [fwdInput, setFwdInput] = useState('');
   const [revInput, setRevInput] = useState('');
   const [probeInput, setProbeInput] = useState('');
   const [targetAnnealTemp, setTargetAnnealTemp] = useState('');
 
-  const debouncedFwd = useDebouncedValue(fwdInput, 250);
-  const debouncedRev = useDebouncedValue(revInput, 250);
-  const debouncedProbe = useDebouncedValue(probeInput, 250);
-  const debouncedAnneal = useDebouncedValue(targetAnnealTemp, 250);
-
   const [results, setResults] = useState(null);
   const [validationError, setValidationError] = useState('');
-  const [overallStatus, setOverallStatus] = useState('empty'); // pass, warn, empty
+  const [overallStatus, setOverallStatus] = useState('empty');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // DNA Nearest-Neighbor Tm helper (standard parameters: 50mM Na+, 1.5mM Mg2+, 250nM primer)
+  const steps = [
+    { number: 1, title: 'Oligo Inputs' },
+    { number: 2, title: 'Reaction settings' },
+    { number: 3, title: 'Run Diagnostics' },
+    { number: 4, title: 'Checklist Report' }
+  ];
+
   const calculateTmNN = (seq) => {
     const clean = cleanSequence(seq);
     if (!clean || clean.length < 4) return 0;
@@ -27,7 +29,6 @@ export default function PrimerCheck() {
     let dS = 0;
     const length = clean.length;
 
-    // Sum dinucleotides
     for (let i = 0; i < length - 1; i++) {
       const step = clean.substring(i, i + 2);
       const params = NN_THERMODYNAMICS[step];
@@ -37,7 +38,6 @@ export default function PrimerCheck() {
       }
     }
 
-    // Initiation
     const first = clean[0];
     const last = clean[length - 1];
     if (first === 'G' || first === 'C') {
@@ -55,17 +55,15 @@ export default function PrimerCheck() {
       dS += NN_THERMODYNAMICS.init_AT.ds;
     }
 
-    // Symmetry correction
     if (clean === reverseComplement(clean)) {
       dH += NN_THERMODYNAMICS.symmetry.dh;
       dS += NN_THERMODYNAMICS.symmetry.ds;
     }
 
     const R = 1.987;
-    const Ct = 250 * 1e-9; // 250 nM standard
+    const Ct = 250 * 1e-9;
     const rawTm = (dH * 1000) / (dS + R * Math.log(Ct / 4)) - 273.15;
 
-    // Owczarzy Salt Correction (50mM Na+, 1.5mM Mg2+)
     const saltM = (50 + 120 * Math.sqrt(1.5)) / 1000;
     const lnSalt = Math.log(saltM);
     const gcFrac = clean.replace(/[^GC]/g, '').length / length;
@@ -75,14 +73,11 @@ export default function PrimerCheck() {
     return correctedTm;
   };
 
-  // Complementary Base Check helper
   const isComplementary = (b1, b2) => {
     const pairs = { A: 'T', T: 'A', G: 'C', C: 'G', U: 'A' };
     return pairs[b1] === b2;
   };
 
-  // Complementarity slider alignment (dimer finder)
-  // Returns: { maxContig, maxTotal, alignmentView, risk }
   const findDimerization = (seq1, seq2, name1, name2) => {
     const s1 = cleanSequence(seq1);
     const s2 = cleanSequence(seq2);
@@ -92,8 +87,6 @@ export default function PrimerCheck() {
     let bestOffset = 0;
     let bestTotal = 0;
 
-    // Slide S2 relative to S1
-    // Offset is start index of S2 relative to S1
     for (let offset = -(s2.length - 1); offset < s1.length; offset++) {
       let currentContig = 0;
       let tempContig = 0;
@@ -102,7 +95,6 @@ export default function PrimerCheck() {
       for (let j = 0; j < s2.length; j++) {
         const i = offset + j;
         if (i >= 0 && i < s1.length) {
-          // Compare S1[i] and S2[s2.length - 1 - j] (antiparallel binding)
           const base1 = s1[i];
           const base2 = s2[s2.length - 1 - j];
           if (isComplementary(base1, base2)) {
@@ -124,26 +116,14 @@ export default function PrimerCheck() {
       }
     }
 
-    // Check if dimer is near 3' end (Forward: end of s1, Reverse: start of s2)
-    // 3' end of S1 is index s1.length - 1. 3' end of S2 is index s2.length - 1.
-    // In our antiparallel scan, S2 is reversed. So S2's 3' end aligns near S1's 5' end, and vice versa.
-    // Dimerization at 3' end is dangerous.
     let is3PrimeRisk = false;
-    
-    // Check if the match spans near 3' end of S1 (index s1.length - 1) or S2 (which aligns with offset + s2.length - 1)
-    // If the offset aligns S2's 3' end with S1's 5' region, or S1's 3' end with S2's 5' region.
-    // Specifically, let's flag if a contiguous run of >= 3bp is within 3 bases of either 3' end.
     const s1_3p_start = s1.length - 4;
     const s2_3p_start = s2.length - 4;
 
-    // Verify 3' matches
     for (let j = 0; j < s2.length; j++) {
       const i = bestOffset + j;
       if (i >= 0 && i < s1.length) {
-        const base1 = s1[i];
-        const base2 = s2[s2.length - 1 - j];
-        if (isComplementary(base1, base2)) {
-          // Check if index corresponds to 3' region
+        if (isComplementary(s1[i], s2[s2.length - 1 - j])) {
           if (i >= s1_3p_start || (s2.length - 1 - j) >= s2_3p_start) {
             if (maxContig >= 3) {
               is3PrimeRisk = true;
@@ -155,40 +135,24 @@ export default function PrimerCheck() {
 
     let risk = 'Low Risk';
     if (maxContig >= 4 && is3PrimeRisk) {
-      risk = 'High Risk (3\' Dimer)';
+      risk = "High Risk (3' Dimer)";
     } else if (maxContig >= 4) {
       risk = 'Moderate Risk (Internal)';
     }
 
-    // Build visual alignment text
-    // Ref:   5'-ATGCGATC-3'
-    //           ||||
-    // Query: 3'-TACGCTAG-5'
     let topStr = `5'-${s1}-3'`;
     let midStr = '   ';
     let btmStr = '';
 
-    const revS2 = s2.split('').reverse().map(b => {
-      if (b === 'A') return 'T';
-      if (b === 'T') return 'A';
-      if (b === 'G') return 'C';
-      if (b === 'C') return 'G';
-      return b;
-    }).join('');
-
-    // Align strings padding
     const padding = Math.abs(bestOffset);
     if (bestOffset >= 0) {
       btmStr = '   ' + ' '.repeat(bestOffset) + `3'-${s2.split('').reverse().join('')}-5'`;
       midStr = '   ' + ' '.repeat(bestOffset) + '   ';
-      // Fill match line
-      let matchCount = 0;
       for (let j = 0; j < s2.length; j++) {
         const i = bestOffset + j;
         if (i >= 0 && i < s1.length) {
           if (isComplementary(s1[i], s2[s2.length - 1 - j])) {
             midStr += '|';
-            matchCount++;
           } else {
             midStr += ' ';
           }
@@ -198,7 +162,6 @@ export default function PrimerCheck() {
       topStr = '   ' + ' '.repeat(padding) + `5'-${s1}-3'`;
       btmStr = `3'-${s2.split('').reverse().join('')}-5'`;
       midStr = '   ';
-      // Fill match line
       for (let j = 0; j < s2.length; j++) {
         const i = bestOffset + j;
         if (i >= 0 && i < s1.length) {
@@ -225,8 +188,6 @@ export default function PrimerCheck() {
     };
   };
 
-  // Hairpin Loop finder
-  // Returns: { found, stem, loop, visualText }
   const findHairpin = (seq, name) => {
     const s = cleanSequence(seq);
     if (!s || s.length < 10) return { found: false };
@@ -234,10 +195,7 @@ export default function PrimerCheck() {
     let bestStem = '';
     let bestLoop = '';
     let bestStemLen = 0;
-    let bestI = -1;
-    let bestJ = -1;
 
-    // Scan for stems >= 3bp separated by loop >= 3nt
     for (let i = 0; i < s.length - 8; i++) {
       for (let len = 3; len <= 8; len++) {
         if (i + len * 2 + 3 > s.length) continue;
@@ -255,8 +213,6 @@ export default function PrimerCheck() {
               bestStemLen = len;
               bestStem = stem1;
               bestLoop = s.substring(i + len, j);
-              bestI = i;
-              bestJ = j;
             }
           }
         }
@@ -276,130 +232,135 @@ export default function PrimerCheck() {
     return { found: false };
   };
 
-  // Run validation checks
-  useEffect(() => {
-    setValidationError('');
-    
-    const fwd = cleanSequence(debouncedFwd);
-    const rev = cleanSequence(debouncedRev);
-    const probe = cleanSequence(debouncedProbe);
+  const handleNextFromStep1 = () => {
+    const fwd = cleanSequence(fwdInput);
+    const rev = cleanSequence(revInput);
 
     if (!fwd || !rev) {
-      setResults(null);
-      setOverallStatus('empty');
+      setValidationError('Please enter both Forward and Reverse primer sequences.');
       return;
     }
 
-    // Validation checks
     const invalidFwd = fwd.replace(/[ACGUTN]/g, '');
     const invalidRev = rev.replace(/[ACGUTN]/g, '');
     if (invalidFwd.length > 0 || invalidRev.length > 0) {
       setValidationError('Primers contain invalid nucleotides. Use standard A/C/G/T/U.');
-      setResults(null);
       return;
     }
 
-    // 1. Individual metrics
-    const fwdTm = calculateTmNN(fwd);
-    const revTm = calculateTmNN(rev);
-    const probeTm = probe ? calculateTmNN(probe) : 0;
+    setValidationError('');
+    setActiveStep(2);
+  };
 
-    const fwdGc = (fwd.replace(/[^GC]/g, '').length / fwd.length) * 100;
-    const revGc = (rev.replace(/[^GC]/g, '').length / rev.length) * 100;
-    const probeGc = probe ? (probe.replace(/[^GC]/g, '').length / probe.length) * 100 : 0;
+  const runDiagnostics = () => {
+    const fwd = cleanSequence(fwdInput);
+    const rev = cleanSequence(revInput);
+    const probe = cleanSequence(probeInput);
 
-    // 2. Self-Dimers
-    const fwdSelf = findDimerization(fwd, fwd, 'Forward', 'Forward');
-    const revSelf = findDimerization(rev, rev, 'Reverse', 'Reverse');
-    const probeSelf = probe ? findDimerization(probe, probe, 'Probe', 'Probe') : null;
-
-    // 3. Hetero-Dimers
-    const fwdRevHetero = findDimerization(fwd, rev, 'Forward', 'Reverse');
-    const fwdProbeHetero = probe ? findDimerization(fwd, probe, 'Forward', 'Probe') : null;
-    const revProbeHetero = probe ? findDimerization(rev, probe, 'Reverse', 'Probe') : null;
-
-    // 4. Hairpins
-    const fwdHairpin = findHairpin(fwd, 'Forward');
-    const revHairpin = findHairpin(rev, 'Reverse');
-    const probeHairpin = probe ? findHairpin(probe, 'Probe') : { found: false };
-
-    // 5. 3' GC Clamp
-    // Forward last 5 bases:
-    const fwdLast5 = fwd.substring(fwd.length - 5);
-    const fwdGcCount = fwdLast5.replace(/[^GC]/g, '').length;
-    let fwdClampStatus = 'pass';
-    let fwdClampMsg = `${fwdGcCount} G/C bases in last 5 bases.`;
-    if (fwdGcCount === 0) {
-      fwdClampStatus = 'warn';
-      fwdClampMsg = 'Weak clamp: 0 G/C in last 5 bases (unstable 3\' priming).';
-    } else if (fwdGcCount > 3) {
-      fwdClampStatus = 'warn';
-      fwdClampMsg = `Sticky clamp: ${fwdGcCount} G/C in last 5 bases (high mispriming risk).`;
+    if (!fwd || !rev) {
+      setValidationError('Please enter Forward and Reverse primer sequences.');
+      setActiveStep(1);
+      return;
     }
 
-    // Reverse last 5 bases:
-    const revLast5 = rev.substring(rev.length - 5);
-    const revGcCount = revLast5.replace(/[^GC]/g, '').length;
-    let revClampStatus = 'pass';
-    let revClampMsg = `${revGcCount} G/C bases in last 5 bases.`;
-    if (revGcCount === 0) {
-      revClampStatus = 'warn';
-      revClampMsg = 'Weak clamp: 0 G/C in last 5 bases (unstable 3\' priming).';
-    } else if (revGcCount > 3) {
-      revClampStatus = 'warn';
-      revClampMsg = `Sticky clamp: ${revGcCount} G/C in last 5 bases (high mispriming risk).`;
-    }
+    setIsAnalyzing(true);
+    setTimeout(() => {
+      setIsAnalyzing(false);
 
-    // 6. Tm Matching delta check
-    const tmDelta = Math.abs(fwdTm - revTm);
-    let tmDeltaStatus = 'pass';
-    let tmDeltaMsg = `Tm Difference is ${tmDelta.toFixed(1)}°C (ideal <= 5°C).`;
-    if (tmDelta > 5) {
-      tmDeltaStatus = 'warn';
-      tmDeltaMsg = `High delta Tm: ${tmDelta.toFixed(1)}°C difference can cause unbalanced amplification.`;
-    }
+      const fwdTm = calculateTmNN(fwd);
+      const revTm = calculateTmNN(rev);
+      const probeTm = probe ? calculateTmNN(probe) : 0;
 
-    // Target Annealing comparison
-    let annealWarning = '';
-    const annealNum = parseFloat(debouncedAnneal);
-    if (!isNaN(annealNum) && annealNum > 0) {
-      const idealAnneal = Math.min(fwdTm, revTm) - 5;
-      if (Math.abs(annealNum - idealAnneal) > 3) {
-        annealWarning = `Annealing temperature (${annealNum}°C) deviates from ideal (${idealAnneal.toFixed(1)}°C, 5°C below lowest Tm).`;
+      const fwdGc = (fwd.replace(/[^GC]/g, '').length / fwd.length) * 100;
+      const revGc = (rev.replace(/[^GC]/g, '').length / rev.length) * 100;
+      const probeGc = probe ? (probe.replace(/[^GC]/g, '').length / probe.length) * 100 : 0;
+
+      const fwdSelf = findDimerization(fwd, fwd, 'Forward', 'Forward');
+      const revSelf = findDimerization(rev, rev, 'Reverse', 'Reverse');
+      const probeSelf = probe ? findDimerization(probe, probe, 'Probe', 'Probe') : null;
+
+      const fwdRevHetero = findDimerization(fwd, rev, 'Forward', 'Reverse');
+      const fwdProbeHetero = probe ? findDimerization(fwd, probe, 'Forward', 'Probe') : null;
+      const revProbeHetero = probe ? findDimerization(rev, probe, 'Reverse', 'Probe') : null;
+
+      const fwdHairpin = findHairpin(fwd, 'Forward');
+      const revHairpin = findHairpin(rev, 'Reverse');
+      const probeHairpin = probe ? findHairpin(probe, 'Probe') : { found: false };
+
+      const fwdLast5 = fwd.substring(fwd.length - 5);
+      const fwdGcCount = fwdLast5.replace(/[^GC]/g, '').length;
+      let fwdClampStatus = 'pass';
+      let fwdClampMsg = `${fwdGcCount} G/C bases in last 5 bases.`;
+      if (fwdGcCount === 0) {
+        fwdClampStatus = 'warn';
+        fwdClampMsg = 'Weak clamp: 0 G/C in last 5 bases (unstable 3\' priming).';
+      } else if (fwdGcCount > 3) {
+        fwdClampStatus = 'warn';
+        fwdClampMsg = `Sticky clamp: ${fwdGcCount} G/C in last 5 bases (high mispriming risk).`;
       }
-    }
 
-    // Check if issues found to determine status
-    const hasWarnings = 
-      fwdSelf?.risk.startsWith('High') || revSelf?.risk.startsWith('High') ||
-      fwdRevHetero?.risk.startsWith('High') ||
-      fwdHairpin.found || revHairpin.found ||
-      fwdClampStatus === 'warn' || revClampStatus === 'warn' ||
-      tmDeltaStatus === 'warn' || (probe && (probeSelf?.risk.startsWith('High') || fwdProbeHetero?.risk.startsWith('High') || revProbeHetero?.risk.startsWith('High') || probeHairpin.found));
-
-    setOverallStatus(hasWarnings ? 'warn' : 'pass');
-
-    setResults({
-      fwd: { seq: fwd, len: fwd.length, gc: fwdGc.toFixed(1), tm: fwdTm.toFixed(1) },
-      rev: { seq: rev, len: rev.length, gc: revGc.toFixed(1), tm: revTm.toFixed(1) },
-      probe: probe ? { seq: probe, len: probe.length, gc: probeGc.toFixed(1), tm: probeTm.toFixed(1) } : null,
-      checks: {
-        fwdSelf,
-        revSelf,
-        probeSelf,
-        fwdRevHetero,
-        fwdProbeHetero,
-        revProbeHetero,
-        fwdHairpin,
-        revHairpin,
-        probeHairpin,
-        fwdClamp: { status: fwdClampStatus, msg: fwdClampMsg },
-        revClamp: { status: revClampStatus, msg: revClampMsg },
-        tmDelta: { status: tmDeltaStatus, msg: tmDeltaMsg, val: tmDelta.toFixed(1) },
-        annealWarning
+      const revLast5 = rev.substring(rev.length - 5);
+      const revGcCount = revLast5.replace(/[^GC]/g, '').length;
+      let revClampStatus = 'pass';
+      let revClampMsg = `${revGcCount} G/C bases in last 5 bases.`;
+      if (revGcCount === 0) {
+        revClampStatus = 'warn';
+        revClampMsg = 'Weak clamp: 0 G/C in last 5 bases (unstable 3\' priming).';
+      } else if (revGcCount > 3) {
+        revClampStatus = 'warn';
+        revClampMsg = `Sticky clamp: ${revGcCount} G/C in last 5 bases (high mispriming risk).`;
       }
-    });
-  }, [debouncedFwd, debouncedRev, debouncedProbe, debouncedAnneal]);
+
+      const tmDelta = Math.abs(fwdTm - revTm);
+      let tmDeltaStatus = 'pass';
+      let tmDeltaMsg = `Tm Difference is ${tmDelta.toFixed(1)}°C (ideal <= 5°C).`;
+      if (tmDelta > 5) {
+        tmDeltaStatus = 'warn';
+        tmDeltaMsg = `High delta Tm: ${tmDelta.toFixed(1)}°C difference can cause unbalanced amplification.`;
+      }
+
+      let annealWarning = '';
+      const annealNum = parseFloat(targetAnnealTemp);
+      if (!isNaN(annealNum) && annealNum > 0) {
+        const idealAnneal = Math.min(fwdTm, revTm) - 5;
+        if (Math.abs(annealNum - idealAnneal) > 3) {
+          annealWarning = `Annealing temperature (${annealNum}°C) deviates from ideal (${idealAnneal.toFixed(1)}°C, 5°C below lowest Tm).`;
+        }
+      }
+
+      const hasWarnings = 
+        fwdSelf?.risk.startsWith('High') || revSelf?.risk.startsWith('High') ||
+        fwdRevHetero?.risk.startsWith('High') ||
+        fwdHairpin.found || revHairpin.found ||
+        fwdClampStatus === 'warn' || revClampStatus === 'warn' ||
+        tmDeltaStatus === 'warn' || (probe && (probeSelf?.risk.startsWith('High') || fwdProbeHetero?.risk.startsWith('High') || revProbeHetero?.risk.startsWith('High') || probeHairpin.found));
+
+      setOverallStatus(hasWarnings ? 'warn' : 'pass');
+
+      setResults({
+        fwd: { seq: fwd, len: fwd.length, gc: fwdGc.toFixed(1), tm: fwdTm.toFixed(1) },
+        rev: { seq: rev, len: rev.length, gc: revGc.toFixed(1), tm: revTm.toFixed(1) },
+        probe: probe ? { seq: probe, len: probe.length, gc: probeGc.toFixed(1), tm: probeTm.toFixed(1) } : null,
+        checks: {
+          fwdSelf,
+          revSelf,
+          probeSelf,
+          fwdRevHetero,
+          fwdProbeHetero,
+          revProbeHetero,
+          fwdHairpin,
+          revHairpin,
+          probeHairpin,
+          fwdClamp: { status: fwdClampStatus, msg: fwdClampMsg },
+          revClamp: { status: revClampStatus, msg: revClampMsg },
+          tmDelta: { status: tmDeltaStatus, msg: tmDeltaMsg, val: tmDelta.toFixed(1) },
+          annealWarning
+        }
+      });
+
+      setActiveStep(4);
+    }, 850);
+  };
 
   const loadSample = (withProbe = false) => {
     setFwdInput('CCTGGAGATCGTGGAGAACA');
@@ -409,6 +370,7 @@ export default function PrimerCheck() {
     } else {
       setProbeInput('');
     }
+    setValidationError('');
   };
 
   const getCopyText = () => {
@@ -442,354 +404,348 @@ Hairpins: Fwd: ${checks.fwdHairpin.found ? 'Yes' : 'No'}, Rev: ${checks.revHairp
     return csv;
   };
 
+  const resetAnalysis = () => {
+    setResults(null);
+    setActiveStep(1);
+  };
+
+  const renderStepTracker = () => (
+    <div className="bx-step-tracker">
+      {steps.map((s) => {
+        const isCompleted = s.number < activeStep;
+        const isActive = s.number === activeStep;
+        const isDisabled = s.number > activeStep && !results;
+        return (
+          <div
+            key={s.number}
+            className={`bx-step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isDisabled ? 'disabled' : ''}`}
+            onClick={() => !isDisabled && setActiveStep(s.number)}
+          >
+            <span className="bx-step-circle">{s.number}</span>
+            <span>{s.title}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <ToolShell slug="primercheck">
-      <style>{`
-        .pc-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 24px;
-        }
-        @media (min-width: 1024px) {
-          .pc-grid {
-            grid-template-columns: 1.2fr 1.8fr;
-          }
-        }
-        .summary-banner {
-          border-radius: var(--radius);
-          padding: 14px 20px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-weight: 700;
-          font-size: 15px;
-          margin-bottom: 12px;
-        }
-        .summary-banner.pass {
-          background-color: var(--g50);
-          color: var(--accent-d);
-          border: 1px solid var(--border2);
-        }
-        .summary-banner.warn {
-          background-color: var(--amber-l);
-          color: var(--amber);
-          border: 1px solid var(--amber);
-        }
-        .primers-summary-row {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 12px;
-          margin-bottom: 20px;
-        }
-        .primer-detail-card {
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 14px;
-          background-color: var(--white);
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-        .primer-card-label {
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: var(--text3);
-          font-weight: 700;
-        }
-        .primer-card-seq {
-          font-family: var(--font-mono, monospace);
-          font-size: 13.5px;
-          word-break: break-all;
-          color: var(--text1);
-        }
-        .checklist-item {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          border-bottom: 1px solid var(--border);
-          padding-bottom: 12px;
-          margin-bottom: 12px;
-        }
-        .checklist-row-top {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .checklist-title {
-          font-size: 14px;
-          font-weight: 700;
-          color: var(--text1);
-        }
-        .checklist-details {
-          font-size: 12.5px;
-          color: var(--text3);
-          line-height: 1.4;
-        }
-        .alignment-svg-container {
-          background-color: var(--off);
-          border: 1px solid var(--border);
-          border-radius: 6px;
-          padding: 12px;
-          font-family: var(--font-mono, monospace);
-          font-size: 13px;
-          line-height: 1.5;
-          margin-top: 8px;
-          white-space: pre;
-          overflow-x: auto;
-        }
-      `}</style>
+      {renderStepTracker()}
 
-      <div className="pc-grid">
-        
-        {/* Left column: Inputs */}
-        <div className="tool-pane-card">
-          <div className="tool-pane-title">
-            <span>Primer Sequences</span>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button type="button" className="mock-sample-btn" onClick={() => loadSample(false)}>Load Standard</button>
-              <button type="button" className="mock-sample-btn" onClick={() => loadSample(true)}>Load qPCR Probe</button>
+      <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+        {/* Step 1: Oligo Inputs */}
+        {activeStep === 1 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 1</span>
+              <h3 className="bx-step-title">Enter Oligo Sequences</h3>
+            </div>
+
+            <div className="bx-field-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label htmlFor="fwd-primer-input" className="bx-label">Forward Primer (5' → 3')</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button type="button" className="bx-btn-sample" onClick={() => loadSample(false)}>Load Standard PCR Pair</button>
+                  <span style={{ color: 'var(--border2)' }}>|</span>
+                  <button type="button" className="bx-btn-sample" onClick={() => loadSample(true)}>Load qPCR Probe Set</button>
+                </div>
+              </div>
+              <input
+                id="fwd-primer-input"
+                type="text"
+                className="bx-input"
+                placeholder="e.g. CCTGGAGATCGTGGAGAACA"
+                value={fwdInput}
+                onChange={(e) => {
+                  setFwdInput(e.target.value.toUpperCase());
+                  setValidationError('');
+                }}
+              />
+            </div>
+
+            <div className="bx-field-group">
+              <label htmlFor="rev-primer-input" className="bx-label">Reverse Primer (5' → 3')</label>
+              <input
+                id="rev-primer-input"
+                type="text"
+                className="bx-input"
+                placeholder="e.g. TCGTGGTACTTGGGGTTGAT"
+                value={revInput}
+                onChange={(e) => {
+                  setRevInput(e.target.value.toUpperCase());
+                  setValidationError('');
+                }}
+              />
+            </div>
+
+            <div className="bx-field-group">
+              <label htmlFor="probe-primer-input" className="bx-label">qPCR Probe (Optional, 5' → 3')</label>
+              <input
+                id="probe-primer-input"
+                type="text"
+                className="bx-input"
+                placeholder="e.g. AAGCGTGCGATCGATCGATC"
+                value={probeInput}
+                onChange={(e) => {
+                  setProbeInput(e.target.value.toUpperCase());
+                  setValidationError('');
+                }}
+              />
+              {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={handleNextFromStep1}
+                disabled={!fwdInput.trim() || !revInput.trim()}
+              >
+                Next: Configure Reaction Settings →
+              </button>
             </div>
           </div>
+        )}
 
-          {/* Forward */}
-          <div className="mock-field-group">
-            <label htmlFor="fwd-primer-input" className="mock-label">Forward Primer (5' → 3')</label>
-            <input
-              id="fwd-primer-input"
-              type="text"
-              className="mock-textarea"
-              style={{ height: '42px', padding: '8px 12px' }}
-              placeholder="e.g. CCTGGAGATCGTGGAGAACA"
-              value={fwdInput}
-              onChange={(e) => setFwdInput(e.target.value.toUpperCase())}
-            />
+        {/* Step 2: Settings */}
+        {activeStep === 2 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 2</span>
+              <h3 className="bx-step-title">Configure Reaction Parameters</h3>
+            </div>
+
+            <div className="bx-field-group">
+              <label htmlFor="anneal-temp-input" className="bx-label">Target Annealing Temperature (°C, Optional)</label>
+              <input
+                id="anneal-temp-input"
+                type="number"
+                className="bx-input"
+                placeholder="e.g. 55"
+                value={targetAnnealTemp}
+                onChange={(e) => setTargetAnnealTemp(e.target.value)}
+              />
+              <p style={{ fontSize: '12px', color: 'var(--text3)', fontStyle: 'italic', marginTop: '4px' }}>
+                If specified, the diagnostics report will flag any deviation from the ideal PCR annealing thermal profile.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
+              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Analysis →</button>
+            </div>
           </div>
+        )}
 
-          {/* Reverse */}
-          <div className="mock-field-group">
-            <label htmlFor="rev-primer-input" className="mock-label">Reverse Primer (5' → 3')</label>
-            <input
-              id="rev-primer-input"
-              type="text"
-              className="mock-textarea"
-              style={{ height: '42px', padding: '8px 12px' }}
-              placeholder="e.g. TCGTGGTACTTGGGGTTGAT"
-              value={revInput}
-              onChange={(e) => setRevInput(e.target.value.toUpperCase())}
-            />
+        {/* Step 3: Run Diagnostics */}
+        {activeStep === 3 && (
+          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
+            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
+              <span className="bx-step-badge">Step 3</span>
+              <h3 className="bx-step-title">Execute Primer Diagnostics</h3>
+            </div>
+
+            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
+              Scanning hybridization structures for primer-dimers, hairpins, GC clamp stability, and Tm compatibility.
+            </p>
+
+            <button
+              type="button"
+              className="bx-btn-primary"
+              style={{ width: '100%', padding: '12px' }}
+              onClick={runDiagnostics}
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <>
+                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
+                  Simulating Hybridization Thermals...
+                </>
+              ) : (
+                'Run Primer Diagnostics & Checks'
+              )}
+            </button>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
+              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
+            </div>
           </div>
+        )}
 
-          {/* Probe */}
-          <div className="mock-field-group">
-            <label htmlFor="probe-primer-input" className="mock-label">qPCR Probe (Optional, 5' → 3')</label>
-            <input
-              id="probe-primer-input"
-              type="text"
-              className="mock-textarea"
-              style={{ height: '42px', padding: '8px 12px' }}
-              placeholder="e.g. AAGCGTGCGATCGATCGATC"
-              value={probeInput}
-              onChange={(e) => setProbeInput(e.target.value.toUpperCase())}
-            />
-          </div>
+        {/* Step 4: Results */}
+        {activeStep === 4 && results && (
+          <div className="bx-step-section" style={{ alignItems: 'stretch' }}>
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 4</span>
+              <h3 className="bx-step-title">Primer Diagnostics Report</h3>
+            </div>
 
-          {/* Target Annealing */}
-          <div className="mock-field-group">
-            <label htmlFor="anneal-temp-input" className="mock-label">Target Annealing Temp (°C, Optional)</label>
-            <input
-              id="anneal-temp-input"
-              type="number"
-              className="mock-textarea"
-              style={{ height: '42px', padding: '8px 12px' }}
-              placeholder="e.g. 55"
-              value={targetAnnealTemp}
-              onChange={(e) => setTargetAnnealTemp(e.target.value)}
-            />
-          </div>
+            {/* Overall status */}
+            {overallStatus === 'pass' ? (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: 'var(--g50)', border: '1px solid var(--border2)', padding: '12px', borderRadius: '6px', fontSize: '13.5px', color: 'var(--accent-d)', fontWeight: 'bold' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: '18px', height: '18px', flexShrink: 0 }}><polyline points="20 6 9 17 5 12"/></svg>
+                <span>PCR Primer Pair OK: No dimerization or Tm mismatches found.</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid var(--amber)', padding: '12px', borderRadius: '6px', fontSize: '13.5px', color: 'var(--amber-d)', fontWeight: 'bold' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: '18px', height: '18px', flexShrink: 0 }}><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Potential Design Warnings. Check GC clamp strengths or dimer maps below.</span>
+              </div>
+            )}
 
-          {validationError && <p style={{ color: 'var(--red)', fontSize: '13px', marginTop: '10px' }}>{validationError}</p>}
-        </div>
+            {/* Individual summaries */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ borderLeft: '4px solid var(--accent)', padding: '8px 12px', background: 'var(--off)', borderRadius: '0 6px 6px 0' }}>
+                <div style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', color: 'var(--text3)' }}>Forward Primer</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', wordBreak: 'break-all', color: 'var(--text1)' }}>{results.fwd.seq}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text3)', marginTop: '4px' }}>
+                  <b>Tm:</b> {results.fwd.tm}°C &bull; <b>GC:</b> {results.fwd.gc}% &bull; <b>Length:</b> {results.fwd.len} nt
+                </div>
+              </div>
 
-        {/* Right column: Results & Visualizations */}
-        <div className="tool-pane-card">
-          <div className="tool-pane-title">Primer Diagnostics</div>
+              <div style={{ borderLeft: '4px solid var(--accent-d)', padding: '8px 12px', background: 'var(--off)', borderRadius: '0 6px 6px 0' }}>
+                <div style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', color: 'var(--text3)' }}>Reverse Primer</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', wordBreak: 'break-all', color: 'var(--text1)' }}>{results.rev.seq}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text3)', marginTop: '4px' }}>
+                  <b>Tm:</b> {results.rev.tm}°C &bull; <b>GC:</b> {results.rev.gc}% &bull; <b>Length:</b> {results.rev.len} nt
+                </div>
+              </div>
 
-          {results ? (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {results.probe && (
+                <div style={{ borderLeft: '4px solid var(--amber)', padding: '8px 12px', background: 'var(--off)', borderRadius: '0 6px 6px 0' }}>
+                  <div style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', color: 'var(--text3)' }}>qPCR Probe</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', wordBreak: 'break-all', color: 'var(--text1)' }}>{results.probe.seq}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text3)', marginTop: '4px' }}>
+                    <b>Tm:</b> {results.probe.tm}°C &bull; <b>GC:</b> {results.probe.gc}% &bull; <b>Length:</b> {results.probe.len} nt
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Checklist */}
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {/* Overall status banner */}
-              {overallStatus === 'pass' && (
-                <div className="summary-banner pass">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: '20px', height: '20px' }}><polyline points="20 6 9 17 5 12"/></svg>
-                  <span>Primer Pair OK: No severe dimerization or Tm issues flagged.</span>
+              {/* Tm Compatibility */}
+              <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13.5px', fontWeight: 'bold', color: 'var(--text1)' }}>Melting Temperature Compatibility</span>
+                  <span className={`sc-badge ${results.checks.tmDelta.status}`}>
+                    {results.checks.tmDelta.status === 'pass' ? 'PASS' : 'WARN'}
+                  </span>
                 </div>
-              )}
-              {overallStatus === 'warn' && (
-                <div className="summary-banner warn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: '20px', height: '20px' }}><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  <span>Potential design alerts found. Verify 3' clamps or dimerization risks.</span>
-                </div>
-              )}
+                <p style={{ fontSize: '12.5px', color: 'var(--text3)', margin: '4px 0 0' }}>{results.checks.tmDelta.msg}</p>
+                {results.checks.annealWarning && (
+                  <p style={{ fontSize: '12px', color: 'var(--amber-d)', fontWeight: 'bold', margin: '4px 0 0' }}>
+                    ⚠ {results.checks.annealWarning}
+                  </p>
+                )}
+              </div>
 
-              {/* Primer detail cards */}
-              <div className="primers-summary-row">
-                <div className="primer-detail-card" style={{ borderLeft: '4px solid var(--accent)' }}>
-                  <span className="primer-card-label">Forward Primer</span>
-                  <span className="primer-card-seq">{results.fwd.seq}</span>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginTop: '4px', color: 'var(--text3)' }}>
-                    <span><b>Tm:</b> {results.fwd.tm}°C</span>
-                    <span><b>GC:</b> {results.fwd.gc}%</span>
-                    <span><b>Len:</b> {results.fwd.len}nt</span>
-                  </div>
+              {/* Self Dimerization */}
+              <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13.5px', fontWeight: 'bold', color: 'var(--text1)' }}>Self-Dimerization Scan</span>
+                  <span className={`sc-badge ${results.checks.fwdSelf.risk.startsWith('High') || results.checks.revSelf.risk.startsWith('High') ? 'warn' : 'pass'}`}>
+                    {results.checks.fwdSelf.risk.startsWith('High') || results.checks.revSelf.risk.startsWith('High') ? 'ALERT' : 'PASS'}
+                  </span>
                 </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--text3)', margin: '4px 0 0' }}>
+                  Fwd self-complementarity: <b>{results.checks.fwdSelf.maxContig} bp</b> ({results.checks.fwdSelf.risk})<br/>
+                  Rev self-complementarity: <b>{results.checks.revSelf.maxContig} bp</b> ({results.checks.revSelf.risk})
+                </p>
 
-                <div className="primer-detail-card" style={{ borderLeft: '4px solid var(--accent-d)' }}>
-                  <span className="primer-card-label">Reverse Primer</span>
-                  <span className="primer-card-seq">{results.rev.seq}</span>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginTop: '4px', color: 'var(--text3)' }}>
-                    <span><b>Tm:</b> {results.rev.tm}°C</span>
-                    <span><b>GC:</b> {results.rev.gc}%</span>
-                    <span><b>Len:</b> {results.rev.len}nt</span>
-                  </div>
-                </div>
-
-                {results.probe && (
-                  <div className="primer-detail-card" style={{ borderLeft: '4px solid var(--amber)' }}>
-                    <span className="primer-card-label">qPCR Probe</span>
-                    <span className="primer-card-seq">{results.probe.seq}</span>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginTop: '4px', color: 'var(--text3)' }}>
-                      <span><b>Tm:</b> {results.probe.tm}°C</span>
-                      <span><b>GC:</b> {results.probe.gc}%</span>
-                      <span><b>Len:</b> {results.probe.len}nt</span>
-                    </div>
+                {(results.checks.fwdSelf.maxContig >= 4 || results.checks.revSelf.maxContig >= 4) && (
+                  <div style={{ backgroundColor: 'var(--off)', border: '1px solid var(--border)', borderRadius: '6px', padding: '10px', marginTop: '8px', fontFamily: 'var(--font-mono)', fontSize: '12px', whiteSpace: 'pre', overflowX: 'auto', lineHeight: '1.5' }}>
+                    {results.checks.fwdSelf.maxContig >= 4 && (
+                      <>
+                        <div style={{ fontWeight: 'bold', color: 'var(--text2)' }}>Forward Self-Dimer alignment:</div>
+                        <div>{results.checks.fwdSelf.topStr}</div>
+                        <div style={{ color: 'var(--accent)' }}>{results.checks.fwdSelf.midStr}</div>
+                        <div>{results.checks.fwdSelf.btmStr}</div>
+                      </>
+                    )}
+                    {results.checks.revSelf.maxContig >= 4 && (
+                      <>
+                        <div style={{ fontWeight: 'bold', color: 'var(--text2)', marginTop: '8px' }}>Reverse Self-Dimer alignment:</div>
+                        <div>{results.checks.revSelf.topStr}</div>
+                        <div style={{ color: 'var(--accent)' }}>{results.checks.revSelf.midStr}</div>
+                        <div>{results.checks.revSelf.btmStr}</div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Checks Checklist */}
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                
-                {/* A. Tmdelta Check */}
-                <div className="checklist-item">
-                  <div className="checklist-row-top">
-                    <span className="checklist-title">Melting Temperature Compatibility</span>
-                    <span className={`sc-badge ${results.checks.tmDelta.status}`}>
-                      {results.checks.tmDelta.status === 'pass' ? 'PASS' : 'WARN'}
-                    </span>
-                  </div>
-                  <span className="checklist-details">{results.checks.tmDelta.msg}</span>
-                  {results.checks.annealWarning && (
-                    <span className="checklist-details" style={{ color: 'var(--amber)', fontWeight: 'bold' }}>
-                      ⚠ {results.checks.annealWarning}
-                    </span>
-                  )}
-                </div>
-
-                {/* B. Self Dimerization */}
-                <div className="checklist-item">
-                  <div className="checklist-row-top">
-                    <span className="checklist-title">Self-Dimerization Scan</span>
-                    <span className={`sc-badge ${results.checks.fwdSelf.risk.startsWith('High') || results.checks.revSelf.risk.startsWith('High') ? 'warn' : 'pass'}`}>
-                      {results.checks.fwdSelf.risk.startsWith('High') || results.checks.revSelf.risk.startsWith('High') ? 'ALERT' : 'PASS'}
-                    </span>
-                  </div>
-                  <span className="checklist-details">
-                    Fwd self-complementarity: <b>{results.checks.fwdSelf.maxContig} bp</b> (Risk: {results.checks.fwdSelf.risk})<br/>
-                    Rev self-complementarity: <b>{results.checks.revSelf.maxContig} bp</b> (Risk: {results.checks.revSelf.risk})
-                  </span>
-                  {(results.checks.fwdSelf.maxContig >= 4 || results.checks.revSelf.maxContig >= 4) && (
-                    <div className="alignment-svg-container">
-                      {results.checks.fwdSelf.maxContig >= 4 && (
-                        <>
-                          <div><b>Forward Self-Dimer:</b></div>
-                          <div>{results.checks.fwdSelf.topStr}</div>
-                          <div style={{ color: 'var(--accent)' }}>{results.checks.fwdSelf.midStr}</div>
-                          <div>{results.checks.fwdSelf.btmStr}</div>
-                        </>
-                      )}
-                      {results.checks.revSelf.maxContig >= 4 && (
-                        <>
-                          <div style={{ marginTop: '10px' }}><b>Reverse Self-Dimer:</b></div>
-                          <div>{results.checks.revSelf.topStr}</div>
-                          <div style={{ color: 'var(--accent)' }}>{results.checks.revSelf.midStr}</div>
-                          <div>{results.checks.revSelf.btmStr}</div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* C. Hetero-Dimerization */}
-                <div className="checklist-item">
-                  <div className="checklist-row-top">
-                    <span className="checklist-title">Hetero-Dimerization (Fwd vs Rev)</span>
-                    <span className={`sc-badge ${results.checks.fwdRevHetero.risk.startsWith('High') ? 'warn' : 'pass'}`}>
-                      {results.checks.fwdRevHetero.risk.startsWith('High') ? 'ALERT' : 'PASS'}
-                    </span>
-                  </div>
-                  <span className="checklist-details">
-                    Cross-complementarity is <b>{results.checks.fwdRevHetero.maxContig} bp</b> (Risk: {results.checks.fwdRevHetero.risk}).
-                  </span>
-                  {results.checks.fwdRevHetero.maxContig >= 3 && (
-                    <div className="alignment-svg-container">
-                      <div><b>Forward / Reverse Hetero-Dimer configuration:</b></div>
-                      <div>{results.checks.fwdRevHetero.topStr}</div>
-                      <div style={{ color: 'var(--accent)' }}>{results.checks.fwdRevHetero.midStr}</div>
-                      <div>{results.checks.fwdRevHetero.btmStr}</div>
-                    </div>
-                  )}
-                </div>
-
-                {/* D. Hairpins */}
-                <div className="checklist-item">
-                  <div className="checklist-row-top">
-                    <span className="checklist-title">Hairpin loop scan</span>
-                    <span className={`sc-badge ${results.checks.fwdHairpin.found || results.checks.revHairpin.found ? 'warn' : 'pass'}`}>
-                      {results.checks.fwdHairpin.found || results.checks.revHairpin.found ? 'WARN' : 'PASS'}
-                    </span>
-                  </div>
-                  <span className="checklist-details">
-                    Fwd Hairpins: {results.checks.fwdHairpin.found ? <span style={{ color: 'var(--amber)' }}>{results.checks.fwdHairpin.msg}</span> : 'None detected.'}<br/>
-                    Rev Hairpins: {results.checks.revHairpin.found ? <span style={{ color: 'var(--amber)' }}>{results.checks.revHairpin.msg}</span> : 'None detected.'}
+              {/* Cross Dimerization */}
+              <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13.5px', fontWeight: 'bold', color: 'var(--text1)' }}>Hetero-Dimerization (Fwd vs Rev)</span>
+                  <span className={`sc-badge ${results.checks.fwdRevHetero.risk.startsWith('High') ? 'warn' : 'pass'}`}>
+                    {results.checks.fwdRevHetero.risk.startsWith('High') ? 'ALERT' : 'PASS'}
                   </span>
                 </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--text3)', margin: '4px 0 0' }}>
+                  Cross-complementarity run: <b>{results.checks.fwdRevHetero.maxContig} bp</b> ({results.checks.fwdRevHetero.risk})
+                </p>
 
-                {/* E. 3' GC Clamp Check */}
-                <div className="checklist-item">
-                  <div className="checklist-row-top">
-                    <span className="checklist-title">3' GC Clamp stability</span>
-                    <span className={`sc-badge ${results.checks.fwdClamp.status === 'warn' || results.checks.revClamp.status === 'warn' ? 'warn' : 'pass'}`}>
-                      {results.checks.fwdClamp.status === 'warn' || results.checks.revClamp.status === 'warn' ? 'WARN' : 'PASS'}
-                    </span>
+                {results.checks.fwdRevHetero.maxContig >= 3 && (
+                  <div style={{ backgroundColor: 'var(--off)', border: '1px solid var(--border)', borderRadius: '6px', padding: '10px', marginTop: '8px', fontFamily: 'var(--font-mono)', fontSize: '12px', whiteSpace: 'pre', overflowX: 'auto', lineHeight: '1.5' }}>
+                    <div style={{ fontWeight: 'bold', color: 'var(--text2)' }}>Cross Dimer alignment:</div>
+                    <div>{results.checks.fwdRevHetero.topStr}</div>
+                    <div style={{ color: 'var(--accent)' }}>{results.checks.fwdRevHetero.midStr}</div>
+                    <div>{results.checks.fwdRevHetero.btmStr}</div>
                   </div>
-                  <span className="checklist-details">
-                    Fwd Clamp: {results.checks.fwdClamp.msg}<br/>
-                    Rev Clamp: {results.checks.revClamp.msg}
-                  </span>
-                </div>
-
+                )}
               </div>
 
-              {/* Actions */}
-              <div className="mock-actions-row">
-                <CopyButton text={getCopyText()} />
-                <ExportButton data={getCsvOutput()} filename="primer_pair_diagnostic_report.csv" format="csv" />
+              {/* Hairpins */}
+              <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13.5px', fontWeight: 'bold', color: 'var(--text1)' }}>Hairpin loops scan</span>
+                  <span className={`sc-badge ${results.checks.fwdHairpin.found || results.checks.revHairpin.found ? 'warn' : 'pass'}`}>
+                    {results.checks.fwdHairpin.found || results.checks.revHairpin.found ? 'WARN' : 'PASS'}
+                  </span>
+                </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--text3)', margin: '4px 0 0' }}>
+                  Fwd Hairpin: {results.checks.fwdHairpin.found ? <span style={{ color: 'var(--amber-d)', fontWeight: 'bold' }}>{results.checks.fwdHairpin.msg}</span> : 'None.'}<br/>
+                  Rev Hairpin: {results.checks.revHairpin.found ? <span style={{ color: 'var(--amber-d)', fontWeight: 'bold' }}>{results.checks.revHairpin.msg}</span> : 'None.'}
+                </p>
               </div>
 
+              {/* GC Clamp */}
+              <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13.5px', fontWeight: 'bold', color: 'var(--text1)' }}>3' GC Clamp stability</span>
+                  <span className={`sc-badge ${results.checks.fwdClamp.status === 'warn' || results.checks.revClamp.status === 'warn' ? 'warn' : 'pass'}`}>
+                    {results.checks.fwdClamp.status === 'warn' || results.checks.revClamp.status === 'warn' ? 'WARN' : 'PASS'}
+                  </span>
+                </div>
+                <p style={{ fontSize: '12.5px', color: 'var(--text3)', margin: '4px 0 0' }}>
+                  Fwd clamp: {results.checks.fwdClamp.msg}<br/>
+                  Rev clamp: {results.checks.revClamp.msg}
+                </p>
+              </div>
             </div>
-          ) : (
-            <div className="mock-empty-results">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '48px', height: '48px', color: 'var(--text4)', marginBottom: '12px' }}>
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text2)', marginBottom: '4px' }}>Awaiting Primer Inputs</p>
-              <p style={{ fontSize: '13px', lineHeight: 1.4 }}>Enter Forward and Reverse primer designs on the left to slide complementary alignments, calculate clamps, and scan hairpins.</p>
-            </div>
-          )}
-        </div>
 
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '8px' }}>
+              <CopyButton text={getCopyText()} />
+              <ExportButton data={getCsvOutput()} filename="primer_pair_diagnostic_report.csv" format="csv" />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={resetAnalysis}
+                style={{ background: 'var(--text2)', boxShadow: 'none' }}
+              >
+                ← Diagnostic Another Primer Set
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </ToolShell>
   );

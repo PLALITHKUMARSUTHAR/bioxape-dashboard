@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import ToolShell, { CopyButton, ExportButton } from '../../components/tools/ToolShell';
 import { cleanSequence, reverseComplement, RESTRICTION_ENZYMES } from '../../utils/bioutils';
-import useDebouncedValue from '../../hooks/useDebouncedValue';
 
 export default function PlasmidForge() {
-  const [activeTab, setActiveTab] = useState('sequence');
+  const [activeStep, setActiveStep] = useState(1);
   const [rawSeq, setRawSeq] = useState('');
   const [plasmidName, setPlasmidName] = useState('pBioXApe_Vector');
-  const [plasmidLength, setPlasmidLength] = useState(3000); // fallback or parsed length
+  const [plasmidLength, setPlasmidLength] = useState(3000);
   const [features, setFeatures] = useState([
     { name: 'AmpR Resistance', start: 200, end: 1000, strand: '+', type: 'Resistance Marker', color: '#f59e0b' },
     { name: 'ColE1 Origin', start: 1200, end: 1800, strand: '+', type: 'Origin of Replication', color: '#64748b' },
@@ -20,16 +19,23 @@ export default function PlasmidForge() {
   const [featEnd, setFeatEnd] = useState(500);
   const [featStrand, setFeatStrand] = useState('+');
   const [featType, setFeatType] = useState('CDS/Gene');
-  const [featColor, setFeatColor] = useState('#27a363');
+  const [featColor, setFeatColor] = useState('#10b981');
 
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [rotation, setRotation] = useState(0);
+  const [isCompiling, setIsCompiling] = useState(false);
+  const [compilationSuccess, setCompilationSuccess] = useState(false);
 
-  const debouncedSeq = useDebouncedValue(rawSeq, 300);
+  const steps = [
+    { number: 1, title: 'Backbone Sequence' },
+    { number: 2, title: 'Feature Annotations' },
+    { number: 3, title: 'Build Map' },
+    { number: 4, title: 'Interactive Vector' }
+  ];
 
-  // Auto-detect features from sequence when sequence changes
-  useEffect(() => {
-    const clean = cleanSequence(debouncedSeq);
+  // Auto-detect features from sequence
+  const parseSequenceFeatures = (sequenceString) => {
+    const clean = cleanSequence(sequenceString);
     if (!clean) return;
 
     setPlasmidLength(clean.length);
@@ -57,7 +63,7 @@ export default function PlasmidForge() {
                   end: j + 3,
                   strand: '+',
                   type: 'CDS/Gene',
-                  color: '#1e3a8a' // deep blue
+                  color: '#3b82f6' // blue
                 });
               }
               i = j;
@@ -74,7 +80,6 @@ export default function PlasmidForge() {
     // 2. Scan Restriction Enzymes (Unique Cutters)
     const cutters = [];
     RESTRICTION_ENZYMES.forEach((enzyme) => {
-      // Basic regex scanner for matching recognition sequence
       const regex = new RegExp(enzyme.seq, 'g');
       let match;
       let count = 0;
@@ -83,7 +88,7 @@ export default function PlasmidForge() {
       while ((match = regex.exec(clean)) !== null) {
         count++;
         pos = match.index + enzyme.cut;
-        if (count > 2) break; // We only care about single/unique cutters
+        if (count > 2) break;
       }
 
       if (count === 1) {
@@ -93,31 +98,31 @@ export default function PlasmidForge() {
           end: pos + 1,
           strand: '+',
           type: 'Other',
-          color: '#ef4444' // red label
+          color: '#ef4444'
         });
       }
     });
 
     const parsedFeatures = [
-      ...detectedOrfs.slice(0, 4), // Capped at top 4 ORFs
-      ...cutters.slice(0, 5),      // Capped at top 5 cutters
+      ...detectedOrfs.slice(0, 4),
+      ...cutters.slice(0, 5),
       { name: 'ColE1 Origin', start: Math.round(clean.length * 0.4), end: Math.round(clean.length * 0.55), strand: '+', type: 'Origin of Replication', color: '#64748b' }
     ];
 
     setFeatures(parsedFeatures);
-  }, [debouncedSeq]);
+  };
 
   const loadSampleVector = () => {
-    // Standard pUC19 mock sequence string generator
     let mockDna = 'ATG';
     for (let i = 0; i < 900; i++) {
       mockDna += 'ATGCGTACGTTAGCTAGC';
     }
-    mockDna += 'TAA'; // stop codon
-    // Let's add some restriction sites
+    mockDna += 'TAA';
     mockDna = mockDna.substring(0, 1000) + 'GAATTC' + mockDna.substring(1006); // EcoRI
     mockDna = mockDna.substring(0, 2000) + 'GGATCC' + mockDna.substring(2006); // BamHI
     setRawSeq(mockDna);
+    setPlasmidName('pUC19_Biotech_Sample');
+    parseSequenceFeatures(mockDna);
   };
 
   const handleAddFeature = (e) => {
@@ -154,10 +159,8 @@ export default function PlasmidForge() {
     const endPt = getCoords(end, radius);
     const isLarge = (end - start) / plasmidLength > 0.5 ? 1 : 0;
     
-    // Standard arc path
     let d = `M ${startPt.x} ${startPt.y} A ${radius} ${radius} 0 ${isLarge} 1 ${endPt.x} ${endPt.y}`;
     
-    // If CDS or resistance marker, render with an arrowhead endpoint
     if (type === 'CDS/Gene' || type === 'Resistance Marker') {
       const tipPos = end;
       const basePos = end - Math.min(end - start, Math.round(plasmidLength * 0.02));
@@ -178,102 +181,157 @@ export default function PlasmidForge() {
     return csv;
   };
 
+  const compileVectorMap = () => {
+    setIsCompiling(true);
+    setTimeout(() => {
+      setIsCompiling(false);
+      setCompilationSuccess(true);
+      setActiveStep(4);
+    }, 900);
+  };
+
+  const resetPlasmid = () => {
+    setCompilationSuccess(false);
+    setActiveStep(1);
+  };
+
+  const renderStepTracker = () => (
+    <div className="bx-step-tracker">
+      {steps.map((s) => {
+        const isCompleted = s.number < activeStep;
+        const isActive = s.number === activeStep;
+        const isDisabled = s.number > activeStep && !compilationSuccess;
+        return (
+          <div
+            key={s.number}
+            className={`bx-step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isDisabled ? 'disabled' : ''}`}
+            onClick={() => !isDisabled && setActiveStep(s.number)}
+          >
+            <span className="bx-step-circle">{s.number}</span>
+            <span>{s.title}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <ToolShell slug="plasmidforge">
-      <div className="bx-tools-grid">
-        {/* Left Side: Sequence / Form details */}
-        <div className="tool-pane-card">
-          <div className="tool-pane-title">Vector Information</div>
+      {renderStepTracker()}
 
-          {/* Form Tabs */}
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: '16px' }}>
-            <button
-              type="button"
-              className={`sort-tab ${activeTab === 'sequence' ? 'active' : ''}`}
-              onClick={() => setActiveTab('sequence')}
-            >
-              Parse Sequence
-            </button>
-            <button
-              type="button"
-              className={`sort-tab ${activeTab === 'features' ? 'active' : ''}`}
-              onClick={() => setActiveTab('features')}
-            >
-              Custom Features
-            </button>
-          </div>
-
-          {activeTab === 'sequence' ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div className="mock-field-group">
-                <label className="mock-label" htmlFor="plasmid-name">Vector Name</label>
-                <input
-                  id="plasmid-name"
-                  type="text"
-                  className="form-control"
-                  value={plasmidName}
-                  onChange={(e) => setPlasmidName(e.target.value)}
-                />
-              </div>
-
-              <div className="mock-field-group">
-                <label className="mock-label" htmlFor="plasmid-seq">Sequence Text (DNA)</label>
-                <textarea
-                  id="plasmid-seq"
-                  className="mock-textarea"
-                  style={{ height: '180px' }}
-                  placeholder="Paste FASTA plasmid vector sequence..."
-                  value={rawSeq}
-                  onChange={(e) => setRawSeq(e.target.value)}
-                />
-                <button type="button" className="mock-sample-btn" onClick={loadSampleVector}>Load Sample pUC19 Sequence</button>
-              </div>
+      <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+        {/* Step 1: Backbone / Sequence Input */}
+        {activeStep === 1 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 1</span>
+              <h3 className="bx-step-title">Vector Base Details</h3>
             </div>
-          ) : (
-            /* Manual Feature Annotator Form */
+
+            <div className="bx-field-group">
+              <label htmlFor="plasmid-name" className="bx-label">Plasmid / Vector Name</label>
+              <input
+                id="plasmid-name"
+                type="text"
+                className="bx-input"
+                value={plasmidName}
+                onChange={(e) => setPlasmidName(e.target.value)}
+              />
+            </div>
+
+            <div className="bx-field-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label htmlFor="plasmid-seq" className="bx-label">DNA Sequence (Pasting auto-extracts ORFs & Restriction Cuts)</label>
+                <button type="button" className="bx-btn-sample" onClick={loadSampleVector}>Load Sample pUC19 Backbone</button>
+              </div>
+              <textarea
+                id="plasmid-seq"
+                className="bx-textarea"
+                style={{ height: '140px' }}
+                placeholder="Enter sequence in bp or paste FASTA content here..."
+                value={rawSeq}
+                onChange={(e) => {
+                  setRawSeq(e.target.value);
+                  parseSequenceFeatures(e.target.value);
+                }}
+              />
+            </div>
+
+            <div className="bx-field-group">
+              <label htmlFor="plasmid-len" className="bx-label">Backbone Length (bp)</label>
+              <input
+                id="plasmid-len"
+                type="number"
+                className="bx-input"
+                value={plasmidLength}
+                onChange={(e) => setPlasmidLength(Math.max(10, parseInt(e.target.value) || 0))}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={() => setActiveStep(2)}
+              >
+                Next: Add Feature Annotations →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Annotate Features */}
+        {activeStep === 2 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 2</span>
+              <h3 className="bx-step-title">Add & Edit Features</h3>
+            </div>
+
+            {/* Form */}
             <form onSubmit={handleAddFeature} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div className="mock-field-group">
-                <label className="mock-label" htmlFor="feat-name">Feature Label</label>
+              <div className="bx-field-group">
+                <label htmlFor="feat-name" className="bx-label">Feature Label / Name</label>
                 <input
                   id="feat-name"
                   type="text"
-                  className="form-control"
-                  placeholder="e.g. Origin, Prom, GFP"
+                  className="bx-input"
+                  placeholder="e.g. Origin, Promoter, GFP"
                   value={featName}
                   onChange={(e) => setFeatName(e.target.value)}
                   required
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div className="mock-field-group">
-                  <label className="mock-label" htmlFor="feat-start">Start Position (bp)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="bx-field-group">
+                  <label htmlFor="feat-start" className="bx-label">Start Point (bp)</label>
                   <input
                     id="feat-start"
                     type="number"
-                    className="form-control"
+                    className="bx-input"
                     value={featStart}
                     onChange={(e) => setFeatStart(e.target.value)}
                   />
                 </div>
-                <div className="mock-field-group">
-                  <label className="mock-label" htmlFor="feat-end">End Position (bp)</label>
+                <div className="bx-field-group">
+                  <label htmlFor="feat-end" className="bx-label">End Point (bp)</label>
                   <input
                     id="feat-end"
                     type="number"
-                    className="form-control"
+                    className="bx-input"
                     value={featEnd}
                     onChange={(e) => setFeatEnd(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div className="mock-field-group">
-                  <label className="mock-label" htmlFor="feat-strand">Strand Orientation</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="bx-field-group">
+                  <label htmlFor="feat-strand" className="bx-label">Strand direction</label>
                   <select
                     id="feat-strand"
-                    className="form-control"
+                    className="bx-select"
                     value={featStrand}
                     onChange={(e) => setFeatStrand(e.target.value)}
                   >
@@ -281,20 +339,19 @@ export default function PlasmidForge() {
                     <option value="-">Antisense (-)</option>
                   </select>
                 </div>
-                <div className="mock-field-group">
-                  <label className="mock-label" htmlFor="feat-type">Category Class</label>
+                <div className="bx-field-group">
+                  <label htmlFor="feat-type" className="bx-label">Annotation Class</label>
                   <select
                     id="feat-type"
-                    className="form-control"
+                    className="bx-select"
                     value={featType}
                     onChange={(e) => {
                       setFeatType(e.target.value);
-                      // Suggest default palette color
                       if (e.target.value === 'Origin of Replication') setFeatColor('#64748b');
-                      else if (e.target.value === 'Promoter') setFeatColor('#3db87a');
+                      else if (e.target.value === 'Promoter') setFeatColor('#10b981');
                       else if (e.target.value === 'Resistance Marker') setFeatColor('#f59e0b');
                       else if (e.target.value === 'Terminator') setFeatColor('#8b5cf6');
-                      else setFeatColor('#27a363');
+                      else setFeatColor('#3b82f6');
                     }}
                   >
                     <option value="CDS/Gene">CDS/Gene (Arrow)</option>
@@ -307,151 +364,210 @@ export default function PlasmidForge() {
                 </div>
               </div>
 
-              <div className="mock-field-group">
-                <label className="mock-label" htmlFor="feat-color">Feature Fill Color</label>
+              <div className="bx-field-group">
+                <label htmlFor="feat-color" className="bx-label">Feature Hex Color</label>
                 <input
                   id="feat-color"
                   type="color"
                   value={featColor}
                   onChange={(e) => setFeatColor(e.target.value)}
-                  style={{ width: '100%', height: '36px', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', padding: '0' }}
+                  style={{ width: '100%', height: '38px', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', padding: '0', backgroundColor: 'transparent' }}
                 />
               </div>
 
-              <button type="submit" className="mock-btn-primary">Add Feature to Map</button>
+              <button type="submit" className="bx-btn-primary">Add Annotation Feature</button>
             </form>
-          )}
 
-          {/* Feature List Table */}
-          <div style={{ marginTop: '20px' }}>
-            <span className="mock-label" style={{ display: 'block', marginBottom: '8px' }}>Feature Annotation Table</span>
-            <div style={{ maxHeight: '180px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '6px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                <thead>
-                  <tr style={{ backgroundColor: 'var(--off)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
-                    <th style={{ padding: '8px' }}>Label</th>
-                    <th style={{ padding: '8px' }}>Span</th>
-                    <th style={{ padding: '8px' }}>Strand</th>
-                    <th style={{ padding: '8px', textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {features.map((feat, idx) => (
-                    <tr
+            {/* List Table */}
+            <div style={{ marginTop: '16px' }}>
+              <span className="bx-label" style={{ display: 'block', marginBottom: '8px' }}>Feature Annotation Table ({features.length})</span>
+              <div style={{ maxHeight: '160px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '6px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: 'var(--off)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
+                      <th style={{ padding: '8px' }}>Label</th>
+                      <th style={{ padding: '8px' }}>Span (bp)</th>
+                      <th style={{ padding: '8px' }}>Strand</th>
+                      <th style={{ padding: '8px', textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {features.map((feat, idx) => (
+                      <tr
+                        key={idx}
+                        style={{ borderBottom: '1px solid var(--border)' }}
+                      >
+                        <td style={{ padding: '8px', fontWeight: 'bold' }}>
+                          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: feat.color, marginRight: '6px' }} />
+                          {feat.name}
+                        </td>
+                        <td style={{ padding: '8px' }}>{feat.start} - {feat.end}</td>
+                        <td style={{ padding: '8px', textAlign: 'center' }}>{feat.strand}</td>
+                        <td style={{ padding: '8px', textAlign: 'right' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteFeature(idx)}
+                            style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {features.length === 0 && (
+                      <tr>
+                        <td colSpan="4" style={{ textAlign: 'center', padding: '12px', color: 'var(--text4)' }}>No features added to backbone.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
+              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Build Map →</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Run / Compile */}
+        {activeStep === 3 && (
+          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
+            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
+              <span className="bx-step-badge">Step 3</span>
+              <h3 className="bx-step-title">Compile Circular Map</h3>
+            </div>
+
+            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
+              Ready to draw vector annotations onto the circular plasmid backbone.
+            </p>
+
+            <button
+              type="button"
+              className="bx-btn-primary"
+              style={{ width: '100%', padding: '12px' }}
+              onClick={compileVectorMap}
+              disabled={isCompiling}
+            >
+              {isCompiling ? (
+                <>
+                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
+                  Mapping Feature Rings...
+                </>
+              ) : (
+                'Generate Plasmid Vector SVG'
+              )}
+            </button>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
+              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isCompiling}>← Back</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Circular Vector Output */}
+        {activeStep === 4 && compilationSuccess && (
+          <div className="bx-step-section" style={{ alignItems: 'center' }}>
+            <div className="bx-step-header" style={{ width: '100%' }}>
+              <span className="bx-step-badge">Step 4</span>
+              <h3 className="bx-step-title">Interactive Plasmid Vector</h3>
+            </div>
+
+            {/* SVG Visualizer */}
+            <div style={{ margin: '10px 0', position: 'relative', width: '280px', height: '280px' }}>
+              <svg
+                viewBox="0 0 300 300"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  transform: `rotate(${rotation}deg)`,
+                  transition: 'transform 0.4s ease'
+                }}
+              >
+                {/* Central Info */}
+                <circle cx="150" cy="150" r="45" fill="#fff" />
+                <text x="150" y="146" fontSize="9" fontWeight="bold" textAnchor="middle" fill="var(--text1)">{plasmidName}</text>
+                <text x="150" y="158" fontSize="8" fill="var(--text3)" textAnchor="middle">{plasmidLength} bp</text>
+
+                {/* Backbone Circle ring */}
+                <circle cx="150" cy="150" r="70" fill="none" stroke="var(--border)" strokeWidth="1.5" />
+
+                {/* Arcs */}
+                {features.map((feat, idx) => {
+                  const isHovered = hoveredIndex === idx;
+                  const dPath = getArcPath(feat.start, feat.end, 70, feat.type);
+
+                  return (
+                    <path
                       key={idx}
+                      d={dPath}
+                      fill={feat.type === 'CDS/Gene' || feat.type === 'Resistance Marker' ? feat.color : 'none'}
+                      stroke={feat.type === 'CDS/Gene' || feat.type === 'Resistance Marker' ? 'none' : feat.color}
+                      strokeWidth={feat.type === 'CDS/Gene' || feat.type === 'Resistance Marker' ? '0' : isHovered ? '8' : '5'}
+                      strokeLinecap="round"
+                      cursor="pointer"
+                      opacity={hoveredIndex === null || isHovered ? 1 : 0.4}
+                      style={{ transition: 'stroke-width 0.15s ease, opacity 0.15s ease' }}
                       onMouseEnter={() => setHoveredIndex(idx)}
                       onMouseLeave={() => setHoveredIndex(null)}
-                      style={{
-                        borderBottom: '1px solid var(--border)',
-                        backgroundColor: hoveredIndex === idx ? 'var(--g50)' : 'transparent',
-                        transition: 'background-color 0.15s ease'
+                      onClick={() => {
+                        const mid = (feat.start + feat.end) / 2;
+                        const pct = mid / plasmidLength;
+                        const targetAngle = 360 - (pct * 360);
+                        setRotation(targetAngle);
                       }}
-                    >
-                      <td style={{ padding: '8px', fontWeight: 'bold' }}>
-                        <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: feat.color, marginRight: '6px' }} />
-                        {feat.name}
-                      </td>
-                      <td style={{ padding: '8px' }}>{feat.start} - {feat.end} bp</td>
-                      <td style={{ padding: '8px', textAlign: 'center' }}>{feat.strand}</td>
-                      <td style={{ padding: '8px', textAlign: 'right' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteFeature(idx)}
-                          style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline' }}
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {features.length === 0 && (
-                    <tr>
-                      <td colSpan="4" style={{ textAlign: 'center', padding: '12px', color: 'var(--text4)' }}>No features added to backbone.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side: Circular Map Visualizer */}
-        <div className="tool-pane-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div className="tool-pane-title" style={{ width: '100%' }}>Vector Plasmid Map</div>
-
-          <div style={{ margin: '20px 0', position: 'relative', width: '300px', height: '300px' }}>
-            <svg
-              viewBox="0 0 300 300"
-              style={{
-                width: '100%',
-                height: '100%',
-                transform: `rotate(${rotation}deg)`,
-                transition: 'transform 0.4s ease'
-              }}
-            >
-              {/* Central Information */}
-              <circle cx="150" cy="150" r="45" fill="#fff" />
-              <text x="150" y="146" fontSize="9" fontWeight="bold" textAnchor="middle" fill="var(--text1)">{plasmidName}</text>
-              <text x="150" y="158" fontSize="8" fill="var(--text3)" textAnchor="middle">{plasmidLength} bp</text>
-
-              {/* Plasmid Backbone circle ring */}
-              <circle cx="150" cy="150" r="70" fill="none" stroke="var(--g200)" strokeWidth="1" />
-
-              {/* Render Features Arcs */}
-              {features.map((feat, idx) => {
-                const isHovered = hoveredIndex === idx;
-                const dPath = getArcPath(feat.start, feat.end, 70, feat.type);
-
-                return (
-                  <path
-                    key={idx}
-                    d={dPath}
-                    fill={feat.type === 'CDS/Gene' || feat.type === 'Resistance Marker' ? feat.color : 'none'}
-                    stroke={feat.type === 'CDS/Gene' || feat.type === 'Resistance Marker' ? 'none' : feat.color}
-                    strokeWidth={feat.type === 'CDS/Gene' || feat.type === 'Resistance Marker' ? '0' : isHovered ? '8' : '5'}
-                    strokeLinecap="round"
-                    cursor="pointer"
-                    opacity={hoveredIndex === null || isHovered ? 1 : 0.4}
-                    style={{ transition: 'stroke-width 0.15s ease, opacity 0.15s ease' }}
-                    onMouseEnter={() => setHoveredIndex(idx)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                    onClick={() => {
-                      // Rotate card to bring midpoint to 12 o'clock (270 degrees)
-                      const mid = (feat.start + feat.end) / 2;
-                      const pct = mid / plasmidLength;
-                      const targetAngle = 360 - (pct * 360);
-                      setRotation(targetAngle);
-                    }}
-                  />
-                );
-              })}
-            </svg>
-          </div>
-
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <span className="mock-label">Legend</span>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '11px' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#64748b' }} /> Origin of Replication
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#3db87a' }} /> Promoter
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#f59e0b' }} /> Resistance Marker
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#8b5cf6' }} /> Terminator
-              </span>
+                    />
+                  );
+                })}
+              </svg>
             </div>
 
-            {/* Actions row */}
-            <div className="mock-actions-row">
+            {/* Click info */}
+            <p style={{ fontSize: '11px', color: 'var(--text3)', fontStyle: 'italic', marginBottom: '10px' }}>
+              💡 Hover on features to highlight. Click on a feature to rotate it to the top.
+            </p>
+
+            {/* Legend */}
+            <div style={{ width: '100%', borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
+              <span className="bx-label">Feature Classes Legend</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '11px', marginTop: '6px', color: 'var(--text2)' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#64748b' }} /> Origin
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#10b981' }} /> Promoter
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#f59e0b' }} /> Resistance
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#8b5cf6' }} /> Terminator
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#3b82f6' }} /> CDS/Gene
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ width: '100%', display: 'flex', gap: '10px', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '16px' }}>
               <CopyButton text={`Plasmid Vector features list:\n${features.map(f => `${f.name}: ${f.start}-${f.end}bp`).join('\n')}`} />
               <ExportButton data={getCsvData()} filename={`${plasmidName}_features.csv`} format="csv" />
             </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={resetPlasmid}
+                style={{ background: 'var(--text2)', boxShadow: 'none' }}
+              >
+                ← Design Another Plasmid
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </ToolShell>
   );

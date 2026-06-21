@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ToolShell, { CopyButton, ExportButton } from '../../components/tools/ToolShell';
 import { cleanSequence, detectSequenceType, reverseComplement, transcribe, translate, STANDARD_GENETIC_CODE } from '../../utils/bioutils';
-import useDebouncedValue from '../../hooks/useDebouncedValue';
 
 export default function SeqConvert() {
+  const [activeStep, setActiveStep] = useState(1);
   const [rawInput, setRawInput] = useState('');
-  const debouncedInput = useDebouncedValue(rawInput, 250);
   
   const [seqType, setSeqType] = useState('DNA');
   const [activeMode, setActiveMode] = useState('transcribe'); // transcribe, revcomp, translate, sixframe, orf
   
   // Translation settings
-  const [selectedFrame, setSelectedFrame] = useState(1); // 1, 2, 3, -1, -2, -3
+  const [selectedFrame, setSelectedFrame] = useState(1);
   const [readThroughStop, setReadThroughStop] = useState(false);
 
   // ORF settings
-  const [minOrfLen, setMinOrfLen] = useState(100); // in bp
+  const [minOrfLen, setMinOrfLen] = useState(100);
 
   // Results
   const [cleanedSeq, setCleanedSeq] = useState('');
@@ -23,30 +22,32 @@ export default function SeqConvert() {
   const [orfResults, setOrfResults] = useState([]);
   const [validationError, setValidationError] = useState('');
   const [performanceWarning, setPerformanceWarning] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Process sequence whenever debounced input changes
-  useEffect(() => {
+  const steps = [
+    { number: 1, title: 'Sequence Input' },
+    { number: 2, title: 'Conversion settings' },
+    { number: 3, title: 'Run Analysis' },
+    { number: 4, title: 'Outputs' }
+  ];
+
+  const handleNextFromStep1 = () => {
     setValidationError('');
     setPerformanceWarning('');
     
-    const clean = cleanSequence(debouncedInput);
+    const clean = cleanSequence(rawInput);
     if (!clean) {
-      setCleanedSeq('');
-      setSimpleResult('');
-      setOrfResults([]);
+      setValidationError('Please enter a sequence.');
       return;
     }
 
-    // Determine type
     const type = detectSequenceType(clean);
     setSeqType(type);
 
-    // Limit checks
     if (clean.length > 5000) {
       setPerformanceWarning('Large sequence. Computations will run but visualization will be capped to prevent DOM lag.');
     }
 
-    // Validate characters based on type
     const invalidDnaRna = clean.replace(/[ACGUTN]/g, '');
     const invalidProtein = clean.replace(/[ACDEFGHIKLMNPQRSTVWY]/g, '');
 
@@ -59,54 +60,56 @@ export default function SeqConvert() {
     }
 
     setCleanedSeq(clean);
-  }, [debouncedInput]);
+    setActiveStep(2);
+  };
 
-  // Perform active conversions
-  useEffect(() => {
+  const runSequenceConversion = () => {
     if (!cleanedSeq || validationError) {
-      setSimpleResult('');
-      setOrfResults([]);
+      setValidationError('Sequence validation failed. Please check your inputs.');
+      setActiveStep(1);
       return;
     }
 
-    if (activeMode === 'transcribe') {
-      // DNA -> RNA or RNA -> DNA depending on input
-      if (seqType === 'RNA') {
-        // Reverse transcribe
-        setSimpleResult(cleanedSeq.replace(/U/g, 'T'));
-      } else {
-        setSimpleResult(transcribe(cleanedSeq));
-      }
-    } else if (activeMode === 'revcomp') {
-      setSimpleResult(reverseComplement(cleanedSeq));
-    } else if (activeMode === 'translate') {
-      const translated = translate(cleanedSeq, selectedFrame, readThroughStop);
-      const remainder = (cleanedSeq.length - (Math.abs(selectedFrame) - 1)) % 3;
-      const note = remainder > 0 ? `\n\n[Note: ${remainder} incomplete trailing base(s) at 3' end ignored]` : '';
-      setSimpleResult(translated + note);
-    } else if (activeMode === 'orf') {
-      // Find ORFs across 6 frames
-      const foundOrfs = [];
-      const minLengthBp = parseInt(minOrfLen) || 100;
+    setIsAnalyzing(true);
+    setTimeout(() => {
+      setIsAnalyzing(false);
 
-      // Frames 1, 2, 3
-      for (let f = 1; f <= 3; f++) {
-        scanOrfsInFrame(cleanedSeq, f, minLengthBp, foundOrfs);
-      }
-      
-      // Frames -1, -2, -3 (using reverse complement)
-      const revComp = reverseComplement(cleanedSeq);
-      for (let f = 1; f <= 3; f++) {
-        scanOrfsInFrame(revComp, -f, minLengthBp, foundOrfs, true);
+      if (activeMode === 'transcribe') {
+        if (seqType === 'RNA') {
+          setSimpleResult(cleanedSeq.replace(/U/g, 'T'));
+        } else {
+          setSimpleResult(transcribe(cleanedSeq));
+        }
+      } else if (activeMode === 'revcomp') {
+        setSimpleResult(reverseComplement(cleanedSeq));
+      } else if (activeMode === 'translate') {
+        const translated = translate(cleanedSeq, selectedFrame, readThroughStop);
+        const remainder = (cleanedSeq.length - (Math.abs(selectedFrame) - 1)) % 3;
+        const note = remainder > 0 ? `\n\n[Note: ${remainder} incomplete trailing base(s) at 3' end ignored]` : '';
+        setSimpleResult(translated + note);
+      } else if (activeMode === 'sixframe') {
+        // Handled directly inside render
+      } else if (activeMode === 'orf') {
+        const foundOrfs = [];
+        const minLengthBp = parseInt(minOrfLen) || 100;
+
+        for (let f = 1; f <= 3; f++) {
+          scanOrfsInFrame(cleanedSeq, f, minLengthBp, foundOrfs);
+        }
+        
+        const revComp = reverseComplement(cleanedSeq);
+        for (let f = 1; f <= 3; f++) {
+          scanOrfsInFrame(revComp, -f, minLengthBp, foundOrfs, true);
+        }
+
+        foundOrfs.sort((a, b) => b.lengthBp - a.lengthBp);
+        setOrfResults(foundOrfs);
       }
 
-      // Sort by length descending
-      foundOrfs.sort((a, b) => b.lengthBp - a.lengthBp);
-      setOrfResults(foundOrfs);
-    }
-  }, [cleanedSeq, activeMode, selectedFrame, readThroughStop, minOrfLen, seqType, validationError]);
+      setActiveStep(4);
+    }, 800);
+  };
 
-  // ORF Helper scanning algorithm
   const scanOrfsInFrame = (seqStr, frame, minLengthBp, orfList, isReverse = false) => {
     const offset = Math.abs(frame) - 1;
     let inOrf = false;
@@ -123,10 +126,7 @@ export default function SeqConvert() {
       } else if (inOrf && aa === '*') {
         const lengthBp = (i + 3) - startIdx;
         if (lengthBp >= minLengthBp) {
-          // Translate the full ORF
           const peptide = translate(seqStr.substring(startIdx, i + 3), 1, true);
-          
-          // Map coordinates relative to original forward sequence
           let mappedStart, mappedEnd;
           if (isReverse) {
             mappedStart = seqStr.length - (i + 3) + 1;
@@ -152,17 +152,14 @@ export default function SeqConvert() {
     }
   };
 
-  // Six Frame Visualizer Grid Renderer
   const renderSixFrameGrid = () => {
     if (!cleanedSeq || seqType === 'PROTEIN') return null;
 
-    // Limit rendering length to prevent DOM freezing
     const capLen = 600;
     const isCapped = cleanedSeq.length > capLen;
     const workingSeq = cleanedSeq.substring(0, capLen);
     const revSeq = reverseComplement(workingSeq);
 
-    // Prepare AA lists for alignment
     const getAlignedAaRow = (seq, frame) => {
       const offset = Math.abs(frame) - 1;
       const row = Array(seq.length).fill('');
@@ -172,8 +169,8 @@ export default function SeqConvert() {
         const aaInfo = STANDARD_GENETIC_CODE[codon];
         const aa = aaInfo ? aaInfo.symbol : 'X';
         
-        row[i] = aa;   // Place at codon start
-        row[i+1] = ''; // blank spacers
+        row[i] = aa;
+        row[i+1] = '';
         row[i+2] = '';
       }
       return row;
@@ -188,32 +185,25 @@ export default function SeqConvert() {
     const r3Row = getAlignedAaRow(revSeq, 3);
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        
-        {/* Forward Frames Section */}
-        <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '16px', backgroundColor: 'var(--white)', overflowX: 'auto' }}>
-          <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
-            Forward Strand (5' → 3') & Reading Frames
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+        <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', backgroundColor: 'var(--white)', overflowX: 'auto' }}>
+          <div style={{ fontSize: '13.5px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid var(--border)', paddingBottom: '6px', color: 'var(--text1)' }}>
+            Forward Strand (5' → 3') Frames
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '13px', whiteSpace: 'nowrap' }}>
-            {/* Headers / Labels */}
+          <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '12.5px', whiteSpace: 'nowrap' }}>
             <div style={{ fontWeight: 'bold', color: 'var(--text3)' }}>Frame +3</div>
             <div style={{ letterSpacing: '0.22em', paddingLeft: '8px' }}>
               {f3Row.map((aa, idx) => renderAaCharacter(aa, idx))}
             </div>
-
             <div style={{ fontWeight: 'bold', color: 'var(--text3)' }}>Frame +2</div>
             <div style={{ letterSpacing: '0.22em', paddingLeft: '4px' }}>
               {f2Row.map((aa, idx) => renderAaCharacter(aa, idx))}
             </div>
-
             <div style={{ fontWeight: 'bold', color: 'var(--text3)' }}>Frame +1</div>
             <div style={{ letterSpacing: '0.22em' }}>
               {f1Row.map((aa, idx) => renderAaCharacter(aa, idx))}
             </div>
-
-            {/* Sequence */}
             <div style={{ fontWeight: 'bold', color: 'var(--accent-d)', borderTop: '1px solid var(--border)', paddingTop: '4px' }}>DNA</div>
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: '4px', letterSpacing: '0.22em', color: 'var(--text1)' }}>
               {workingSeq}
@@ -221,30 +211,24 @@ export default function SeqConvert() {
           </div>
         </div>
 
-        {/* Reverse Frames Section */}
-        <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '16px', backgroundColor: 'var(--white)', overflowX: 'auto' }}>
-          <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
-            Reverse Complement Strand (5' → 3') & Reading Frames
+        <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', backgroundColor: 'var(--white)', overflowX: 'auto' }}>
+          <div style={{ fontSize: '13.5px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid var(--border)', paddingBottom: '6px', color: 'var(--text1)' }}>
+            Reverse Complement Strand (5' → 3') Frames
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '13px', whiteSpace: 'nowrap' }}>
-            {/* Sequence */}
+          <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '12.5px', whiteSpace: 'nowrap' }}>
             <div style={{ fontWeight: 'bold', color: 'var(--accent-d)' }}>Rev-Comp</div>
             <div style={{ letterSpacing: '0.22em', color: 'var(--text2)' }}>
               {revSeq}
             </div>
-
-            {/* Reverse Reading Rows */}
             <div style={{ fontWeight: 'bold', color: 'var(--text3)', borderTop: '1px solid var(--border)', paddingTop: '4px' }}>Frame -1</div>
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: '4px', letterSpacing: '0.22em' }}>
               {r1Row.map((aa, idx) => renderAaCharacter(aa, idx))}
             </div>
-
             <div style={{ fontWeight: 'bold', color: 'var(--text3)' }}>Frame -2</div>
             <div style={{ letterSpacing: '0.22em', paddingLeft: '4px' }}>
               {r2Row.map((aa, idx) => renderAaCharacter(aa, idx))}
             </div>
-
             <div style={{ fontWeight: 'bold', color: 'var(--text3)' }}>Frame -3</div>
             <div style={{ letterSpacing: '0.22em', paddingLeft: '8px' }}>
               {r3Row.map((aa, idx) => renderAaCharacter(aa, idx))}
@@ -253,15 +237,14 @@ export default function SeqConvert() {
         </div>
 
         {isCapped && (
-          <p style={{ fontSize: '12px', color: 'var(--text3)', fontStyle: 'italic', textAlign: 'center' }}>
-            *Visual representation capped at 600bp to maintain UI performance. Use full export functions for complete sequence.
+          <p style={{ fontSize: '11px', color: 'var(--text3)', fontStyle: 'italic', textAlign: 'center' }}>
+            *Visual alignment cap at 600bp to avoid performance issues. Use exports for full length files.
           </p>
         )}
       </div>
     );
   };
 
-  // Stylized character helper
   const renderAaCharacter = (aa, key) => {
     if (!aa) return ' ';
     if (aa === 'M') {
@@ -273,7 +256,7 @@ export default function SeqConvert() {
     }
     if (aa === '*') {
       return (
-        <span key={key} style={{ backgroundColor: 'var(--amber-l)', color: 'var(--amber)', fontWeight: 'bold', padding: '1px 2px', borderRadius: '3px' }}>
+        <span key={key} style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--red)', fontWeight: 'bold', padding: '1px 2px', borderRadius: '3px' }}>
           *
         </span>
       );
@@ -283,6 +266,7 @@ export default function SeqConvert() {
 
   const loadSample = () => {
     setRawInput('ATGGCCAGCATGCTGCAGCTGAGCGTGTTCGCCGTGCTGGCCGTGGCCCTGGCCGTGGACCAGTCGTAG');
+    setValidationError('');
   };
 
   const getFastaOutput = () => {
@@ -300,325 +284,276 @@ export default function SeqConvert() {
     return csv;
   };
 
+  const resetAnalysis = () => {
+    setResults(null);
+    setSimpleResult('');
+    setOrfResults([]);
+    setActiveStep(1);
+  };
+
+  const renderStepTracker = () => (
+    <div className="bx-step-tracker">
+      {steps.map((s) => {
+        const isCompleted = s.number < activeStep;
+        const isActive = s.number === activeStep;
+        const isDisabled = s.number > activeStep && !results && !simpleResult && orfResults.length === 0 && activeMode !== 'sixframe';
+        return (
+          <div
+            key={s.number}
+            className={`bx-step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isDisabled ? 'disabled' : ''}`}
+            onClick={() => !isDisabled && setActiveStep(s.number)}
+          >
+            <span className="bx-step-circle">{s.number}</span>
+            <span>{s.title}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <ToolShell slug="seqconvert">
-      <style>{`
-        .scv-modes-bar {
-          display: flex;
-          border-bottom: 2px solid var(--border);
-          gap: 12px;
-          margin-bottom: 20px;
-        }
-        .scv-mode-btn {
-          background: none;
-          border: none;
-          padding: 8px 14px;
-          font-size: 14px;
-          font-weight: 600;
-          color: var(--text3);
-          cursor: pointer;
-          position: relative;
-          transition: color 0.15s ease;
-        }
-        .scv-mode-btn:hover {
-          color: var(--accent);
-        }
-        .scv-mode-btn.active {
-          color: var(--accent-d);
-        }
-        .scv-mode-btn.active::after {
-          content: '';
-          position: absolute;
-          bottom: -2px;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background-color: var(--accent);
-        }
-        .scv-layout {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 24px;
-        }
-        @media (min-width: 1024px) {
-          .scv-layout {
-            grid-template-columns: 1fr;
-          }
-          /* Override two columns since we want full width sequence visualizers */
-          .tool-layout-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-        .output-sequence-box {
-          border: 1px solid var(--border);
-          background-color: var(--off);
-          border-radius: 8px;
-          padding: 16px;
-          font-family: var(--font-mono, monospace);
-          font-size: 13.5px;
-          line-height: 1.6;
-          max-height: 250px;
-          overflow-y: auto;
-          white-space: pre-wrap;
-          word-break: break-all;
-        }
-        .orfs-table-wrapper {
-          overflow-x: auto;
-          border: 1px solid var(--border);
-          border-radius: 8px;
-        }
-        .orfs-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 13px;
-        }
-        .orfs-table th, .orfs-table td {
-          padding: 10px 12px;
-          border-bottom: 1px solid var(--border);
-          text-align: left;
-        }
-        .orfs-table th {
-          background-color: var(--off);
-          font-weight: 600;
-        }
-        .orfs-table tr:hover {
-          background-color: var(--g50);
-        }
-        .frame-badge {
-          font-size: 11px;
-          font-weight: 700;
-          padding: 2px 6px;
-          border-radius: 4px;
-        }
-        .frame-badge.plus {
-          background-color: var(--g50);
-          color: var(--accent-d);
-          border: 1px solid var(--border2);
-        }
-        .frame-badge.minus {
-          background-color: var(--amber-l);
-          color: var(--amber);
-          border: 1px solid var(--amber);
-        }
-      `}</style>
+      {renderStepTracker()}
 
-      {/* Modes Navigation */}
-      <div className="scv-modes-bar" role="tablist">
-        <button
-          type="button"
-          className={`scv-mode-btn ${activeMode === 'transcribe' ? 'active' : ''}`}
-          onClick={() => setActiveMode('transcribe')}
-          role="tab"
-          aria-selected={activeMode === 'transcribe'}
-        >
-          Transcribe (DNA ↔ RNA)
-        </button>
-        <button
-          type="button"
-          className={`scv-mode-btn ${activeMode === 'revcomp' ? 'active' : ''}`}
-          onClick={() => setActiveMode('revcomp')}
-          role="tab"
-          aria-selected={activeMode === 'revcomp'}
-        >
-          Reverse Complement
-        </button>
-        <button
-          type="button"
-          className={`scv-mode-btn ${activeMode === 'translate' ? 'active' : ''}`}
-          onClick={() => setActiveMode('translate')}
-          role="tab"
-          aria-selected={activeMode === 'translate'}
-          disabled={seqType === 'PROTEIN'}
-          style={{ opacity: seqType === 'PROTEIN' ? 0.5 : 1 }}
-        >
-          Translate (Single Frame)
-        </button>
-        <button
-          type="button"
-          className={`scv-mode-btn ${activeMode === 'sixframe' ? 'active' : ''}`}
-          onClick={() => setActiveMode('sixframe')}
-          role="tab"
-          aria-selected={activeMode === 'sixframe'}
-          disabled={seqType === 'PROTEIN'}
-          style={{ opacity: seqType === 'PROTEIN' ? 0.5 : 1 }}
-        >
-          Six-Frame Alignment
-        </button>
-        <button
-          type="button"
-          className={`scv-mode-btn ${activeMode === 'orf' ? 'active' : ''}`}
-          onClick={() => setActiveMode('orf')}
-          role="tab"
-          aria-selected={activeMode === 'orf'}
-          disabled={seqType === 'PROTEIN'}
-          style={{ opacity: seqType === 'PROTEIN' ? 0.5 : 1 }}
-        >
-          ORF Finder
-        </button>
-      </div>
-
-      <div className="bx-tools-grid">
-        
-        {/* Input Panel */}
-        <div className="tool-pane-card">
-          <div className="tool-pane-title">
-            <span>Sequence Input</span>
-            <button type="button" className="mock-sample-btn" onClick={loadSample}>Load DNA Sample</button>
-          </div>
-
-          <div className="mock-field-group">
-            <label htmlFor="seq-input" className="mock-label">
-              Paste Nucleotide or Peptide Sequence (FASTA headers parsed automatically)
-            </label>
-            <textarea
-              id="seq-input"
-              className="mock-textarea"
-              placeholder="Paste raw sequence e.g., ATGGCCAGC..."
-              value={rawInput}
-              onChange={(e) => setRawInput(e.target.value)}
-            />
-          </div>
-
-          {/* Controls relative to mode */}
-          {activeMode === 'translate' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="mock-field-group">
-                <label htmlFor="frame-select" className="mock-label">Reading Frame</label>
-                <select
-                  id="frame-select"
-                  className="mock-textarea"
-                  style={{ height: '42px', padding: '8px' }}
-                  value={selectedFrame}
-                  onChange={(e) => setSelectedFrame(parseInt(e.target.value))}
-                >
-                  <option value={1}>Frame +1</option>
-                  <option value={2}>Frame +2</option>
-                  <option value={3}>Frame +3</option>
-                  <option value={-1}>Frame -1</option>
-                  <option value={-2}>Frame -2</option>
-                  <option value={-3}>Frame -3</option>
-                </select>
-              </div>
-              <div className="mock-field-group" style={{ justifyContent: 'center' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={readThroughStop}
-                    onChange={(e) => setReadThroughStop(e.target.checked)}
-                  />
-                  Read through stop codons (*)
-                </label>
-              </div>
+      <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+        {/* Step 1: Sequence Input */}
+        {activeStep === 1 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 1</span>
+              <h3 className="bx-step-title">Enter DNA/RNA/Protein Sequence</h3>
             </div>
-          )}
 
-          {activeMode === 'orf' && (
-            <div className="mock-field-group">
-              <label htmlFor="orf-len-input" className="mock-label">Minimum ORF Length (bp)</label>
-              <input
-                id="orf-len-input"
-                type="number"
-                className="mock-textarea"
-                style={{ height: '42px', padding: '8px 12px' }}
-                value={minOrfLen}
-                onChange={(e) => setMinOrfLen(e.target.value)}
+            <div className="bx-field-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label htmlFor="seq-input" className="bx-label">Raw Nucleotide or Peptide Sequence</label>
+                <button type="button" className="bx-btn-sample" onClick={loadSample}>Load DNA Sample</button>
+              </div>
+              <textarea
+                id="seq-input"
+                className="bx-textarea"
+                style={{ height: '140px' }}
+                placeholder="Paste FASTA or raw character sequence here..."
+                value={rawInput}
+                onChange={(e) => {
+                  setRawInput(e.target.value.toUpperCase());
+                  setValidationError('');
+                }}
               />
+              {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
             </div>
-          )}
 
-          {validationError && <p style={{ color: 'var(--red)', fontSize: '13px', marginTop: '10px' }}>{validationError}</p>}
-          {performanceWarning && <p style={{ color: 'var(--amber)', fontSize: '12px', marginTop: '10px' }}>{performanceWarning}</p>}
-
-          <div style={{ fontSize: '12px', color: 'var(--text3)', borderTop: '1px solid var(--border)', paddingTop: '10px', marginTop: '10px' }}>
-            <strong>Detected Input Type:</strong> <span style={{ color: 'var(--accent-d)', fontWeight: 'bold' }}>{seqType}</span>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={handleNextFromStep1}
+                disabled={!rawInput.trim()}
+              >
+                Next: Select Mode Settings →
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Results Panel */}
-        <div className="tool-pane-card">
-          <div className="tool-pane-title">Conversion Outputs</div>
+        {/* Step 2: Configure Mode & Settings */}
+        {activeStep === 2 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 2</span>
+              <h3 className="bx-step-title">Choose Conversion Mode</h3>
+            </div>
 
-          {cleanedSeq && !validationError ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              
-              {/* 1. Simple Conversions / Transcribe / Translate Output */}
-              {(activeMode === 'transcribe' || activeMode === 'revcomp' || activeMode === 'translate') && (
+            <div className="bx-field-group">
+              <label htmlFor="convert-mode-select" className="bx-label">Conversion Mode</label>
+              <select
+                id="convert-mode-select"
+                className="bx-select"
+                value={activeMode}
+                onChange={(e) => setActiveMode(e.target.value)}
+              >
+                <option value="transcribe">Transcribe (DNA ↔ RNA)</option>
+                <option value="revcomp">Reverse Complement</option>
+                <option value="translate" disabled={seqType === 'PROTEIN'}>Translate (Single Frame)</option>
+                <option value="sixframe" disabled={seqType === 'PROTEIN'}>Six-Frame Alignment Visualizer</option>
+                <option value="orf" disabled={seqType === 'PROTEIN'}>ORF Finder (Open Reading Frame)</option>
+              </select>
+            </div>
+
+            {activeMode === 'translate' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '10px' }}>
+                <div className="bx-field-group">
+                  <label htmlFor="frame-select" className="bx-label">Reading Frame</label>
+                  <select
+                    id="frame-select"
+                    className="bx-select"
+                    value={selectedFrame}
+                    onChange={(e) => setSelectedFrame(parseInt(e.target.value))}
+                  >
+                    <option value={1}>Frame +1</option>
+                    <option value={2}>Frame +2</option>
+                    <option value={3}>Frame +3</option>
+                    <option value={-1}>Frame -1</option>
+                    <option value={-2}>Frame -2</option>
+                    <option value={-3}>Frame -3</option>
+                  </select>
+                </div>
+                <div className="bx-field-group" style={{ justifyContent: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', color: 'var(--text2)' }}>
+                    <input
+                      type="checkbox"
+                      checked={readThroughStop}
+                      onChange={(e) => setReadThroughStop(e.target.checked)}
+                    />
+                    Read through stop codons (*)
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {activeMode === 'orf' && (
+              <div className="bx-field-group" style={{ marginTop: '10px' }}>
+                <label htmlFor="orf-len-input" className="bx-label">Minimum ORF Length (bp)</label>
+                <input
+                  id="orf-len-input"
+                  type="number"
+                  className="bx-input"
+                  value={minOrfLen}
+                  onChange={(e) => setMinOrfLen(parseInt(e.target.value) || 0)}
+                />
+              </div>
+            )}
+
+            {performanceWarning && <p style={{ color: 'var(--amber)', fontSize: '12.5px', marginTop: '8px' }}>{performanceWarning}</p>}
+
+            <div style={{ fontSize: '12px', color: 'var(--text3)', borderTop: '1px solid var(--border)', paddingTop: '10px', marginTop: '10px' }}>
+              <strong>Detected Type:</strong> <span style={{ color: 'var(--accent-d)', fontWeight: 'bold' }}>{seqType}</span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
+              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Analysis →</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Run Analysis */}
+        {activeStep === 3 && (
+          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
+            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
+              <span className="bx-step-badge">Step 3</span>
+              <h3 className="bx-step-title">Execute Sequence Converter</h3>
+            </div>
+
+            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
+              Solving translation alignments, reading frames, and scanning codons on the <strong>{seqType}</strong> backbone.
+            </p>
+
+            <button
+              type="button"
+              className="bx-btn-primary"
+              style={{ width: '100%', padding: '12px' }}
+              onClick={runSequenceConversion}
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
                 <>
-                  <div className="output-sequence-box">
-                    {simpleResult}
-                  </div>
-                  <div className="mock-actions-row">
-                    <CopyButton text={simpleResult} />
-                    <ExportButton data={getFastaOutput()} filename="sequence_conversion.fasta" format="fasta" />
-                  </div>
+                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
+                  Mapping Reading Frame Triplets...
                 </>
+              ) : (
+                'Run Sequence Conversion'
               )}
+            </button>
 
-              {/* 2. Six-Frame Translation Alignment */}
-              {activeMode === 'sixframe' && renderSixFrameGrid()}
+            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
+              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
+            </div>
+          </div>
+        )}
 
-              {/* 3. ORF Finder Table */}
-              {activeMode === 'orf' && (
-                <>
-                  {orfResults.length > 0 ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                      <div className="orfs-table-wrapper">
-                        <table className="orfs-table">
-                          <thead>
-                            <tr>
-                              <th>ID</th>
-                              <th>Frame</th>
-                              <th>Start</th>
-                              <th>End</th>
-                              <th>Length (bp)</th>
-                              <th>Peptide Preview</th>
+        {/* Step 4: Outputs */}
+        {activeStep === 4 && (
+          <div className="bx-step-section" style={{ alignItems: 'stretch' }}>
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 4</span>
+              <h3 className="bx-step-title">Conversion Outputs</h3>
+            </div>
+
+            {/* simple transcription/translations */}
+            {(activeMode === 'transcribe' || activeMode === 'revcomp' || activeMode === 'translate') && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ border: '1px solid var(--border)', backgroundColor: 'var(--off)', borderRadius: '8px', padding: '12px', fontFamily: 'var(--font-mono)', fontSize: '13px', lineHeight: '1.6', maxHeight: '200px', overflowY: 'auto', wordBreak: 'break-all' }}>
+                  {simpleResult}
+                </div>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                  <CopyButton text={simpleResult} />
+                  <ExportButton data={getFastaOutput()} filename="sequence_conversion.fasta" format="fasta" />
+                </div>
+              </div>
+            )}
+
+            {/* six frame alignment */}
+            {activeMode === 'sixframe' && renderSixFrameGrid()}
+
+            {/* ORF results */}
+            {activeMode === 'orf' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {orfResults.length > 0 ? (
+                  <>
+                    <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: '6px' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: 'var(--off)', borderBottom: '1px solid var(--border)' }}>
+                            <th style={{ padding: '8px', textAlign: 'center' }}>ID</th>
+                            <th style={{ padding: '8px', textAlign: 'center' }}>Frame</th>
+                            <th style={{ padding: '8px', textAlign: 'center' }}>Span</th>
+                            <th style={{ padding: '8px', textAlign: 'center' }}>Length (bp)</th>
+                            <th style={{ padding: '8px' }}>Peptide Preview</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {orfResults.map((orf, idx) => (
+                            <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
+                              <td style={{ padding: '8px', textAlign: 'center' }}><b>{idx + 1}</b></td>
+                              <td style={{ padding: '8px', textAlign: 'center' }}>
+                                <span className={`frame-badge ${orf.frame > 0 ? 'plus' : 'minus'}`}>
+                                  {orf.frame > 0 ? `+${orf.frame}` : orf.frame}
+                                </span>
+                              </td>
+                              <td style={{ padding: '8px', textAlign: 'center' }}>{orf.start} - {orf.end}</td>
+                              <td style={{ padding: '8px', textAlign: 'center' }}>{orf.lengthBp} bp ({orf.lengthAa} aa)</td>
+                              <td style={{ padding: '8px', fontFamily: 'var(--font-mono)', fontSize: '11.5px' }}>{orf.peptidePreview}</td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {orfResults.map((orf, idx) => (
-                              <tr key={idx} style={{ borderLeft: idx === 0 ? '4px solid var(--accent)' : 'none' }}>
-                                <td><b>{idx + 1}</b></td>
-                                <td>
-                                  <span className={`frame-badge ${orf.frame > 0 ? 'plus' : 'minus'}`}>
-                                    {orf.frame > 0 ? `+${orf.frame}` : orf.frame}
-                                  </span>
-                                </td>
-                                <td>{orf.start}</td>
-                                <td>{orf.end}</td>
-                                <td>{orf.lengthBp} bp ({orf.lengthAa} aa)</td>
-                                <td style={{ fontFamily: 'var(--font-mono)', fontSize: '12px' }}>
-                                  {orf.peptidePreview}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      <div className="mock-actions-row">
-                        <CopyButton text={orfResults.map((o, idx) => `ORF ${idx+1} [Frame ${o.frame}, ${o.start}-${o.end}]: ${o.peptideFull}`).join('\n')} />
-                        <ExportButton data={getOrfCsvOutput()} filename="orf_results_profile.csv" format="csv" />
-                      </div>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  ) : (
-                    <div className="mock-empty-results">
-                      <p>No open reading frames found exceeding {minOrfLen}bp.</p>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                      <CopyButton text={orfResults.map((o, idx) => `ORF ${idx+1} [Frame ${o.frame}, ${o.start}-${o.end}]: ${o.peptideFull}`).join('\n')} />
+                      <ExportButton data={getOrfCsvOutput()} filename="orf_results_profile.csv" format="csv" />
                     </div>
-                  )}
-                </>
-              )}
+                  </>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '24px', border: '1.5px dashed var(--border)', borderRadius: '8px', color: 'var(--text3)' }}>
+                    No open reading frames found exceeding {minOrfLen}bp.
+                  </div>
+                )}
+              </div>
+            )}
 
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={resetAnalysis}
+                style={{ background: 'var(--text2)', boxShadow: 'none' }}
+              >
+                ← Convert Another Sequence
+              </button>
             </div>
-          ) : (
-            <div className="mock-empty-results">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '48px', height: '48px', color: 'var(--text4)', marginBottom: '12px' }}>
-                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.2 8H16.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text2)', marginBottom: '4px' }}>No Sequence Processed</p>
-              <p style={{ fontSize: '13px', lineHeight: 1.4 }}>Input a nucleic acid or peptide sequence to execute transcriptions, alignments, or translate open reading frames.</p>
-            </div>
-          )}
-        </div>
-
+          </div>
+        )}
       </div>
     </ToolShell>
   );

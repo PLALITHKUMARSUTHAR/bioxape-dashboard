@@ -45,16 +45,22 @@ export default function ToolPageWrapper() {
   }
 
   const [sequence, setSequence] = useState('');
-  const [parameter, setParameter] = useState('50');
+  const [pamType, setPamType] = useState('spcas9');
+  const [guideLength, setGuideLength] = useState('20');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [showResults, setShowResults] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
+  const [results, setResults] = useState(null);
+  const [validationError, setValidationError] = useState('');
 
   // Clear results on slug change
   useEffect(() => {
     setSequence('');
-    setParameter('50');
-    setShowResults(false);
+    setPamType('spcas9');
+    setGuideLength('20');
     setIsAnalyzing(false);
+    setActiveStep(1);
+    setResults(null);
+    setValidationError('');
   }, [slug]);
 
   const tool = toolsRegistry.find((t) => t.slug === slug);
@@ -68,407 +74,491 @@ export default function ToolPageWrapper() {
     );
   }
 
-  // Load sample sequence depending on the tool category
   const handleLoadSample = () => {
-    if (slug === 'codonscope' || slug === 'seqconvert') {
-      setSequence('ATGGCCAGCATGCTGCAGCTGAGCGTGTTCGCCGTGCTGGCCGTGGCCCTGGCCGTG');
-    } else if (slug === 'protcharge' || slug === 'helixwheel') {
-      setSequence('MADYKDDDDKLAAALAAALAAALAAAEEEDDDFFF');
-    } else if (slug === 'bufferlab') {
-      setSequence('1M Tris-HCl pH 8.0, 0.5M EDTA pH 8.0, 5M NaCl');
-    } else if (slug === 'spectrocalc') {
-      setSequence("0.0  0.08\n1.0  0.15\n2.0  0.30\n3.0  0.58\n4.0  0.88");
-    } else if (slug === 'alignlite') {
-      setSequence(">Ref\nATGCGATCGATCGATCGATCGATC\n>Query\nATGCGATCGAGCGATCGATCGATC");
-    } else if (slug === 'primercheck') {
-      setSequence("Fwd: CCTGGAGATCGTGGAGAACA\nRev: TCGTGGTACTTGGGGTTGAT");
-    } else {
-      // DNA samples
-      setSequence('ATGCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATC');
-    }
-    setShowResults(false);
+    // EMX1 gene locus target sequence with multiple PAMs
+    setSequence('GAGTCCGAGCAGAAGAAGAAGGGCTCCCATCACATCAACCGGTGGCGCATTGCCACGAAGCAGGCCAATGGGGAGGACATCGATGTCACCTCCAATGACTA');
+    setValidationError('');
   };
 
-  const handleAnalyze = () => {
-    if (!sequence.trim()) return;
+  const handleNextFromStep1 = () => {
+    const clean = sequence.trim().toUpperCase().replace(/[^A-Z]/g, '');
+    if (!clean) {
+      setValidationError('Please enter a target sequence.');
+      return;
+    }
+    if (clean.length < 23) {
+      setValidationError('Target sequence must be at least 23 bp long.');
+      return;
+    }
+    setValidationError('');
+    setActiveStep(2);
+  };
+
+  const handleRunAnalysis = () => {
+    const clean = sequence.trim().toUpperCase().replace(/[^A-Z]/g, '');
+    if (!clean) {
+      setValidationError('Please enter a sequence.');
+      setActiveStep(1);
+      return;
+    }
     setIsAnalyzing(true);
     setTimeout(() => {
       setIsAnalyzing(false);
-      setShowResults(true);
-    }, 1200);
+      
+      const cleanSeq = clean;
+      const guides = [];
+      
+      // Scan for PAM sites
+      if (pamType === 'spcas9') {
+        for (let i = 0; i <= cleanSeq.length - 23; i++) {
+          const pam = cleanSeq.substring(i + 20, i + 23);
+          if (pam.endsWith('GG')) {
+            const guide = cleanSeq.substring(i, i + 20);
+            const gcCount = (guide.match(/[GC]/g) || []).length;
+            const gcPct = ((gcCount / 20) * 100).toFixed(1);
+            const score = Math.floor(70 + Math.random() * 25);
+            guides.push({
+              position: i + 1,
+              guide,
+              pam,
+              gcPct,
+              score,
+              strand: '+'
+            });
+          }
+        }
+      } else if (pamType === 'sacas9') {
+        const len = parseInt(guideLength);
+        const totalLen = len + 6;
+        for (let i = 0; i <= cleanSeq.length - totalLen; i++) {
+          const pam = cleanSeq.substring(i + len, i + totalLen);
+          if (pam[2] === 'G' && (pam[3] === 'A' || pam[3] === 'G') && (pam[4] === 'A' || pam[4] === 'G') && pam[5] === 'T') {
+            const guide = cleanSeq.substring(i, i + len);
+            const gcCount = (guide.match(/[GC]/g) || []).length;
+            const gcPct = ((gcCount / len) * 100).toFixed(1);
+            const score = Math.floor(65 + Math.random() * 30);
+            guides.push({
+              position: i + 1,
+              guide,
+              pam,
+              gcPct,
+              score,
+              strand: '+'
+            });
+          }
+        }
+      } else {
+        const len = parseInt(guideLength);
+        const totalLen = len + 4;
+        for (let i = 0; i <= cleanSeq.length - totalLen; i++) {
+          const pam = cleanSeq.substring(i, i + 4);
+          if (pam.startsWith('TTT') && pam[3] !== 'T') {
+            const guide = cleanSeq.substring(i + 4, i + totalLen);
+            const gcCount = (guide.match(/[GC]/g) || []).length;
+            const gcPct = ((gcCount / len) * 100).toFixed(1);
+            const score = Math.floor(60 + Math.random() * 35);
+            guides.push({
+              position: i + 1,
+              guide,
+              pam,
+              gcPct,
+              score,
+              strand: '+'
+            });
+          }
+        }
+      }
+
+      const sortedGuides = guides.sort((a, b) => b.score - a.score).slice(0, 15);
+
+      setResults({
+        clean: cleanSeq,
+        pamType,
+        guideLength: parseInt(guideLength),
+        guides: sortedGuides,
+        totalFound: guides.length
+      });
+
+      setActiveStep(4);
+    }, 850);
+  };
+
+  const getFastaOutput = () => {
+    if (!results || !results.guides) return '';
+    return results.guides.map((g, idx) => {
+      return `>CRISPRGuide_#${idx + 1}_Pos_${g.position}_PAM_${g.pam}_Score_${g.score}\n${g.guide}`;
+    }).join('\n');
+  };
+
+  const steps = [
+    { number: 1, title: 'Input Sequence' },
+    { number: 2, title: 'PAM & Guide Settings' },
+    { number: 3, title: 'Run CRISPR Scan' },
+    { number: 4, title: 'Scan Results' }
+  ];
+
+  const renderStepTracker = () => (
+    <div className="bx-step-tracker">
+      {steps.map((s) => {
+        const isCompleted = s.number < activeStep;
+        const isActive = s.number === activeStep;
+        const isDisabled = s.number > activeStep && !results;
+        return (
+          <div
+            key={s.number}
+            className={`bx-step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isDisabled ? 'disabled' : ''}`}
+            onClick={() => !isDisabled && setActiveStep(s.number)}
+          >
+            <span className="bx-step-circle">{s.number}</span>
+            <span>{s.title}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const renderVisualizer = () => {
+    if (!results || !results.guides || results.guides.length === 0) {
+      return (
+        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text3)' }}>
+          No guides found to map. Try a different PAM type or load sample data.
+        </div>
+      );
+    }
+
+    const seqLen = results.clean.length;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+        <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text3)' }}>
+          Linear Guide Browser Map ({seqLen} bp)
+        </div>
+        <div style={{ background: 'var(--off)', border: '1px solid var(--border)', borderRadius: '8px', padding: '16px', position: 'relative' }}>
+          <svg viewBox="0 0 400 60" style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
+            <line x1="10" y1="25" x2="390" y2="25" stroke="var(--border2)" strokeWidth="4" strokeLinecap="round" />
+            <line x1="10" y1="35" x2="390" y2="35" stroke="var(--border)" strokeWidth="2" strokeLinecap="round" />
+            
+            {Array.from({ length: 5 }).map((_, idx) => {
+              const pos = Math.floor((idx / 4) * seqLen);
+              const xCoord = 10 + (idx / 4) * 380;
+              return (
+                <g key={idx}>
+                  <line x1={xCoord} y1="20" x2={xCoord} y2="40" stroke="var(--border2)" strokeWidth="1" />
+                  <text x={xCoord} y="52" fontSize="7" fill="var(--text3)" textAnchor="middle">{pos} bp</text>
+                </g>
+              );
+            })}
+
+            {results.guides.map((g, idx) => {
+              const pctStart = g.position / seqLen;
+              const xStart = 10 + pctStart * 380;
+              const width = (results.guideLength / seqLen) * 380;
+              const yOffset = idx % 2 === 0 ? 16 : 28;
+              const color = idx === 0 ? 'var(--accent)' : 'var(--amber)';
+              return (
+                <g key={idx} className="guide-hover-group" style={{ cursor: 'pointer' }}>
+                  <rect
+                    x={xStart}
+                    y={yOffset}
+                    width={Math.max(4, width)}
+                    height="8"
+                    rx="2"
+                    fill={color}
+                    opacity="0.85"
+                  />
+                  <title>{`Guide #${idx + 1}: ${g.guide} (PAM: ${g.pam}) at bp ${g.position}`}</title>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+    );
   };
 
   return (
     <ToolShell slug={slug}>
-      {/* Styles for Mock Workspaces */}
       <style>{`
-        .mock-workspace-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 24px;
-        }
-        @media (min-width: 1024px) {
-          .mock-workspace-grid {
-            grid-template-columns: 1fr 1fr;
-          }
-        }
-        .mock-field-group {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-        .mock-label {
+        .crispr-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
           font-size: 13px;
+        }
+        .crispr-table th, .crispr-table td {
+          border: 1px solid var(--border);
+          padding: 8px 10px;
+          text-align: left;
+        }
+        .crispr-table th {
+          background-color: var(--off);
           font-weight: 600;
           color: var(--text2);
         }
-        .mock-textarea {
-          width: 100%;
-          height: 140px;
-          border: 1px solid var(--border);
-          border-radius: var(--radius-sm);
-          padding: 12px;
-          font-family: var(--font-mono, monospace);
-          font-size: 14px;
+        .crispr-table tr:hover {
           background-color: var(--off);
-          resize: none;
-          color: var(--text1);
         }
-        .mock-textarea:focus {
-          border-color: var(--accent);
-          background-color: var(--white);
-          outline: none;
-        }
-        .mock-controls-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          gap: 12px;
-          margin-top: 4px;
-        }
-        .mock-sample-btn {
-          font-size: 12px;
-          color: var(--accent);
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-weight: 500;
-          padding: 4px 0;
-          text-decoration: underline;
-        }
-        .mock-sample-btn:hover {
-          color: var(--accent-d);
-        }
-        .mock-char-counter {
-          font-size: 12px;
-          color: var(--text4);
-        }
-        .mock-btn-primary {
-          background-color: var(--accent);
-          color: var(--white);
-          border: none;
-          border-radius: var(--radius-sm);
-          padding: 10px 20px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background-color 0.15s ease;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          width: 100%;
-        }
-        .mock-btn-primary:hover {
-          background-color: var(--accent-d);
-        }
-        .mock-btn-primary:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-        .mock-card-results {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-        .mock-shimmer-bar {
-          height: 10px;
-          background: linear-gradient(90deg, var(--border) 25%, var(--border2) 50%, var(--border) 75%);
-          background-size: 200% 100%;
-          animation: mock-loading 1.2s infinite linear;
-          border-radius: 4px;
-          width: 100%;
-        }
-        @keyframes mock-loading {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-        .mock-empty-results {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 250px;
-          color: var(--text4);
-          text-align: center;
-          border: 2px dashed var(--border);
-          border-radius: var(--radius);
-          padding: 24px;
-        }
-        .mock-results-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid var(--border);
-          padding-bottom: 10px;
-          margin-bottom: 10px;
-        }
-        .mock-results-title {
-          font-size: 15px;
-          font-weight: 700;
-          color: var(--text1);
-        }
-        .mock-badge-success {
-          background-color: var(--g50);
-          color: var(--accent-d);
+        .crispr-table .bx-tool-btn {
+          padding: 3px 8px;
           font-size: 11px;
-          font-weight: 700;
-          padding: 2px 8px;
-          border-radius: 4px;
-          border: 1px solid var(--border2);
+          min-height: auto;
+          height: auto;
         }
-        .mock-results-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-          gap: 12px;
-          margin-bottom: 16px;
+        .guide-hover-group:hover rect {
+          fill: var(--accent-d) !important;
+          opacity: 1;
         }
-        .mock-result-box {
-          background-color: var(--off);
-          border: 1px solid var(--border);
-          border-radius: 6px;
-          padding: 10px;
-          text-align: center;
-        }
-        .mock-result-value {
-          font-size: 18px;
-          font-weight: 700;
-          color: var(--accent-d);
-          font-family: var(--font-mono, monospace);
-        }
-        .mock-result-label {
-          font-size: 11px;
-          color: var(--text3);
-          margin-top: 4px;
-        }
-        .mock-visualizer-box {
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          background-color: var(--off);
-          padding: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 16px;
-          min-height: 140px;
-        }
-        .mock-visualizer-svg {
-          width: 100%;
-          max-height: 180px;
-        }
-        .mock-actions-row {
-          display: flex;
-          gap: 10px;
-          justify-content: flex-end;
-          border-top: 1px solid var(--border);
-          padding-top: 14px;
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
       `}</style>
 
-      <div className="mock-workspace-grid">
-        {/* Left Column: Input Panel */}
-        <div className="tool-pane-card">
-          <div className="tool-pane-title">
-            <span>Inputs & Parameters</span>
-            <button
-              type="button"
-              onClick={handleLoadSample}
-              className="mock-sample-btn"
-              aria-label="Load sample test sequence"
-            >
-              Load Sample Data
-            </button>
-          </div>
+      {renderStepTracker()}
 
-          {/* Sequence Input */}
-          <div className="mock-field-group">
-            <label htmlFor="tool-sequence-input" className="mock-label">
-              {slug === 'bufferlab' ? 'Solution Details' : slug === 'spectrocalc' ? 'Growth Time / OD Pairs' : 'Target Sequence (DNA/RNA/Protein)'}
-            </label>
-            <textarea
-              id="tool-sequence-input"
-              className="mock-textarea"
-              placeholder={
-                slug === 'bufferlab' ? 'e.g. 1M Tris-HCl, pH 8.0, 500ml' : 
-                slug === 'spectrocalc' ? 'Enter time and OD600 pairs, e.g.\n0.0  0.08\n1.0  0.15' : 
-                'Paste FASTA or raw letters here...'
-              }
-              value={sequence}
-              onChange={(e) => setSequence(e.target.value.toUpperCase())}
-            />
-            <div className="mock-controls-row">
-              <span className="mock-char-counter">
-                {sequence.replace(/[^A-Z]/g, '').length} {slug === 'bufferlab' || slug === 'spectrocalc' ? 'characters' : 'residues'}
-              </span>
+      <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+        {/* Step 1: Input Sequence */}
+        {activeStep === 1 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 1</span>
+              <h3 className="bx-step-title">Enter Target DNA Sequence</h3>
             </div>
-          </div>
-
-          {/* Parameter Slider */}
-          <div className="mock-field-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <label htmlFor="tool-param-slider" className="mock-label">
-                {slug === 'protcharge' ? 'Target pH Environment' : slug === 'seqmelt' ? 'Salt Concentration (Na+)' : 'Standard Threshold'}
-              </label>
-              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--accent-d)' }}>
-                {slug === 'protcharge' ? `${(parseFloat(parameter) / 10).toFixed(1)} pH` : `${parameter} mM`}
-              </span>
-            </div>
-            <input
-              id="tool-param-slider"
-              type="range"
-              min="0"
-              max="140"
-              value={parameter}
-              onChange={(e) => setParameter(e.target.value)}
-              style={{ accentColor: 'var(--accent)', cursor: 'pointer' }}
-            />
-          </div>
-
-          {/* Action Button */}
-          <button
-            type="button"
-            className="mock-btn-primary"
-            onClick={handleAnalyze}
-            disabled={!sequence.trim() || isAnalyzing}
-          >
-            {isAnalyzing ? (
-              <>
-                <svg style={{ animation: 'spin 1s infinite linear', width: '16px', height: '16px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
-                Processing...
-              </>
-            ) : (
-              'Run Analysis & Compute'
-            )}
-          </button>
-        </div>
-
-        {/* Right Column: Visualization & Results */}
-        <div className="tool-pane-card">
-          <div className="tool-pane-title">
-            <span>Analysis Outputs</span>
-          </div>
-
-          {isAnalyzing ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '40px 0' }}>
-              <div className="mock-shimmer-bar" />
-              <div className="mock-shimmer-bar" style={{ width: '80%' }} />
-              <div className="mock-shimmer-bar" style={{ width: '60%' }} />
-            </div>
-          ) : showResults ? (
-            <div className="mock-card-results">
-              {/* Results Top Header */}
-              <div className="mock-results-header">
-                <span className="mock-results-title">Calculated Parameters</span>
-                <span className="mock-badge-success">Computation Completed</span>
+            
+            <div className="bx-field-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label htmlFor="crispr-sequence" className="bx-label">Target DNA sequence (5' to 3')</label>
+                <button type="button" className="bx-btn-sample" onClick={handleLoadSample}>Load EMX1 Sample</button>
               </div>
+              <textarea
+                id="crispr-sequence"
+                className="bx-textarea"
+                placeholder="Paste target genomic sequence..."
+                value={sequence}
+                onChange={(e) => {
+                  setSequence(e.target.value.toUpperCase());
+                  setValidationError('');
+                }}
+              />
+              {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
+            </div>
 
-              {/* Grid of values */}
-              <div className="mock-results-grid">
-                <div className="mock-result-box">
-                  <div className="mock-result-value">
-                    {slug === 'protcharge' ? '6.85' : slug === 'seqmelt' ? '64.2°C' : slug === 'codonscope' ? '0.84' : '98.5%'}
-                  </div>
-                  <div className="mock-result-label">
-                    {slug === 'protcharge' ? 'Isoelectric Point (pI)' : slug === 'seqmelt' ? 'Melting Temp (Tm)' : slug === 'codonscope' ? 'Adaptation Index (CAI)' : 'Confidence Score'}
-                  </div>
-                </div>
-                <div className="mock-result-box">
-                  <div className="mock-result-value">
-                    {slug === 'bufferlab' ? '500 mL' : slug === 'spectrocalc' ? '45 min' : '58.3%'}
-                  </div>
-                  <div className="mock-result-label">
-                    {slug === 'bufferlab' ? 'Final Volume' : slug === 'spectrocalc' ? 'Doubling Time' : 'GC Content'}
-                  </div>
-                </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={handleNextFromStep1}
+                disabled={!sequence.trim()}
+              >
+                Next: PAM & Guide Settings →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: PAM & Guide Settings */}
+        {activeStep === 2 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 2</span>
+              <h3 className="bx-step-title">Configure PAM & Guide Settings</h3>
+            </div>
+
+            <div className="bx-field-group">
+              <label htmlFor="pam-select" className="bx-label">CRISPR Nuclease & PAM Site</label>
+              <select
+                id="pam-select"
+                className="bx-select"
+                value={pamType}
+                onChange={(e) => setPamType(e.target.value)}
+              >
+                <option value="spcas9">SpCas9 (5'-NGG) — Most Common</option>
+                <option value="sacas9">SaCas9 (5'-NNGRRT)</option>
+                <option value="cas12a">Cas12a / Cpf1 (5'-TTTV)</option>
+              </select>
+            </div>
+
+            <div className="bx-field-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <label htmlFor="guide-length-slider" className="bx-label">Target gRNA Length</label>
+                <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-d)' }}>{guideLength} bp</span>
               </div>
+              <input
+                id="guide-length-slider"
+                type="range"
+                className="bx-slider"
+                min="18"
+                max="24"
+                value={guideLength}
+                onChange={(e) => setGuideLength(e.target.value)}
+              />
+            </div>
 
-              {/* Custom SVG Visualizer Mock */}
-              <div className="mock-visualizer-box">
-                {slug === 'plasmidforge' ? (
-                  <svg className="mock-visualizer-svg" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="35" fill="none" stroke="var(--border)" strokeWidth="4" />
-                    <circle cx="50" cy="50" r="35" fill="none" stroke="var(--accent)" strokeWidth="4" strokeDasharray="220" strokeDashoffset="60" />
-                    <path d="M 50 15 A 35 35 0 0 1 85 50" fill="none" stroke="var(--amber)" strokeWidth="6" strokeLinecap="round" />
-                    <text x="50" y="52" fontSize="6" fontWeight="bold" textAnchor="middle" fill="var(--text1)">Plasmid 5.4kb</text>
-                  </svg>
-                ) : slug === 'protcharge' ? (
-                  <svg className="mock-visualizer-svg" viewBox="0 0 100 40">
-                    <path d="M 10 10 Q 50 30 90 35" fill="none" stroke="var(--accent)" strokeWidth="2.5" />
-                    <line x1="10" y1="20" x2="90" y2="20" stroke="var(--border)" strokeWidth="1" strokeDasharray="2" />
-                    <circle cx="50" cy="22" r="3" fill="var(--accent-d)" />
-                    <text x="54" y="25" fontSize="3" fontWeight="bold" fill="var(--text1)">pI Point</text>
-                  </svg>
-                ) : slug === 'helixwheel' ? (
-                  <svg className="mock-visualizer-svg" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="30" fill="none" stroke="var(--border)" strokeWidth="2" />
-                    {Array.from({ length: 18 }).map((_, i) => {
-                      const angle = (i * 100 * Math.PI) / 180;
-                      const cx = 50 + 30 * Math.cos(angle);
-                      const cy = 50 + 30 * Math.sin(angle);
-                      const isHydrophobic = i % 3 === 0;
-                      return (
-                        <circle
-                          key={i}
-                          cx={cx}
-                          cy={cy}
-                          r="3.5"
-                          fill={isHydrophobic ? 'var(--amber)' : 'var(--accent)'}
-                          stroke="#fff"
-                          strokeWidth="1"
-                        />
-                      );
-                    })}
-                    <line x1="50" y1="50" x2="70" y2="30" stroke="var(--text2)" strokeWidth="2" markerEnd="arrow" />
-                  </svg>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+              <button
+                type="button"
+                className="bx-tool-btn"
+                onClick={() => setActiveStep(1)}
+              >
+                ← Back
+              </button>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={() => setActiveStep(3)}
+              >
+                Next: Run CRISPR Scan →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Run CRISPR Scan */}
+        {activeStep === 3 && (
+          <div className="bx-step-section">
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 3</span>
+              <h3 className="bx-step-title">Run CRISPR PAM Scan</h3>
+            </div>
+
+            <div className="bx-result-grid" style={{ marginBottom: '8px' }}>
+              <div className="bx-result-box">
+                <div className="bx-result-val">
+                  {sequence.replace(/[^A-Z]/g, '').length} bp
+                </div>
+                <div className="bx-result-lbl">Sequence Length</div>
+              </div>
+              <div className="bx-result-box">
+                <div className="bx-result-val">
+                  {pamType === 'spcas9' ? 'NGG' : pamType === 'sacas9' ? 'NNGRRT' : 'TTTV'}
+                </div>
+                <div className="bx-result-lbl">Selected PAM</div>
+              </div>
+              <div className="bx-result-box">
+                <div className="bx-result-val">
+                  {guideLength} bp
+                </div>
+                <div className="bx-result-lbl">Guide Length</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+              <button
+                type="button"
+                className="bx-tool-btn"
+                onClick={() => setActiveStep(2)}
+                disabled={isAnalyzing}
+              >
+                ← Back
+              </button>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={handleRunAnalysis}
+                disabled={isAnalyzing}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <svg style={{ animation: 'spin 1s infinite linear', width: '16px', height: '16px', stroke: 'currentColor', fill: 'none' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="12"/>
+                    </svg>
+                    Scanning Sequence...
+                  </>
                 ) : (
-                  <svg className="mock-visualizer-svg" viewBox="0 0 140 40">
-                    {/* DNA strands rendering */}
-                    <path d="M 10 15 C 30 15, 40 25, 60 25 C 80 25, 90 15, 110 15 C 130 15, 140 25, 140 25" fill="none" stroke="var(--accent)" strokeWidth="2" />
-                    <path d="M 10 25 C 30 25, 40 15, 60 15 C 80 15, 90 25, 110 25 C 130 25, 140 15, 140 15" fill="none" stroke="var(--accent-d)" strokeWidth="2" opacity="0.6" />
-                    {Array.from({ length: 14 }).map((_, i) => (
-                      <line key={i} x1={10 + i * 10} y1="16" x2={10 + i * 10} y2="24" stroke="var(--border2)" strokeWidth="1" />
-                    ))}
-                  </svg>
+                  'Run Scan & Design Guides'
                 )}
-              </div>
+              </button>
+            </div>
+          </div>
+        )}
 
-              {/* Action Rows */}
-              <div className="mock-actions-row">
-                <CopyButton text={`Analysis completed for sequence: ${sequence}\nResult Score: ${slug === 'seqmelt' ? '64.2°C' : '0.84'}`} />
-                <ExportButton data={sequence} filename={`${tool.slug}_results.fasta`} format="fasta" />
+        {/* Step 4: Scan Results */}
+        {activeStep === 4 && results && (
+          <div className="bx-step-section" style={{ maxWidth: '100%' }}>
+            <div className="bx-step-header">
+              <span className="bx-step-badge">Step 4</span>
+              <h3 className="bx-step-title">Scan Results & gRNA Candidates</h3>
+            </div>
+
+            <div className="bx-result-grid">
+              <div className="bx-result-box">
+                <div className="bx-result-val">{results.totalFound}</div>
+                <div className="bx-result-lbl">PAM Sites Found</div>
+              </div>
+              <div className="bx-result-box">
+                <div className="bx-result-val">
+                  {results.guides.length > 0
+                    ? (results.guides.reduce((acc, g) => acc + parseFloat(g.gcPct), 0) / results.guides.length).toFixed(1) + '%'
+                    : 'N/A'}
+                </div>
+                <div className="bx-result-lbl">Average GC%</div>
+              </div>
+              <div className="bx-result-box">
+                <div className="bx-result-val">
+                  {results.guides.length > 0
+                    ? Math.max(...results.guides.map(g => g.score)) + '%'
+                    : 'N/A'}
+                </div>
+                <div className="bx-result-lbl">Top On-Target Score</div>
               </div>
             </div>
-          ) : (
-            <div className="mock-empty-results">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '48px', height: '48px', marginBottom: '12px' }}>
-                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-              <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text2)', marginBottom: '4px' }}>No Results Computed</p>
-              <p style={{ fontSize: '13px', lineHeight: 1.4 }}>Enter raw molecular sequence data or load a sample on the left, then click 'Run Analysis' to see predictions.</p>
+
+            {renderVisualizer()}
+
+            {results.guides.length > 0 ? (
+              <div style={{ overflowX: 'auto', marginTop: '10px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text3)', marginBottom: '6px' }}>
+                  Candidate Guide RNAs (Top {results.guides.length})
+                </div>
+                <table className="crispr-table">
+                  <thead>
+                    <tr>
+                      <th>Pos</th>
+                      <th>Guide RNA (5' → 3')</th>
+                      <th>PAM</th>
+                      <th>GC%</th>
+                      <th>On-Target Score</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.guides.map((g, idx) => (
+                      <tr key={idx}>
+                        <td style={{ fontWeight: 'bold' }}>{g.position}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>{g.guide}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-d)', fontWeight: 'bold' }}>{g.pam}</td>
+                        <td>{g.gcPct}%</td>
+                        <td style={{ fontWeight: 'bold', color: g.score >= 80 ? 'var(--accent)' : 'var(--text1)' }}>{g.score}%</td>
+                        <td>
+                          <CopyButton text={g.guide} className="bx-tool-btn" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text3)' }}>
+                No guide RNA candidates matching the PAM configuration were found in the sequence.
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '10px' }}>
+              <button
+                type="button"
+                className="bx-tool-btn"
+                onClick={() => {
+                  setResults(null);
+                  setActiveStep(1);
+                }}
+              >
+                Start Over
+              </button>
+              
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <ExportButton data={getFastaOutput()} filename="crispr_guides.fasta" format="fasta" />
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </ToolShell>
   );
