@@ -1,0 +1,21 @@
+export const commonReagents = [
+  { name: 'Tris base', mw: 121.14, note: 'Primary buffer agent for Tris-HCl buffers in DNA/RNA work (pH 7-9).' },
+  { name: 'Tris-HCl', mw: 157.60, note: 'Acidic conjugate component of Tris buffers.' },
+  { name: 'NaCl', mw: 58.44, note: 'Sodium chloride, salt for adjusting ionic strength and osmolarity.' },
+  { name: 'EDTA (disodium)', mw: 372.24, note: 'Chelating agent for divalent cations (Mg2+, Ca2+) to inhibit nucleases.' },
+  { name: 'Glycine', mw: 75.07, note: 'Running buffer component for SDS-PAGE protein gels.' },
+  { name: 'SDS', mw: 288.38, note: 'Anionic detergent for denaturing protein complexes in electrophoresis.' },
+  { name: 'Sucrose', mw: 342.30, note: 'Density gradient medium and cryoprotectant.' },
+  { name: 'Glucose', mw: 180.16, note: 'Sugar substrate for cellular growth media.' },
+  { name: 'KCl', mw: 74.55, note: 'Potassium chloride, standard salt for cellular lysis and PCR buffers.' },
+  { name: 'MgCl2 (hexahydrate)', mw: 203.30, note: 'Cation cofactor source for polymerases and restriction enzymes.' },
+  { name: 'CaCl2 (dihydrate)', mw: 147.02, note: 'Calcium source for bacterial cell transformation competency.' },
+  { name: 'Sodium Acetate', mw: 82.03, note: 'Buffering agent for DNA precipitation protocols (pH 4.8 - 5.2).' },
+  { name: 'Sodium Phosphate (monobasic)', mw: 119.98, note: 'Acidic component of phosphate buffer systems (PBS).' },
+  { name: 'Sodium Phosphate (dibasic)', mw: 141.96, note: 'Basic component of phosphate buffer systems (PBS).' },
+  { name: 'Imidazole', mw: 68.08, note: 'Elution competitive agent for His-tagged protein purification.' },
+  { name: 'DTT', mw: 154.25, note: 'Reducing agent for cleavage of protein disulfide bonds.' },
+  { name: 'Beta-mercaptoethanol', mw: 78.13, note: 'Volatile reducing agent for denaturing protein structures.' },
+  { name: 'Acrylamide', mw: 71.08, note: 'Polymer monomer for polyacrylamide gel matrices.' },
+  { name: 'Agarose', mw: null, note: 'N/A — Gelling polymer. Calculated as percentage weight/volume (% w/v).' }
+];

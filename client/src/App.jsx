@@ -8,6 +8,8 @@ import ForumPage from './pages/ForumPage';
 import ForumCategoryPage from './pages/ForumCategoryPage';
 import ForumPostPage from './pages/ForumPostPage';
 import NewPostPage from './pages/NewPostPage';
+import ToolsHub from './pages/ToolsHub';
+import ToolPageWrapper from './pages/tools/ToolPageWrapper';
 
 const SITE_API_URL = import.meta.env.VITE_API_URL 
   ? import.meta.env.VITE_API_URL.replace('/forum', '') 
@@ -17,8 +19,7 @@ const SITE_API_URL = import.meta.env.VITE_API_URL
       : 'https://bioxape-backend.onrender.com/api'
   );
 
-const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const routerBasename = isDev ? '/' : '/forum';
+const routerBasename = window.location.pathname.startsWith('/forum') ? '/forum' : '/';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -119,7 +120,7 @@ function App() {
                   <a href="/category.html?name=Cancer%20Research">Cancer Research</a>
                 </div>
               </div>
-              <a href="/research.html">Tools</a>
+              <Link to="/tools">Tools</Link>
               <a href="/store.html">Store</a>
               <Link to="/" style={{ color: 'var(--accent)', fontWeight: 600 }}>Forum</Link>
               <a href="/public-pages/write-for-us.html">Write for Us</a>
@@ -202,6 +203,14 @@ function App() {
             <Route 
               path="/new" 
               element={<NewPostPage currentUser={currentUser} />} 
+            />
+            <Route 
+              path="/tools" 
+              element={<ToolsHub />} 
+            />
+            <Route 
+              path="/tools/:slug" 
+              element={<ToolPageWrapper />} 
             />
           </Routes>
         </main>
