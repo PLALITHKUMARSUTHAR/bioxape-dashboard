@@ -120,7 +120,7 @@ function App() {
                   <a href="/category.html?name=Cancer%20Research">Cancer Research</a>
                 </div>
               </div>
-              <Link to="/tools">Tools</Link>
+              <a href="/tools">Tools</a>
               <a href="/store.html">Store</a>
               <Link to="/" style={{ color: 'var(--accent)', fontWeight: 600 }}>Forum</Link>
               <a href="/public-pages/write-for-us.html">Write for Us</a>

@@ -11,6 +11,8 @@
     { "source": "/research", "destination": "/research.html" },
     { "source": "/category", "destination": "/category.html" },
     { "source": "/post", "destination": "/post.html" },
+    { "source": "/tools/(.*)", "destination": "/forum/index.html" },
+    { "source": "/tools", "destination": "/forum/index.html" },
     { "source": "/forum/(.*)", "destination": "/forum/index.html" },
     { "source": "/forum", "destination": "/forum/index.html" }
   ]
