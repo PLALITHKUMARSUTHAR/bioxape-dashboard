@@ -31,6 +31,14 @@ function App() {
   ]);
 
   useEffect(() => {
+    // Prevent access to tools under /forum/tools, redirecting to /tools instead
+    if (window.location.pathname.startsWith('/forum/tools')) {
+      const newPath = window.location.pathname.replace('/forum/tools', '/tools');
+      window.location.href = newPath + window.location.search + window.location.hash;
+    }
+  }, []);
+
+  useEffect(() => {
     // Read session from shared localStorage automatically
     const token = localStorage.getItem('bioxape_token');
     const userStr = localStorage.getItem('bioxape_user');
@@ -120,9 +128,21 @@ function App() {
                   <a href="/category.html?name=Cancer%20Research">Cancer Research</a>
                 </div>
               </div>
-              <a href="/tools">Tools</a>
+              <a 
+                href="/tools" 
+                style={window.location.pathname.startsWith('/tools') ? { color: 'var(--accent)', fontWeight: 600 } : {}}
+                className={window.location.pathname.startsWith('/tools') ? 'nav-active' : ''}
+              >
+                Tools
+              </a>
               <a href="/store.html">Store</a>
-              <Link to="/" style={{ color: 'var(--accent)', fontWeight: 600 }}>Forum</Link>
+              <Link 
+                to="/" 
+                style={!window.location.pathname.startsWith('/tools') ? { color: 'var(--accent)', fontWeight: 600 } : {}}
+                className={!window.location.pathname.startsWith('/tools') ? 'nav-active' : ''}
+              >
+                Forum
+              </Link>
               <a href="/public-pages/write-for-us.html">Write for Us</a>
             </nav>
 
