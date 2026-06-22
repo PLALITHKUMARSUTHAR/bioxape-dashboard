@@ -60,10 +60,8 @@ export default function BufferLab() {
   const [isCalculating, setIsCalculating] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Calculation Mode' },
-    { number: 2, title: 'Parameters' },
-    { number: 3, title: 'Run Dilutions' },
-    { number: 4, title: 'Recipe Card' }
+    { number: 1, title: 'Inputs & Parameters' },
+    { number: 2, title: 'Recipe Card' }
   ];
 
   // Unit conversion helpers
@@ -133,7 +131,7 @@ export default function BufferLab() {
             volume: volL,
             recipe: `Weigh ${massGrams.toFixed(2)} g of ${selectedReagent.name}.\nDissolve in distilled water to a final volume of ${formatVolume(volL)}.`
           });
-          setActiveStep(4);
+          setActiveStep(2);
           return;
         }
 
@@ -159,7 +157,7 @@ export default function BufferLab() {
           mass: massGrams,
           recipe: `Weigh ${formatMass(massGrams)} of ${reagentName} (MW: ${mw} g/mol).\nDissolve in ~80% of the target volume of distilled water (${formatVolume(volL * 0.8)}), adjust pH if necessary, then top off to exactly ${formatVolume(volL)}.`
         });
-        setActiveStep(4);
+        setActiveStep(2);
 
       } else if (subMode === 'dilution') {
         const c1Val = convertToMolar(c1, c1Unit);
@@ -200,7 +198,7 @@ export default function BufferLab() {
           recipe = `Mixing ${formatVolume(v1Val)} of ${c1} ${c1Unit} stock solution in a final volume of ${formatVolume(v2Val)} will yield a final concentration (C2) of ${calculatedVal.toFixed(4)} M.`;
           setResults({ mode: 'dilution', solveFor, val: calculatedVal, unit: c1Unit, recipe, volume: v2Val });
         }
-        setActiveStep(4);
+        setActiveStep(2);
 
       } else if (subMode === 'serial') {
         const start = parseFloat(serialStart);
@@ -236,7 +234,7 @@ export default function BufferLab() {
           steps: table,
           volume: stepVolL
         });
-        setActiveStep(4);
+        setActiveStep(2);
 
       } else if (subMode === 'buffer') {
         const preset = BUFFER_PRESETS[presetIdx];
@@ -276,7 +274,7 @@ export default function BufferLab() {
           recipe,
           volume: volL
         });
-        setActiveStep(4);
+        setActiveStep(2);
       }
     }, 800);
   };
@@ -315,241 +313,151 @@ export default function BufferLab() {
   return (
     <ToolShell slug="bufferlab">
       {renderStepTracker()}
-
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Mode Selection */}
+        {/* Step 1: Inputs & Parameters */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Select Calculation Mode</h3>
+              <h3 className="bx-step-title">Select Mode & Configure Parameters</h3>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
               <button
                 type="button"
                 className={`bx-tool-btn ${subMode === 'molarity' ? 'copied' : ''}`}
                 onClick={() => setSubMode('molarity')}
-                style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', height: '100px', justifyContent: 'center' }}
+                style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', height: '90px', justifyContent: 'center' }}
               >
-                <strong style={{ fontSize: '14px', marginBottom: '4px' }}>Mass for Molarity</strong>
+                <strong style={{ fontSize: '14px', marginBottom: '2px' }}>Mass for Molarity</strong>
                 Prepare solution from solid mass
               </button>
               <button
                 type="button"
                 className={`bx-tool-btn ${subMode === 'dilution' ? 'copied' : ''}`}
                 onClick={() => setSubMode('dilution')}
-                style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', height: '100px', justifyContent: 'center' }}
+                style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', height: '90px', justifyContent: 'center' }}
               >
-                <strong style={{ fontSize: '14px', marginBottom: '4px' }}>Dilution (C1V1)</strong>
+                <strong style={{ fontSize: '14px', marginBottom: '2px' }}>Dilution (C1V1)</strong>
                 Dilute stock solutions
               </button>
               <button
                 type="button"
                 className={`bx-tool-btn ${subMode === 'serial' ? 'copied' : ''}`}
                 onClick={() => setSubMode('serial')}
-                style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', height: '100px', justifyContent: 'center' }}
+                style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', height: '90px', justifyContent: 'center' }}
               >
-                <strong style={{ fontSize: '14px', marginBottom: '4px' }}>Serial Dilution</strong>
-                dilution series steps
+                <strong style={{ fontSize: '14px', marginBottom: '2px' }}>Serial Dilution</strong>
+                Dilution series steps
               </button>
               <button
                 type="button"
                 className={`bx-tool-btn ${subMode === 'buffer' ? 'copied' : ''}`}
                 onClick={() => setSubMode('buffer')}
-                style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', height: '100px', justifyContent: 'center' }}
+                style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', height: '90px', justifyContent: 'center' }}
               >
-                <strong style={{ fontSize: '14px', marginBottom: '4px' }}>Buffer pH (HH)</strong>
+                <strong style={{ fontSize: '14px', marginBottom: '2px' }}>Buffer pH (HH)</strong>
                 Henderson-Hasselbalch system
               </button>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={() => setActiveStep(2)}
-              >
-                Next: Configure Parameters →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Parameters */}
-        {activeStep === 2 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Configure Mode Parameters</h3>
-            </div>
-
-            {/* Molarity inputs */}
-            {subMode === 'molarity' && (
-              <>
-                <div className="bx-field-group">
-                  <label htmlFor="reagent-select" className="bx-label">Select Reagent</label>
-                  <select
-                    id="reagent-select"
-                    className="bx-select"
-                    value={reagentIdx}
-                    onChange={(e) => {
-                      setReagentIdx(parseInt(e.target.value));
-                      setUseManualMw(false);
-                    }}
-                  >
-                    {commonReagents.map((item, idx) => (
-                      <option key={idx} value={idx}>{item.name} {item.mw ? `(${item.mw} g/mol)` : ''}</option>
-                    ))}
-                    <option value={commonReagents.length}>Custom Reagent (Manual MW)</option>
-                  </select>
-                </div>
-
-                {commonReagents[reagentIdx] && (
-                  <div style={{ fontSize: '12px', color: 'var(--text3)', background: 'var(--off)', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
-                    {commonReagents[reagentIdx].note}
-                  </div>
-                )}
-
-                {(useManualMw || parseInt(reagentIdx) === commonReagents.length) && (
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+              {/* Molarity inputs */}
+              {subMode === 'molarity' && (
+                <>
                   <div className="bx-field-group">
-                    <label htmlFor="manual-mw-input" className="bx-label">Molecular Weight (g/mol)</label>
-                    <input
-                      id="manual-mw-input"
-                      type="number"
-                      className="bx-input"
-                      value={manualMw}
+                    <label htmlFor="reagent-select" className="bx-label">Select Reagent</label>
+                    <select
+                      id="reagent-select"
+                      className="bx-select"
+                      value={reagentIdx}
                       onChange={(e) => {
-                        setManualMw(e.target.value);
-                        setUseManualMw(true);
+                        setReagentIdx(parseInt(e.target.value));
+                        setUseManualMw(false);
                       }}
-                    />
+                    >
+                      {commonReagents.map((item, idx) => (
+                        <option key={idx} value={idx}>{item.name} {item.mw ? `(${item.mw} g/mol)` : ''}</option>
+                      ))}
+                      <option value={commonReagents.length}>Custom Reagent (Manual MW)</option>
+                    </select>
                   </div>
-                )}
 
-                {commonReagents[reagentIdx] && commonReagents[reagentIdx].mw === null ? (
+                  {commonReagents[reagentIdx] && (
+                    <div style={{ fontSize: '12px', color: 'var(--text3)', background: 'var(--off)', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)', marginBottom: '12px' }}>
+                      {commonReagents[reagentIdx].note}
+                    </div>
+                  )}
+
+                  {(useManualMw || parseInt(reagentIdx) === commonReagents.length) && (
+                    <div className="bx-field-group">
+                      <label htmlFor="manual-mw-input" className="bx-label">Molecular Weight (g/mol)</label>
+                      <input
+                        id="manual-mw-input"
+                        type="number"
+                        className="bx-input"
+                        value={manualMw}
+                        onChange={(e) => {
+                          setManualMw(e.target.value);
+                          setUseManualMw(true);
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {commonReagents[reagentIdx] && commonReagents[reagentIdx].mw === null ? (
+                    <div className="bx-field-group">
+                      <label htmlFor="pct-input" className="bx-label">Target Percent Concentration (% w/v)</label>
+                      <input
+                        id="pct-input"
+                        type="number"
+                        className="bx-input"
+                        value={pctVal}
+                        onChange={(e) => setPctVal(e.target.value)}
+                      />
+                    </div>
+                  ) : (
+                    <div className="bx-field-group">
+                      <label htmlFor="target-molarity-input" className="bx-label">Target Concentration</label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          id="target-molarity-input"
+                          type="number"
+                          className="bx-input"
+                          value={targetMolarity}
+                          onChange={(e) => setTargetMolarity(e.target.value)}
+                        />
+                        <select
+                          id="molarity-unit-select"
+                          className="bx-select"
+                          style={{ width: '80px' }}
+                          value={molarityUnit}
+                          onChange={(e) => setMolarityUnit(e.target.value)}
+                        >
+                          <option value="M">M</option>
+                          <option value="mM">mM</option>
+                          <option value="uM">µM</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="bx-field-group">
-                    <label htmlFor="pct-input" className="bx-label">Target Percent Concentration (% w/v)</label>
-                    <input
-                      id="pct-input"
-                      type="number"
-                      className="bx-input"
-                      value={pctVal}
-                      onChange={(e) => setPctVal(e.target.value)}
-                    />
-                  </div>
-                ) : (
-                  <div className="bx-field-group">
-                    <label htmlFor="target-molarity-input" className="bx-label">Target Concentration</label>
+                    <label htmlFor="target-volume-input" className="bx-label">Target Volume</label>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <input
-                        id="target-molarity-input"
+                        id="target-volume-input"
                         type="number"
                         className="bx-input"
-                        value={targetMolarity}
-                        onChange={(e) => setTargetMolarity(e.target.value)}
+                        value={targetVolume}
+                        onChange={(e) => setTargetVolume(e.target.value)}
                       />
                       <select
-                        id="molarity-unit-select"
+                        id="volume-unit-select"
                         className="bx-select"
                         style={{ width: '80px' }}
-                        value={molarityUnit}
-                        onChange={(e) => setMolarityUnit(e.target.value)}
-                      >
-                        <option value="M">M</option>
-                        <option value="mM">mM</option>
-                        <option value="uM">µM</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                <div className="bx-field-group">
-                  <label htmlFor="target-volume-input" className="bx-label">Target Volume</label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                      id="target-volume-input"
-                      type="number"
-                      className="bx-input"
-                      value={targetVolume}
-                      onChange={(e) => setTargetVolume(e.target.value)}
-                    />
-                    <select
-                      id="volume-unit-select"
-                      className="bx-select"
-                      style={{ width: '80px' }}
-                      value={volumeUnit}
-                      onChange={(e) => setVolumeUnit(e.target.value)}
-                    >
-                      <option value="mL">mL</option>
-                      <option value="L">L</option>
-                      <option value="uL">µL</option>
-                    </select>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Dilution inputs */}
-            {subMode === 'dilution' && (
-              <>
-                <div className="bx-field-group">
-                  <label htmlFor="solve-for-select" className="bx-label">Unknown Variable (Solve For)</label>
-                  <select
-                    id="solve-for-select"
-                    className="bx-select"
-                    value={solveFor}
-                    onChange={(e) => setSolveFor(e.target.value)}
-                  >
-                    <option value="V1">Stock Volume (V1)</option>
-                    <option value="V2">Final Volume (V2)</option>
-                    <option value="C1">Stock Concentration (C1)</option>
-                    <option value="C2">Final Concentration (C2)</option>
-                  </select>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div className="bx-field-group">
-                    <label htmlFor="c1-input" className="bx-label">Stock Conc (C1)</label>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <input
-                        id="c1-input"
-                        type="number"
-                        className="bx-input"
-                        value={c1}
-                        onChange={(e) => setC1(e.target.value)}
-                        disabled={solveFor === 'C1'}
-                      />
-                      <select
-                        id="c1-unit"
-                        className="bx-select"
-                        value={c1Unit}
-                        onChange={(e) => setC1Unit(e.target.value)}
-                      >
-                        <option value="M">M</option>
-                        <option value="mM">mM</option>
-                        <option value="uM">µM</option>
-                        <option value="%">%</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="bx-field-group">
-                    <label htmlFor="v1-input" className="bx-label">Stock Volume (V1)</label>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <input
-                        id="v1-input"
-                        type="number"
-                        className="bx-input"
-                        value={v1}
-                        onChange={(e) => setV1(e.target.value)}
-                        disabled={solveFor === 'V1'}
-                      />
-                      <select
-                        id="v1-unit"
-                        className="bx-select"
-                        value={v1Unit}
-                        onChange={(e) => setV1Unit(e.target.value)}
+                        value={volumeUnit}
+                        onChange={(e) => setVolumeUnit(e.target.value)}
                       >
                         <option value="mL">mL</option>
                         <option value="L">L</option>
@@ -557,285 +465,320 @@ export default function BufferLab() {
                       </select>
                     </div>
                   </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div className="bx-field-group">
-                    <label htmlFor="c2-input" className="bx-label">Final Conc (C2)</label>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <input
-                        id="c2-input"
-                        type="number"
-                        className="bx-input"
-                        value={c2}
-                        onChange={(e) => setC2(e.target.value)}
-                        disabled={solveFor === 'C2'}
-                      />
-                      <select
-                        id="c2-unit"
-                        className="bx-select"
-                        value={c2Unit}
-                        onChange={(e) => setC2Unit(e.target.value)}
-                      >
-                        <option value="M">M</option>
-                        <option value="mM">mM</option>
-                        <option value="uM">µM</option>
-                        <option value="%">%</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="bx-field-group">
-                    <label htmlFor="v2-input" className="bx-label">Final Volume (V2)</label>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <input
-                        id="v2-input"
-                        type="number"
-                        className="bx-input"
-                        value={v2}
-                        onChange={(e) => setV2(e.target.value)}
-                        disabled={solveFor === 'V2'}
-                      />
-                      <select
-                        id="v2-unit"
-                        className="bx-select"
-                        value={v2Unit}
-                        onChange={(e) => setV2Unit(e.target.value)}
-                      >
-                        <option value="mL">mL</option>
-                        <option value="L">L</option>
-                        <option value="uL">µL</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Serial inputs */}
-            {subMode === 'serial' && (
-              <>
-                <div className="bx-field-group">
-                  <label htmlFor="serial-start-input" className="bx-label">Start Stock Concentration</label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                      id="serial-start-input"
-                      type="number"
-                      className="bx-input"
-                      value={serialStart}
-                      onChange={(e) => setSerialStart(e.target.value)}
-                    />
-                    <select
-                      id="serial-start-unit"
-                      className="bx-select"
-                      value={serialStartUnit}
-                      onChange={(e) => setSerialStartUnit(e.target.value)}
-                    >
-                      <option value="M">M</option>
-                      <option value="mM">mM</option>
-                      <option value="uM">µM</option>
-                      <option value="%">%</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div className="bx-field-group">
-                    <label htmlFor="serial-factor" className="bx-label">Dilution Factor (1:X)</label>
-                    <input
-                      id="serial-factor"
-                      type="number"
-                      className="bx-input"
-                      value={serialFactor}
-                      onChange={(e) => setSerialFactor(e.target.value)}
-                    />
-                  </div>
-                  <div className="bx-field-group">
-                    <label htmlFor="serial-steps" className="bx-label">Tubes count (Steps)</label>
-                    <input
-                      id="serial-steps"
-                      type="number"
-                      className="bx-input"
-                      value={serialSteps}
-                      onChange={(e) => setSerialSteps(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="bx-field-group">
-                  <label htmlFor="serial-vol" className="bx-label">Target Volume per tube</label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                      id="serial-vol"
-                      type="number"
-                      className="bx-input"
-                      value={serialVol}
-                      onChange={(e) => setSerialVol(e.target.value)}
-                    />
-                    <select
-                      id="serial-vol-unit"
-                      className="bx-select"
-                      value={serialVolUnit}
-                      onChange={(e) => setSerialVolUnit(e.target.value)}
-                    >
-                      <option value="mL">mL</option>
-                      <option value="L">L</option>
-                      <option value="uL">µL</option>
-                    </select>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Buffer Presets inputs */}
-            {subMode === 'buffer' && (
-              <>
-                <div className="bx-field-group">
-                  <label htmlFor="preset-select" className="bx-label">Buffer Presets</label>
-                  <select
-                    id="preset-select"
-                    className="bx-select"
-                    value={presetIdx}
-                    onChange={(e) => setPresetIdx(parseInt(e.target.value))}
-                  >
-                    {BUFFER_PRESETS.map((p, idx) => (
-                      <option key={idx} value={idx}>{p.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {presetIdx === BUFFER_PRESETS.length - 1 && (
-                  <>
-                    <div className="bx-field-group">
-                      <label htmlFor="custom-pka-input" className="bx-label">Buffer system pKa</label>
-                      <input
-                        id="custom-pka-input"
-                        type="number"
-                        step="0.01"
-                        className="bx-input"
-                        value={customPka}
-                        onChange={(e) => setCustomPka(e.target.value)}
-                      />
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <div className="bx-field-group">
-                        <label htmlFor="custom-acid-mw" className="bx-label">Acid MW (g/mol)</label>
-                        <input
-                          id="custom-acid-mw"
-                          type="number"
-                          className="bx-input"
-                          value={customAcidMw}
-                          onChange={(e) => setCustomAcidMw(e.target.value)}
-                        />
-                      </div>
-                      <div className="bx-field-group">
-                        <label htmlFor="custom-base-mw" className="bx-label">Base MW (g/mol)</label>
-                        <input
-                          id="custom-base-mw"
-                          type="number"
-                          className="bx-input"
-                          value={customBaseMw}
-                          onChange={(e) => setCustomBaseMw(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div className="bx-field-group">
-                    <label htmlFor="target-ph-input" className="bx-label">Target pH</label>
-                    <input
-                      id="target-ph-input"
-                      type="number"
-                      step="0.05"
-                      className="bx-input"
-                      value={targetPh}
-                      onChange={(e) => setTargetPh(e.target.value)}
-                    />
-                  </div>
-                  <div className="bx-field-group">
-                    <label htmlFor="total-conc-input" className="bx-label">Total Concentration</label>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <input
-                        id="total-conc-input"
-                        type="number"
-                        className="bx-input"
-                        value={totalBufferConc}
-                        onChange={(e) => setTotalBufferConc(e.target.value)}
-                      />
-                      <select
-                        id="buffer-conc-unit"
-                        className="bx-select"
-                        value={bufferConcUnit}
-                        onChange={(e) => setBufferConcUnit(e.target.value)}
-                      >
-                        <option value="mM">mM</option>
-                        <option value="M">M</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bx-field-group">
-                  <label htmlFor="buffer-vol-input" className="bx-label">Preparation Volume</label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                      id="buffer-vol-input"
-                      type="number"
-                      className="bx-input"
-                      value={bufferVolume}
-                      onChange={(e) => setBufferVolume(e.target.value)}
-                    />
-                    <select
-                      id="buffer-vol-unit"
-                      className="bx-select"
-                      value={bufferVolumeUnit}
-                      onChange={(e) => setBufferVolumeUnit(e.target.value)}
-                    >
-                      <option value="mL">mL</option>
-                      <option value="L">L</option>
-                    </select>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
-              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run calculations →</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Run / Dilute */}
-        {activeStep === 3 && (
-          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
-            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Run Solution Solver</h3>
-            </div>
-
-            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
-              Calculates mass properties or dilution parameters based on molar concentrations.
-            </p>
-
-            <button
-              type="button"
-              className="bx-btn-primary"
-              style={{ width: '100%', padding: '12px' }}
-              onClick={runCalculations}
-              disabled={isCalculating}
-            >
-              {isCalculating ? (
-                <>
-                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
-                  Solving Chemical Concentration Equations...
                 </>
-              ) : (
-                'Run Calculation & Generate Recipe'
               )}
-            </button>
+
+              {/* Dilution inputs */}
+              {subMode === 'dilution' && (
+                <>
+                  <div className="bx-field-group">
+                    <label htmlFor="solve-for-select" className="bx-label">Unknown Variable (Solve For)</label>
+                    <select
+                      id="solve-for-select"
+                      className="bx-select"
+                      value={solveFor}
+                      onChange={(e) => setSolveFor(e.target.value)}
+                    >
+                      <option value="V1">Stock Volume (V1)</option>
+                      <option value="V2">Final Volume (V2)</option>
+                      <option value="C1">Stock Concentration (C1)</option>
+                      <option value="C2">Final Concentration (C2)</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="bx-field-group">
+                      <label htmlFor="c1-input" className="bx-label">Stock Conc (C1)</label>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <input
+                          id="c1-input"
+                          type="number"
+                          className="bx-input"
+                          value={c1}
+                          onChange={(e) => setC1(e.target.value)}
+                          disabled={solveFor === 'C1'}
+                        />
+                        <select
+                          id="c1-unit"
+                          className="bx-select"
+                          value={c1Unit}
+                          onChange={(e) => setC1Unit(e.target.value)}
+                        >
+                          <option value="M">M</option>
+                          <option value="mM">mM</option>
+                          <option value="uM">µM</option>
+                          <option value="%">%</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="bx-field-group">
+                      <label htmlFor="v1-input" className="bx-label">Stock Volume (V1)</label>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <input
+                          id="v1-input"
+                          type="number"
+                          className="bx-input"
+                          value={v1}
+                          onChange={(e) => setV1(e.target.value)}
+                          disabled={solveFor === 'V1'}
+                        />
+                        <select
+                          id="v1-unit"
+                          className="bx-select"
+                          value={v1Unit}
+                          onChange={(e) => setV1Unit(e.target.value)}
+                        >
+                          <option value="mL">mL</option>
+                          <option value="L">L</option>
+                          <option value="uL">µL</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="bx-field-group">
+                      <label htmlFor="c2-input" className="bx-label">Final Conc (C2)</label>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <input
+                          id="c2-input"
+                          type="number"
+                          className="bx-input"
+                          value={c2}
+                          onChange={(e) => setC2(e.target.value)}
+                          disabled={solveFor === 'C2'}
+                        />
+                        <select
+                          id="c2-unit"
+                          className="bx-select"
+                          value={c2Unit}
+                          onChange={(e) => setC2Unit(e.target.value)}
+                        >
+                          <option value="M">M</option>
+                          <option value="mM">mM</option>
+                          <option value="uM">µM</option>
+                          <option value="%">%</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="bx-field-group">
+                      <label htmlFor="v2-input" className="bx-label">Final Volume (V2)</label>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <input
+                          id="v2-input"
+                          type="number"
+                          className="bx-input"
+                          value={v2}
+                          onChange={(e) => setV2(e.target.value)}
+                          disabled={solveFor === 'V2'}
+                        />
+                        <select
+                          id="v2-unit"
+                          className="bx-select"
+                          value={v2Unit}
+                          onChange={(e) => setV2Unit(e.target.value)}
+                        >
+                          <option value="mL">mL</option>
+                          <option value="L">L</option>
+                          <option value="uL">µL</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Serial inputs */}
+              {subMode === 'serial' && (
+                <>
+                  <div className="bx-field-group">
+                    <label htmlFor="serial-start-input" className="bx-label">Start Stock Concentration</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input
+                        id="serial-start-input"
+                        type="number"
+                        className="bx-input"
+                        value={serialStart}
+                        onChange={(e) => setSerialStart(e.target.value)}
+                      />
+                      <select
+                        id="serial-start-unit"
+                        className="bx-select"
+                        value={serialStartUnit}
+                        onChange={(e) => setSerialStartUnit(e.target.value)}
+                      >
+                        <option value="M">M</option>
+                        <option value="mM">mM</option>
+                        <option value="uM">µM</option>
+                        <option value="%">%</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="bx-field-group">
+                      <label htmlFor="serial-factor" className="bx-label">Dilution Factor (1:X)</label>
+                      <input
+                        id="serial-factor"
+                        type="number"
+                        className="bx-input"
+                        value={serialFactor}
+                        onChange={(e) => setSerialFactor(e.target.value)}
+                      />
+                    </div>
+                    <div className="bx-field-group">
+                      <label htmlFor="serial-steps" className="bx-label">Tubes count (Steps)</label>
+                      <input
+                        id="serial-steps"
+                        type="number"
+                        className="bx-input"
+                        value={serialSteps}
+                        onChange={(e) => setSerialSteps(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bx-field-group">
+                    <label htmlFor="serial-vol" className="bx-label">Target Volume per tube</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input
+                        id="serial-vol"
+                        type="number"
+                        className="bx-input"
+                        value={serialVol}
+                        onChange={(e) => setSerialVol(e.target.value)}
+                      />
+                      <select
+                        id="serial-vol-unit"
+                        className="bx-select"
+                        value={serialVolUnit}
+                        onChange={(e) => setSerialVolUnit(e.target.value)}
+                      >
+                        <option value="mL">mL</option>
+                        <option value="L">L</option>
+                        <option value="uL">µL</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Buffer Presets inputs */}
+              {subMode === 'buffer' && (
+                <>
+                  <div className="bx-field-group">
+                    <label htmlFor="preset-select" className="bx-label">Buffer Presets</label>
+                    <select
+                      id="preset-select"
+                      className="bx-select"
+                      value={presetIdx}
+                      onChange={(e) => setPresetIdx(parseInt(e.target.value))}
+                    >
+                      {BUFFER_PRESETS.map((p, idx) => (
+                        <option key={idx} value={idx}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {presetIdx === BUFFER_PRESETS.length - 1 && (
+                    <>
+                      <div className="bx-field-group">
+                        <label htmlFor="custom-pka-input" className="bx-label">Buffer system pKa</label>
+                        <input
+                          id="custom-pka-input"
+                          type="number"
+                          step="0.01"
+                          className="bx-input"
+                          value={customPka}
+                          onChange={(e) => setCustomPka(e.target.value)}
+                        />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div className="bx-field-group">
+                          <label htmlFor="custom-acid-mw" className="bx-label">Acid MW (g/mol)</label>
+                          <input
+                            id="custom-acid-mw"
+                            type="number"
+                            className="bx-input"
+                            value={customAcidMw}
+                            onChange={(e) => setCustomAcidMw(e.target.value)}
+                          />
+                        </div>
+                        <div className="bx-field-group">
+                          <label htmlFor="custom-base-mw" className="bx-label">Base MW (g/mol)</label>
+                          <input
+                            id="custom-base-mw"
+                            type="number"
+                            className="bx-input"
+                            value={customBaseMw}
+                            onChange={(e) => setCustomBaseMw(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="bx-field-group">
+                      <label htmlFor="target-ph-input" className="bx-label">Target pH</label>
+                      <input
+                        id="target-ph-input"
+                        type="number"
+                        step="0.05"
+                        className="bx-input"
+                        value={targetPh}
+                        onChange={(e) => setTargetPh(e.target.value)}
+                      />
+                    </div>
+                    <div className="bx-field-group">
+                      <label htmlFor="total-conc-input" className="bx-label">Total Concentration</label>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <input
+                          id="total-conc-input"
+                          type="number"
+                          className="bx-input"
+                          value={totalBufferConc}
+                          onChange={(e) => setTotalBufferConc(e.target.value)}
+                        />
+                        <select
+                          id="buffer-conc-unit"
+                          className="bx-select"
+                          value={bufferConcUnit}
+                          onChange={(e) => setBufferConcUnit(e.target.value)}
+                        >
+                          <option value="mM">mM</option>
+                          <option value="M">M</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bx-field-group">
+                    <label htmlFor="buffer-vol-input" className="bx-label">Preparation Volume</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input
+                        id="buffer-vol-input"
+                        type="number"
+                        className="bx-input"
+                        value={bufferVolume}
+                        onChange={(e) => setBufferVolume(e.target.value)}
+                      />
+                      <select
+                        id="buffer-vol-unit"
+                        className="bx-select"
+                        value={bufferVolumeUnit}
+                        onChange={(e) => setBufferVolumeUnit(e.target.value)}
+                      >
+                        <option value="mL">mL</option>
+                        <option value="L">L</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
 
             {validationError && (
               <p style={{ color: 'var(--red)', fontSize: '13px', marginTop: '12px', fontWeight: '600' }}>
@@ -843,17 +786,33 @@ export default function BufferLab() {
               </p>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isCalculating}>← Back</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={runCalculations}
+                disabled={isCalculating}
+              >
+                {isCalculating ? (
+                  <>
+                    <svg style={{ animation: 'spin 1s infinite linear', width: '16px', height: '16px', stroke: 'currentColor', fill: 'none', marginRight: '6px' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="12"/>
+                    </svg>
+                    Solving concentrations...
+                  </>
+                ) : (
+                  'Generate Recipe Card'
+                )}
+              </button>
             </div>
           </div>
         )}
 
-        {/* Step 4: Recipe Output Card */}
-        {activeStep === 4 && results && (
+        {/* Step 2: Recipe Output Card */}
+        {activeStep === 2 && results && (
           <div className="bx-step-section" style={{ alignItems: 'stretch' }}>
             <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
+              <span className="bx-step-badge">Step 2</span>
               <h3 className="bx-step-title">Preparation Recipe Card</h3>
             </div>
 
@@ -993,7 +952,7 @@ export default function BufferLab() {
                 onClick={resetAnalysis}
                 style={{ background: 'var(--text2)', boxShadow: 'none' }}
               >
-                ← Start New Calculator Mode
+                ← Start Over / Modify Inputs
               </button>
             </div>
           </div>

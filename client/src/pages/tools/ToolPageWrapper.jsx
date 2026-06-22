@@ -80,7 +80,7 @@ export default function ToolPageWrapper() {
     setValidationError('');
   };
 
-  const handleNextFromStep1 = () => {
+  const handleRunAnalysis = () => {
     const clean = sequence.trim().toUpperCase().replace(/[^A-Z]/g, '');
     if (!clean) {
       setValidationError('Please enter a target sequence.');
@@ -91,16 +91,6 @@ export default function ToolPageWrapper() {
       return;
     }
     setValidationError('');
-    setActiveStep(2);
-  };
-
-  const handleRunAnalysis = () => {
-    const clean = sequence.trim().toUpperCase().replace(/[^A-Z]/g, '');
-    if (!clean) {
-      setValidationError('Please enter a sequence.');
-      setActiveStep(1);
-      return;
-    }
     setIsAnalyzing(true);
     setTimeout(() => {
       setIsAnalyzing(false);
@@ -179,7 +169,7 @@ export default function ToolPageWrapper() {
         totalFound: guides.length
       });
 
-      setActiveStep(4);
+      setActiveStep(2);
     }, 850);
   };
 
@@ -191,10 +181,8 @@ export default function ToolPageWrapper() {
   };
 
   const steps = [
-    { number: 1, title: 'Input Sequence' },
-    { number: 2, title: 'PAM & Guide Settings' },
-    { number: 3, title: 'Run CRISPR Scan' },
-    { number: 4, title: 'Scan Results' }
+    { number: 1, title: 'Inputs & Parameters' },
+    { number: 2, title: 'Scan Results' }
   ];
 
   const renderStepTracker = () => (
@@ -315,12 +303,12 @@ export default function ToolPageWrapper() {
       {renderStepTracker()}
 
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Input Sequence */}
+        {/* Step 1: Inputs & Parameters */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Enter Target DNA Sequence</h3>
+              <h3 className="bx-step-title">Target DNA Sequence & Settings</h3>
             </div>
             
             <div className="bx-field-group">
@@ -341,28 +329,7 @@ export default function ToolPageWrapper() {
               {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={handleNextFromStep1}
-                disabled={!sequence.trim()}
-              >
-                Next: PAM & Guide Settings →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: PAM & Guide Settings */}
-        {activeStep === 2 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Configure PAM & Guide Settings</h3>
-            </div>
-
-            <div className="bx-field-group">
+            <div className="bx-field-group" style={{ marginTop: '8px' }}>
               <label htmlFor="pam-select" className="bx-label">CRISPR Nuclease & PAM Site</label>
               <select
                 id="pam-select"
@@ -376,7 +343,7 @@ export default function ToolPageWrapper() {
               </select>
             </div>
 
-            <div className="bx-field-group">
+            <div className="bx-field-group" style={{ marginTop: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <label htmlFor="guide-length-slider" className="bx-label">Target gRNA Length</label>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-d)' }}>{guideLength} bp</span>
@@ -392,68 +359,12 @@ export default function ToolPageWrapper() {
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-tool-btn"
-                onClick={() => setActiveStep(1)}
-              >
-                ← Back
-              </button>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={() => setActiveStep(3)}
-              >
-                Next: Run CRISPR Scan →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Run CRISPR Scan */}
-        {activeStep === 3 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Run CRISPR PAM Scan</h3>
-            </div>
-
-            <div className="bx-result-grid" style={{ marginBottom: '8px' }}>
-              <div className="bx-result-box">
-                <div className="bx-result-val">
-                  {sequence.replace(/[^A-Z]/g, '').length} bp
-                </div>
-                <div className="bx-result-lbl">Sequence Length</div>
-              </div>
-              <div className="bx-result-box">
-                <div className="bx-result-val">
-                  {pamType === 'spcas9' ? 'NGG' : pamType === 'sacas9' ? 'NNGRRT' : 'TTTV'}
-                </div>
-                <div className="bx-result-lbl">Selected PAM</div>
-              </div>
-              <div className="bx-result-box">
-                <div className="bx-result-val">
-                  {guideLength} bp
-                </div>
-                <div className="bx-result-lbl">Guide Length</div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-tool-btn"
-                onClick={() => setActiveStep(2)}
-                disabled={isAnalyzing}
-              >
-                ← Back
-              </button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
               <button
                 type="button"
                 className="bx-btn-primary"
                 onClick={handleRunAnalysis}
-                disabled={isAnalyzing}
+                disabled={!sequence.trim() || isAnalyzing}
               >
                 {isAnalyzing ? (
                   <>
@@ -470,11 +381,11 @@ export default function ToolPageWrapper() {
           </div>
         )}
 
-        {/* Step 4: Scan Results */}
-        {activeStep === 4 && results && (
+        {/* Step 2: Scan Results */}
+        {activeStep === 2 && results && (
           <div className="bx-step-section" style={{ maxWidth: '100%' }}>
             <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
+              <span className="bx-step-badge">Step 2</span>
               <h3 className="bx-step-title">Scan Results & gRNA Candidates</h3>
             </div>
 

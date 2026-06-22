@@ -42,10 +42,8 @@ export default function SpectroCalc() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Spectrophotometry Mode' },
-    { number: 2, title: 'Parameters' },
-    { number: 3, title: 'Run Analysis' },
-    { number: 4, title: 'Growth Plot' }
+    { number: 1, title: 'Inputs & Parameters' },
+    { number: 2, title: 'Analysis Reports' }
   ];
 
   const handlePointChange = (id, field, value) => {
@@ -179,7 +177,7 @@ export default function SpectroCalc() {
           ratioStatus,
           ratioNote
         });
-        setActiveStep(4);
+        setActiveStep(2);
 
       } else if (subMode === 'growth') {
         const activePoints = curvePoints.filter(p => p.active);
@@ -255,7 +253,7 @@ export default function SpectroCalc() {
           intercept,
           cfuPoints
         });
-        setActiveStep(4);
+        setActiveStep(2);
       }
     }, 800);
   };
@@ -360,53 +358,34 @@ export default function SpectroCalc() {
       {renderStepTracker()}
 
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Mode Selection */}
+        {/* Step 1: Inputs & Parameters */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Select Analyzer Mode</h3>
+              <h3 className="bx-step-title">Measurement Parameters</h3>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
+            {/* Mode selection buttons as tabs */}
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
               <button
                 type="button"
                 className={`bx-tool-btn ${subMode === 'beer' ? 'copied' : ''}`}
                 onClick={() => setSubMode('beer')}
-                style={{ flex: 1, padding: '16px', height: '110px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}
+                style={{ flex: 1, padding: '12px', height: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}
               >
-                <strong style={{ display: 'block', fontSize: '14px', marginBottom: '4px' }}>Beer-Lambert Concentration</strong>
-                Determine nucleic acid/protein concentration from UV absorption readings
+                <strong style={{ display: 'block', fontSize: '14px', marginBottom: '2px' }}>Beer-Lambert</strong>
+                <span style={{ fontSize: '11px', color: 'var(--text3)' }}>Concentration from UV absorption</span>
               </button>
               <button
                 type="button"
                 className={`bx-tool-btn ${subMode === 'growth' ? 'copied' : ''}`}
                 onClick={() => setSubMode('growth')}
-                style={{ flex: 1, padding: '16px', height: '110px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}
+                style={{ flex: 1, padding: '12px', height: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}
               >
-                <strong style={{ display: 'block', fontSize: '14px', marginBottom: '4px' }}>Growth Curve fitting</strong>
-                Analyze time vs OD600 to find cell doubling times & growth constants
+                <strong style={{ display: 'block', fontSize: '14px', marginBottom: '2px' }}>Growth Curve</strong>
+                <span style={{ fontSize: '11px', color: 'var(--text3)' }}>OD600 cell doubling times & fits</span>
               </button>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={() => setActiveStep(2)}
-              >
-                Next: Enter Parameters →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Parameters */}
-        {activeStep === 2 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Enter Measurement Parameters</h3>
             </div>
 
             {/* Beer inputs */}
@@ -428,7 +407,7 @@ export default function SpectroCalc() {
                     ))}
                   </select>
                 </div>
-                <p style={{ fontSize: '12px', color: 'var(--text3)', fontStyle: 'italic', marginTop: '-10px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--text3)', fontStyle: 'italic', marginTop: '-10px', marginBottom: '16px' }}>
                   {SPECTRO_PRESETS[presetIdx].description}
                 </p>
 
@@ -618,59 +597,40 @@ export default function SpectroCalc() {
               </>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
-              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Analysis →</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Run Analysis */}
-        {activeStep === 3 && (
-          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
-            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Run Spectroscopic solver</h3>
-            </div>
-
-            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
-              Solving the spectroscopic parameters or fitting linear logarithmic regressions to active growth intervals.
-            </p>
-
-            <button
-              type="button"
-              className="bx-btn-primary"
-              style={{ width: '100%', padding: '12px' }}
-              onClick={runAnalysisCalculation}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <>
-                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
-                  Processing Absorbance Signals & Fits...
-                </>
-              ) : (
-                'Run Analysis & Fit Curve'
-              )}
-            </button>
-
             {validationError && (
               <p style={{ color: 'var(--red)', fontSize: '13px', marginTop: '12px', fontWeight: '600' }}>
                 ⚠ {validationError}
               </p>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                style={{ width: '100%', padding: '12px' }}
+                onClick={runAnalysisCalculation}
+                disabled={isAnalyzing}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px', stroke: 'currentColor', fill: 'none' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" strokeWidth="2.5"/>
+                    </svg>
+                    Solving Spectroscopic Constants...
+                  </>
+                ) : (
+                  subMode === 'beer' ? 'Run Beer-Lambert Calculations' : 'Run Growth Curve Fitting'
+                )}
+              </button>
             </div>
           </div>
         )}
 
-        {/* Step 4: Results */}
-        {activeStep === 4 && results && (
+        {/* Step 2: Results */}
+        {activeStep === 2 && results && (
           <div className="bx-step-section">
             <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
+              <span className="bx-step-badge">Step 2</span>
               <h3 className="bx-step-title">Analysis Reports</h3>
             </div>
 
@@ -805,7 +765,7 @@ export default function SpectroCalc() {
                 onClick={resetAnalysis}
                 style={{ background: 'var(--text2)', boxShadow: 'none' }}
               >
-                ← Analyze Another Spectrophotometry
+                ← Start Over / Modify Inputs
               </button>
             </div>
           </div>

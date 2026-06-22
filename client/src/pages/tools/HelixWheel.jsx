@@ -14,10 +14,8 @@ export default function HelixWheel() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Peptide Input' },
-    { number: 2, title: 'Scales & Settings' },
-    { number: 3, title: 'Run Analysis' },
-    { number: 4, title: 'Helical Projection' }
+    { number: 1, title: 'Inputs & Parameters' },
+    { number: 2, title: 'Helical Projection' }
   ];
 
   const scaleMap = {
@@ -26,7 +24,7 @@ export default function HelixWheel() {
     eisenberg: EISENBERG_SCALE
   };
 
-  const handleNextFromStep1 = () => {
+  const runHelicalProjection = () => {
     const clean = cleanSequence(rawSeq, 'ACDEFGHIKLMNPQRSTVWY');
     if (!clean) {
       setValidationError('Please enter a peptide sequence.');
@@ -38,16 +36,6 @@ export default function HelixWheel() {
       return;
     }
     setValidationError('');
-    setActiveStep(2);
-  };
-
-  const runHelicalProjection = () => {
-    const clean = cleanSequence(rawSeq, 'ACDEFGHIKLMNPQRSTVWY');
-    if (!clean) {
-      setValidationError('Please enter a peptide sequence.');
-      setActiveStep(1);
-      return;
-    }
 
     setIsAnalyzing(true);
     setTimeout(() => {
@@ -143,7 +131,7 @@ export default function HelixWheel() {
         wSize
       });
 
-      setActiveStep(4);
+      setActiveStep(2);
     }, 850);
   };
 
@@ -199,12 +187,12 @@ export default function HelixWheel() {
       {renderStepTracker()}
 
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Peptide Input */}
+        {/* Step 1: Inputs & Parameters */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Enter Peptide Sequence</h3>
+              <h3 className="bx-step-title">Peptide Sequence & Helical Parameters</h3>
             </div>
 
             <div className="bx-field-group">
@@ -225,105 +213,66 @@ export default function HelixWheel() {
               {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '12px' }}>
+              <div className="bx-field-group">
+                <label htmlFor="scale-select" className="bx-label">Hydrophobicity Index Scale</label>
+                <select
+                  id="scale-select"
+                  className="bx-select"
+                  value={selectedScale}
+                  onChange={(e) => setSelectedScale(e.target.value)}
+                >
+                  <option value="kyte">Kyte-Doolittle (Standard Partition)</option>
+                  <option value="hopp">Hopp-Woods (Antigenic Profile)</option>
+                  <option value="eisenberg">Eisenberg (Consensus Hydrophobicity)</option>
+                </select>
+              </div>
+
+              <div className="bx-field-group">
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <label htmlFor="window-size-input" className="bx-label">Sliding Window size</label>
+                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-d)' }}>{windowSize} residues</span>
+                </div>
+                <input
+                  id="window-size-input"
+                  type="range"
+                  className="bx-slider"
+                  min="3"
+                  max="19"
+                  step="2"
+                  value={windowSize}
+                  onChange={(e) => setWindowSize(parseInt(e.target.value))}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
               <button
                 type="button"
                 className="bx-btn-primary"
-                onClick={handleNextFromStep1}
-                disabled={!rawSeq.trim()}
+                onClick={runHelicalProjection}
+                disabled={isAnalyzing || !rawSeq.trim()}
               >
-                Next: Choose Scales & Settings →
+                {isAnalyzing ? (
+                  <>
+                    <svg style={{ animation: 'spin 1s infinite linear', width: '16px', height: '16px', stroke: 'currentColor', fill: 'none', marginRight: '6px' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="12"/>
+                    </svg>
+                    Mapping Vector Geometry...
+                  </>
+                ) : (
+                  'Plot Helical Topologies'
+                )}
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 2: Settings */}
-        {activeStep === 2 && (
+        {/* Step 2: Results */}
+        {activeStep === 2 && results && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Select Scale & Window Size</h3>
-            </div>
-
-            <div className="bx-field-group">
-              <label htmlFor="scale-select" className="bx-label">Hydrophobicity Index Scale</label>
-              <select
-                id="scale-select"
-                className="bx-select"
-                value={selectedScale}
-                onChange={(e) => setSelectedScale(e.target.value)}
-              >
-                <option value="kyte">Kyte-Doolittle (Standard Partition)</option>
-                <option value="hopp">Hopp-Woods (Antigenic Profile)</option>
-                <option value="eisenberg">Eisenberg (Consensus Hydrophobicity)</option>
-              </select>
-            </div>
-
-            <div className="bx-field-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <label htmlFor="window-size-input" className="bx-label">Sliding Window size</label>
-                <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-d)' }}>{windowSize} residues</span>
-              </div>
-              <input
-                id="window-size-input"
-                type="range"
-                className="bx-slider"
-                min="3"
-                max="19"
-                step="2"
-                value={windowSize}
-                onChange={(e) => setWindowSize(parseInt(e.target.value))}
-              />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
-              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Analysis →</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Run Analysis */}
-        {activeStep === 3 && (
-          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
-            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Compute Helical Wheel Projection</h3>
-            </div>
-
-            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
-              Projecting the amino acid angles along an ideal 3.6 residues-per-turn alpha helix vector using the <strong>{selectedScale === 'kyte' ? 'Kyte-Doolittle' : selectedScale === 'hopp' ? 'Hopp-Woods' : 'Eisenberg'}</strong> scale.
-            </p>
-
-            <button
-              type="button"
-              className="bx-btn-primary"
-              style={{ width: '100%', padding: '12px' }}
-              onClick={runHelicalProjection}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <>
-                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
-                  Mapping Vector Geometry...
-                </>
-              ) : (
-                'Generate Helical Projection Map'
-              )}
-            </button>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Results */}
-        {activeStep === 4 && results && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
               <h3 className="bx-step-title">Helical Wheel Projection Results</h3>
             </div>
 
@@ -340,7 +289,7 @@ export default function HelixWheel() {
             </div>
 
             {/* Projection SVG Panels */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '12px' }}>
               {/* Helix Wheel SVG */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', backgroundColor: '#fff' }}>
                 <span className="bx-label" style={{ fontSize: '12px', marginBottom: '8px' }}>Alpha-Helix Ring Projection</span>
@@ -484,7 +433,7 @@ export default function HelixWheel() {
             </div>
 
             {/* Legend */}
-            <div style={{ display: 'flex', gap: '10px', fontSize: '11px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '8px' }}>
+            <div style={{ display: 'flex', gap: '10px', fontSize: '11px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '12px' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#f59e0b' }} /> Hydrophobic
               </span>
@@ -512,7 +461,7 @@ export default function HelixWheel() {
                 onClick={resetAnalysis}
                 style={{ background: 'var(--text2)', boxShadow: 'none' }}
               >
-                ← Analyze Another Peptide
+                ← Start Over / Modify Inputs
               </button>
             </div>
           </div>

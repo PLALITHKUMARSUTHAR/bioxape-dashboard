@@ -13,10 +13,8 @@ export default function CodonScope() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Sequence & Host' },
-    { number: 2, title: 'Mode settings' },
-    { number: 3, title: 'Run Analysis' },
-    { number: 4, title: 'CAI Report' }
+    { number: 1, title: 'Inputs & Parameters' },
+    { number: 2, title: 'CAI Report' }
   ];
 
   const loadSampleCodons = () => {
@@ -24,7 +22,7 @@ export default function CodonScope() {
     setValidationError('');
   };
 
-  const handleNextFromStep1 = () => {
+  const runCodonAnalysis = () => {
     const clean = cleanSequence(rawSeq);
     if (!clean) {
       setValidationError('Please enter a coding sequence.');
@@ -40,16 +38,6 @@ export default function CodonScope() {
       return;
     }
     setValidationError('');
-    setActiveStep(2);
-  };
-
-  const runCodonAnalysis = () => {
-    const clean = cleanSequence(rawSeq);
-    if (!clean) {
-      setValidationError('Please enter a coding sequence.');
-      setActiveStep(1);
-      return;
-    }
 
     setIsAnalyzing(true);
     setTimeout(() => {
@@ -176,7 +164,7 @@ export default function CodonScope() {
         aaCounts
       });
 
-      setActiveStep(4);
+      setActiveStep(2);
     }, 850);
   };
 
@@ -233,28 +221,12 @@ export default function CodonScope() {
       {renderStepTracker()}
 
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Sequence & Host */}
+        {/* Step 1: Inputs & Parameters */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Select Host & Enter CDS</h3>
-            </div>
-
-            <div className="bx-field-group">
-              <label htmlFor="host-select" className="bx-label">Target Expression Host</label>
-              <select
-                id="host-select"
-                className="bx-select"
-                value={hostOrganism}
-                onChange={(e) => setHostOrganism(e.target.value)}
-              >
-                <option value="E. coli K12">Escherichia coli K12</option>
-                <option value="S. cerevisiae">Saccharomyces cerevisiae (Yeast)</option>
-                <option value="Homo sapiens">Homo sapiens (Human)</option>
-                <option value="CHO cells">CHO Cells (Hamster)</option>
-                <option value="Spodoptera frugiperda">Spodoptera frugiperda (Sf9 Insect)</option>
-              </select>
+              <h3 className="bx-step-title">Coding Sequence & Host Parameters</h3>
             </div>
 
             <div className="bx-field-group">
@@ -276,99 +248,65 @@ export default function CodonScope() {
               {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '12px' }}>
+              <div className="bx-field-group">
+                <label htmlFor="host-select" className="bx-label">Target Expression Host</label>
+                <select
+                  id="host-select"
+                  className="bx-select"
+                  value={hostOrganism}
+                  onChange={(e) => setHostOrganism(e.target.value)}
+                >
+                  <option value="E. coli K12">Escherichia coli K12</option>
+                  <option value="S. cerevisiae">Saccharomyces cerevisiae (Yeast)</option>
+                  <option value="Homo sapiens">Homo sapiens (Human)</option>
+                  <option value="CHO cells">CHO Cells (Hamster)</option>
+                  <option value="Spodoptera frugiperda">Spodoptera frugiperda (Sf9 Insect)</option>
+                </select>
+              </div>
+
+              <div className="bx-field-group">
+                <label htmlFor="mode-select" className="bx-label">Optimization Mode</label>
+                <select
+                  id="mode-select"
+                  className="bx-select"
+                  value={mode}
+                  onChange={(e) => setMode(e.target.value)}
+                >
+                  <option value="analyze">Analyze Only (Evaluate GC & CAI)</option>
+                  <option value="optimize">Optimize Codons (Synonymous Replacement)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
               <button
                 type="button"
                 className="bx-btn-primary"
-                onClick={handleNextFromStep1}
-                disabled={!rawSeq.trim()}
+                onClick={runCodonAnalysis}
+                disabled={isAnalyzing || !rawSeq.trim()}
               >
-                Next: Choose Mode Settings →
+                {isAnalyzing ? (
+                  <>
+                    <svg style={{ animation: 'spin 1s infinite linear', width: '16px', height: '16px', stroke: 'currentColor', fill: 'none', marginRight: '6px' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="12"/>
+                    </svg>
+                    Optimizing Codons...
+                  </>
+                ) : (
+                  'Optimize Codons'
+                )}
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 2: Mode Settings */}
-        {activeStep === 2 && (
+        {/* Step 2: CAI Report */}
+        {activeStep === 2 && results && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Choose Analysis Mode Settings</h3>
-            </div>
-
-            <div className="bx-field-group">
-              <label className="bx-label">Optimization Mode</label>
-              <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-                <button
-                  type="button"
-                  className={`bx-tool-btn ${mode === 'analyze' ? 'copied' : ''}`}
-                  onClick={() => setMode('analyze')}
-                  style={{ flex: 1, padding: '12px' }}
-                >
-                  <strong style={{ display: 'block', fontSize: '14px', marginBottom: '2px' }}>Analyze Only</strong>
-                  Evaluate current codon adaptiveness & GC bias
-                </button>
-                <button
-                  type="button"
-                  className={`bx-tool-btn ${mode === 'optimize' ? 'copied' : ''}`}
-                  onClick={() => setMode('optimize')}
-                  style={{ flex: 1, padding: '12px' }}
-                >
-                  <strong style={{ display: 'block', fontSize: '14px', marginBottom: '2px' }}>Optimize Codons</strong>
-                  Replace rare codons with host-preferred synonymous codons
-                </button>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
-              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Analysis →</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Run Analysis */}
-        {activeStep === 3 && (
-          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
-            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Run Codon Compatibility Engine</h3>
-            </div>
-
-            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
-              Ready to evaluate coding sequence against the <strong>{hostOrganism}</strong> codon usage reference.
-            </p>
-
-            <button
-              type="button"
-              className="bx-btn-primary"
-              style={{ width: '100%', padding: '12px' }}
-              onClick={runCodonAnalysis}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <>
-                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
-                  Mapping Host Codon Frequencies...
-                </>
-              ) : (
-                'Run Codon Optimization & Analysis'
-              )}
-            </button>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: CAI Report */}
-        {activeStep === 4 && results && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
-              <h3 className="bx-step-title">Codon Scope report</h3>
+              <h3 className="bx-step-title">Codon Scope Report</h3>
             </div>
 
             {/* Score Ring */}
@@ -484,7 +422,7 @@ export default function CodonScope() {
                 onClick={resetAnalysis}
                 style={{ background: 'var(--text2)', boxShadow: 'none' }}
               >
-                ← Analyze Another Sequence
+                ← Start Over / Modify Inputs
               </button>
             </div>
           </div>

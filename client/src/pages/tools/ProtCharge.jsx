@@ -35,10 +35,8 @@ export default function ProtCharge() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Protein Sequence' },
-    { number: 2, title: 'pH Environment' },
-    { number: 3, title: 'Run Analysis' },
-    { number: 4, title: 'Titration Curve' }
+    { number: 1, title: 'Inputs & Parameters' },
+    { number: 2, title: 'Titration Curve' }
   ];
 
   // Calculate Net Charge at a given pH
@@ -93,7 +91,7 @@ export default function ProtCharge() {
     return mid;
   };
 
-  const handleNextFromStep1 = () => {
+  const runTitrationCalculation = () => {
     const singleLetterInput = convertThreeToSingle(rawSeq);
     const clean = cleanSequence(singleLetterInput, 'ACDEFGHIKLMNPQRSTVWY');
     if (!clean) {
@@ -106,17 +104,6 @@ export default function ProtCharge() {
       return;
     }
     setValidationError('');
-    setActiveStep(2);
-  };
-
-  const runTitrationCalculation = () => {
-    const singleLetterInput = convertThreeToSingle(rawSeq);
-    const clean = cleanSequence(singleLetterInput, 'ACDEFGHIKLMNPQRSTVWY');
-    if (!clean) {
-      setValidationError('Please enter a peptide sequence.');
-      setActiveStep(1);
-      return;
-    }
 
     setIsAnalyzing(true);
     setTimeout(() => {
@@ -174,7 +161,7 @@ export default function ProtCharge() {
         }
       });
 
-      setActiveStep(4);
+      setActiveStep(2);
     }, 800);
   };
 
@@ -257,12 +244,12 @@ export default function ProtCharge() {
       {renderStepTracker()}
 
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Sequence */}
+        {/* Step 1: Inputs & Parameters */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Enter Protein Sequence</h3>
+              <h3 className="bx-step-title">Peptide Sequence & pH Target</h3>
             </div>
 
             <div className="bx-field-group">
@@ -284,28 +271,7 @@ export default function ProtCharge() {
               {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={handleNextFromStep1}
-                disabled={!rawSeq.trim()}
-              >
-                Next: Configure pH Environment →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: pH Environment */}
-        {activeStep === 2 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Titration Environment pH</h3>
-            </div>
-
-            <div className="bx-field-group">
+            <div className="bx-field-group" style={{ marginTop: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <label htmlFor="ph-range-slider" className="bx-label">Environmental pH Target</label>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-d)' }}>pH {pH.toFixed(1)}</span>
@@ -322,53 +288,33 @@ export default function ProtCharge() {
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
-              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Analysis →</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                onClick={runTitrationCalculation}
+                disabled={isAnalyzing || !rawSeq.trim()}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <svg style={{ animation: 'spin 1s infinite linear', width: '16px', height: '16px', stroke: 'currentColor', fill: 'none', marginRight: '6px' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="12"/>
+                    </svg>
+                    Solving Henderson-Hasselbalch...
+                  </>
+                ) : (
+                  'Compute Isoelectric Point'
+                )}
+              </button>
             </div>
           </div>
         )}
 
-        {/* Step 3: Run Analysis */}
-        {activeStep === 3 && (
-          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
-            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Compute Isoelectric Charge</h3>
-            </div>
-
-            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
-              Solving the Henderson-Hasselbalch charge equations for pKa values across the sequence range at pH {pH.toFixed(1)}.
-            </p>
-
-            <button
-              type="button"
-              className="bx-btn-primary"
-              style={{ width: '100%', padding: '12px' }}
-              onClick={runTitrationCalculation}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <>
-                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
-                  Iterating Root Finding Algorithms...
-                </>
-              ) : (
-                'Calculate Titration Curve & pI'
-              )}
-            </button>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Output Titration Graph */}
-        {activeStep === 4 && results && (
+        {/* Step 2: Output Titration Graph */}
+        {activeStep === 2 && results && (
           <div className="bx-step-section">
             <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
+              <span className="bx-step-badge">Step 2</span>
               <h3 className="bx-step-title">Titration Curve & pI Results</h3>
             </div>
 
@@ -385,7 +331,7 @@ export default function ProtCharge() {
             </div>
 
             {/* Titration SVG Plot */}
-            <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', backgroundColor: 'var(--white)' }}>
+            <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', backgroundColor: 'var(--white)', marginTop: '12px' }}>
               <svg viewBox="0 0 150 150" style={{ width: '100%', height: '200px' }}>
                 <line x1="15" y1="75" x2="135" y2="75" stroke="var(--border2)" strokeWidth="1.5" />
                 <line x1="75" y1="15" x2="75" y2="135" stroke="var(--border)" strokeWidth="1" strokeDasharray="2 2" />
@@ -424,7 +370,7 @@ export default function ProtCharge() {
             </div>
 
             {/* AA composition percentages */}
-            <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', backgroundColor: 'var(--off)' }}>
+            <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '12px', backgroundColor: 'var(--off)', marginTop: '12px' }}>
               <span className="bx-label" style={{ display: 'block', marginBottom: '8px' }}>Amino Acid Composition Profile</span>
               <div style={{ display: 'flex', gap: '8px', fontSize: '11px', textAlign: 'center' }}>
                 <div style={{ flex: 1, backgroundColor: 'var(--white)', padding: '6px', borderRadius: '4px', border: '1px solid var(--border)' }}>
@@ -447,7 +393,7 @@ export default function ProtCharge() {
             </div>
 
             {/* Extra Physical Properties */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
               <div className="bx-result-box">
                 <div className="bx-result-val">{results.mw} kDa</div>
                 <div className="bx-result-lbl">Molecular Weight</div>
@@ -459,7 +405,7 @@ export default function ProtCharge() {
             </div>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '8px' }}>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '12px' }}>
               <CopyButton text={getExportSummary()} />
               <ExportButton data={getExportCsv()} filename="protein_titration_curve.csv" format="csv" />
             </div>
@@ -471,7 +417,7 @@ export default function ProtCharge() {
                 onClick={resetAnalysis}
                 style={{ background: 'var(--text2)', boxShadow: 'none' }}
               >
-                ← Analyze Another Peptide
+                ← Start Over / Modify Inputs
               </button>
             </div>
           </div>

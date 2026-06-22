@@ -16,10 +16,8 @@ export default function SeqMelt() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Input Sequence' },
-    { number: 2, title: 'Reaction Ions' },
-    { number: 3, title: 'Method & Run' },
-    { number: 4, title: 'Melting Results' }
+    { number: 1, title: 'Inputs & Parameters' },
+    { number: 2, title: 'Melting Results' }
   ];
 
   const loadSample = (type) => {
@@ -31,7 +29,7 @@ export default function SeqMelt() {
     setValidationError('');
   };
 
-  const handleNextFromStep1 = () => {
+  const handleRunAnalysis = () => {
     const clean = cleanSequence(rawInput);
     if (!clean) {
       setValidationError('Please enter a sequence.');
@@ -43,16 +41,6 @@ export default function SeqMelt() {
       return;
     }
     setValidationError('');
-    setActiveStep(2);
-  };
-
-  const handleRunAnalysis = () => {
-    const clean = cleanSequence(rawInput);
-    if (!clean) {
-      setValidationError('Please enter a sequence.');
-      setActiveStep(1);
-      return;
-    }
 
     setIsAnalyzing(true);
     setTimeout(() => {
@@ -190,7 +178,7 @@ export default function SeqMelt() {
         hairpinDetails
       });
 
-      setActiveStep(4);
+      setActiveStep(2);
     }, 850);
   };
 
@@ -240,15 +228,20 @@ export default function SeqMelt() {
 
   return (
     <ToolShell slug="seqmelt">
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
       {renderStepTracker()}
 
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Input Sequence */}
+        {/* Step 1: Inputs & Parameters */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Enter DNA or RNA Sequence</h3>
+              <h3 className="bx-step-title">DNA or RNA Sequence & Parameters</h3>
             </div>
             
             <div className="bx-field-group">
@@ -273,28 +266,7 @@ export default function SeqMelt() {
               {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={handleNextFromStep1}
-                disabled={!rawInput.trim()}
-              >
-                Next: Configure Parameters →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Configure Parameters */}
-        {activeStep === 2 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Configure Reaction Parameters</h3>
-            </div>
-
-            <div className="bx-field-group">
+            <div className="bx-field-group" style={{ marginTop: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <label htmlFor="na-conc-slider" className="bx-label">Sodium Concentration (Na+)</label>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-d)' }}>{naConc} mM</span>
@@ -310,7 +282,7 @@ export default function SeqMelt() {
               />
             </div>
 
-            <div className="bx-field-group">
+            <div className="bx-field-group" style={{ marginTop: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <label htmlFor="mg-conc-slider" className="bx-label">Magnesium Concentration (Mg2+)</label>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-d)' }}>{mgConc} mM</span>
@@ -327,7 +299,7 @@ export default function SeqMelt() {
               />
             </div>
 
-            <div className="bx-field-group">
+            <div className="bx-field-group" style={{ marginTop: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <label htmlFor="primer-conc-input" className="bx-label">Primer Concentration (Ct)</label>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--accent-d)' }}>{primerConc} nM</span>
@@ -344,34 +316,7 @@ export default function SeqMelt() {
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-tool-btn"
-                onClick={() => setActiveStep(1)}
-              >
-                ← Back
-              </button>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={() => setActiveStep(3)}
-              >
-                Next: Select Method & Run →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Run Analysis */}
-        {activeStep === 3 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Select Analysis Method & Run</h3>
-            </div>
-
-            <div className="bx-field-group">
+            <div className="bx-field-group" style={{ marginTop: '8px' }}>
               <label className="bx-label" htmlFor="seqmelt-method-select">Primary Melting Method</label>
               <select
                 id="seqmelt-method-select"
@@ -385,17 +330,18 @@ export default function SeqMelt() {
               </select>
             </div>
 
-            <div style={{ margin: '12px 0', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
               <button
                 type="button"
                 className="bx-btn-primary"
-                style={{ width: '100%', padding: '12px' }}
                 onClick={handleRunAnalysis}
-                disabled={isAnalyzing}
+                disabled={!rawInput.trim() || isAnalyzing}
               >
                 {isAnalyzing ? (
                   <>
-                    <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
+                    <svg style={{ animation: 'spin 1s infinite linear', width: '16px', height: '16px', stroke: 'currentColor', fill: 'none', marginRight: '6px' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="12"/>
+                    </svg>
                     Running Thermodynamics Simulation...
                   </>
                 ) : (
@@ -403,25 +349,14 @@ export default function SeqMelt() {
                 )}
               </button>
             </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-tool-btn"
-                onClick={() => setActiveStep(2)}
-                disabled={isAnalyzing}
-              >
-                ← Back
-              </button>
-            </div>
           </div>
         )}
 
-        {/* Step 4: Results */}
-        {activeStep === 4 && results && (
+        {/* Step 2: Melting Results */}
+        {activeStep === 2 && results && (
           <div className="bx-step-section">
             <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
+              <span className="bx-step-badge">Step 2</span>
               <h3 className="bx-step-title">Thermodynamic Analysis Results</h3>
             </div>
 

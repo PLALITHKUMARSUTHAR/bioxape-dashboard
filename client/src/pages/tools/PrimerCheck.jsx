@@ -13,12 +13,11 @@ export default function PrimerCheck() {
   const [validationError, setValidationError] = useState('');
   const [overallStatus, setOverallStatus] = useState('empty');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasResults, setHasResults] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Oligo Inputs' },
-    { number: 2, title: 'Reaction settings' },
-    { number: 3, title: 'Run Diagnostics' },
-    { number: 4, title: 'Checklist Report' }
+    { number: 1, title: 'Inputs & Settings' },
+    { number: 2, title: 'Checklist Report' }
   ];
 
   const calculateTmNN = (seq) => {
@@ -232,12 +231,13 @@ export default function PrimerCheck() {
     return { found: false };
   };
 
-  const handleNextFromStep1 = () => {
+  const runDiagnostics = () => {
     const fwd = cleanSequence(fwdInput);
     const rev = cleanSequence(revInput);
+    const probe = cleanSequence(probeInput);
 
     if (!fwd || !rev) {
-      setValidationError('Please enter both Forward and Reverse primer sequences.');
+      setValidationError('Please enter Forward and Reverse primer sequences.');
       return;
     }
 
@@ -249,20 +249,6 @@ export default function PrimerCheck() {
     }
 
     setValidationError('');
-    setActiveStep(2);
-  };
-
-  const runDiagnostics = () => {
-    const fwd = cleanSequence(fwdInput);
-    const rev = cleanSequence(revInput);
-    const probe = cleanSequence(probeInput);
-
-    if (!fwd || !rev) {
-      setValidationError('Please enter Forward and Reverse primer sequences.');
-      setActiveStep(1);
-      return;
-    }
-
     setIsAnalyzing(true);
     setTimeout(() => {
       setIsAnalyzing(false);
@@ -358,7 +344,8 @@ export default function PrimerCheck() {
         }
       });
 
-      setActiveStep(4);
+      setHasResults(true);
+      setActiveStep(2);
     }, 850);
   };
 
@@ -406,6 +393,7 @@ Hairpins: Fwd: ${checks.fwdHairpin.found ? 'Yes' : 'No'}, Rev: ${checks.revHairp
 
   const resetAnalysis = () => {
     setResults(null);
+    setHasResults(false);
     setActiveStep(1);
   };
 
@@ -414,7 +402,7 @@ Hairpins: Fwd: ${checks.fwdHairpin.found ? 'Yes' : 'No'}, Rev: ${checks.revHairp
       {steps.map((s) => {
         const isCompleted = s.number < activeStep;
         const isActive = s.number === activeStep;
-        const isDisabled = s.number > activeStep && !results;
+        const isDisabled = s.number > activeStep && !hasResults;
         return (
           <div
             key={s.number}
@@ -434,12 +422,12 @@ Hairpins: Fwd: ${checks.fwdHairpin.found ? 'Yes' : 'No'}, Rev: ${checks.revHairp
       {renderStepTracker()}
 
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Oligo Inputs */}
+        {/* Step 1: Oligo Inputs & Settings */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Enter Oligo Sequences</h3>
+              <h3 className="bx-step-title">Enter Oligo Sequences & Parameters</h3>
             </div>
 
             <div className="bx-field-group">
@@ -492,31 +480,9 @@ Hairpins: Fwd: ${checks.fwdHairpin.found ? 'Yes' : 'No'}, Rev: ${checks.revHairp
                   setValidationError('');
                 }}
               />
-              {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={handleNextFromStep1}
-                disabled={!fwdInput.trim() || !revInput.trim()}
-              >
-                Next: Configure Reaction Settings →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Settings */}
-        {activeStep === 2 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Configure Reaction Parameters</h3>
-            </div>
-
-            <div className="bx-field-group">
+            <div className="bx-field-group" style={{ marginTop: '16px', marginBottom: '16px' }}>
               <label htmlFor="anneal-temp-input" className="bx-label">Target Annealing Temperature (°C, Optional)</label>
               <input
                 id="anneal-temp-input"
@@ -529,55 +495,37 @@ Hairpins: Fwd: ${checks.fwdHairpin.found ? 'Yes' : 'No'}, Rev: ${checks.revHairp
               <p style={{ fontSize: '12px', color: 'var(--text3)', fontStyle: 'italic', marginTop: '4px' }}>
                 If specified, the diagnostics report will flag any deviation from the ideal PCR annealing thermal profile.
               </p>
+              {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '8px', fontWeight: '600' }}>⚠ {validationError}</p>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
-              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Analysis →</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Run Diagnostics */}
-        {activeStep === 3 && (
-          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
-            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Execute Primer Diagnostics</h3>
-            </div>
-
-            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
-              Scanning hybridization structures for primer-dimers, hairpins, GC clamp stability, and Tm compatibility.
-            </p>
-
-            <button
-              type="button"
-              className="bx-btn-primary"
-              style={{ width: '100%', padding: '12px' }}
-              onClick={runDiagnostics}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <>
-                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
-                  Simulating Hybridization Thermals...
-                </>
-              ) : (
-                'Run Primer Diagnostics & Checks'
-              )}
-            </button>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                style={{ width: '100%', padding: '12px' }}
+                onClick={runDiagnostics}
+                disabled={isAnalyzing || !fwdInput.trim() || !revInput.trim()}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px', stroke: 'currentColor', fill: 'none' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" strokeWidth="2.5"/>
+                    </svg>
+                    Simulating Hybridization Thermals...
+                  </>
+                ) : (
+                  'Run Primer Diagnostics & Checks'
+                )}
+              </button>
             </div>
           </div>
         )}
 
-        {/* Step 4: Results */}
-        {activeStep === 4 && results && (
+        {/* Step 2: Checklist Report */}
+        {activeStep === 2 && results && (
           <div className="bx-step-section" style={{ alignItems: 'stretch' }}>
             <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
+              <span className="bx-step-badge">Step 2</span>
               <h3 className="bx-step-title">Primer Diagnostics Report</h3>
             </div>
 
@@ -741,7 +689,7 @@ Hairpins: Fwd: ${checks.fwdHairpin.found ? 'Yes' : 'No'}, Rev: ${checks.revHairp
                 onClick={resetAnalysis}
                 style={{ background: 'var(--text2)', boxShadow: 'none' }}
               >
-                ← Diagnostic Another Primer Set
+                ← Start Over / Modify Inputs
               </button>
             </div>
           </div>

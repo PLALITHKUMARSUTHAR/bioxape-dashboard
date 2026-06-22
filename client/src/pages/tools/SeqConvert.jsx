@@ -23,15 +23,14 @@ export default function SeqConvert() {
   const [validationError, setValidationError] = useState('');
   const [performanceWarning, setPerformanceWarning] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasResults, setHasResults] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Sequence Input' },
-    { number: 2, title: 'Conversion settings' },
-    { number: 3, title: 'Run Analysis' },
-    { number: 4, title: 'Outputs' }
+    { number: 1, title: 'Inputs & Settings' },
+    { number: 2, title: 'Conversion Outputs' }
   ];
 
-  const handleNextFromStep1 = () => {
+  const runSequenceConversion = () => {
     setValidationError('');
     setPerformanceWarning('');
     
@@ -59,32 +58,28 @@ export default function SeqConvert() {
       return;
     }
 
-    setCleanedSeq(clean);
-    setActiveStep(2);
-  };
-
-  const runSequenceConversion = () => {
-    if (!cleanedSeq || validationError) {
-      setValidationError('Sequence validation failed. Please check your inputs.');
-      setActiveStep(1);
+    if (activeMode !== 'transcribe' && activeMode !== 'revcomp' && type === 'PROTEIN') {
+      setValidationError('Translation, ORF finder, and Six-frame are only available for DNA/RNA sequences.');
       return;
     }
 
+    setCleanedSeq(clean);
     setIsAnalyzing(true);
+
     setTimeout(() => {
       setIsAnalyzing(false);
 
       if (activeMode === 'transcribe') {
-        if (seqType === 'RNA') {
-          setSimpleResult(cleanedSeq.replace(/U/g, 'T'));
+        if (type === 'RNA') {
+          setSimpleResult(clean.replace(/U/g, 'T'));
         } else {
-          setSimpleResult(transcribe(cleanedSeq));
+          setSimpleResult(transcribe(clean));
         }
       } else if (activeMode === 'revcomp') {
-        setSimpleResult(reverseComplement(cleanedSeq));
+        setSimpleResult(reverseComplement(clean));
       } else if (activeMode === 'translate') {
-        const translated = translate(cleanedSeq, selectedFrame, readThroughStop);
-        const remainder = (cleanedSeq.length - (Math.abs(selectedFrame) - 1)) % 3;
+        const translated = translate(clean, selectedFrame, readThroughStop);
+        const remainder = (clean.length - (Math.abs(selectedFrame) - 1)) % 3;
         const note = remainder > 0 ? `\n\n[Note: ${remainder} incomplete trailing base(s) at 3' end ignored]` : '';
         setSimpleResult(translated + note);
       } else if (activeMode === 'sixframe') {
@@ -94,10 +89,10 @@ export default function SeqConvert() {
         const minLengthBp = parseInt(minOrfLen) || 100;
 
         for (let f = 1; f <= 3; f++) {
-          scanOrfsInFrame(cleanedSeq, f, minLengthBp, foundOrfs);
+          scanOrfsInFrame(clean, f, minLengthBp, foundOrfs);
         }
         
-        const revComp = reverseComplement(cleanedSeq);
+        const revComp = reverseComplement(clean);
         for (let f = 1; f <= 3; f++) {
           scanOrfsInFrame(revComp, -f, minLengthBp, foundOrfs, true);
         }
@@ -106,7 +101,8 @@ export default function SeqConvert() {
         setOrfResults(foundOrfs);
       }
 
-      setActiveStep(4);
+      setHasResults(true);
+      setActiveStep(2);
     }, 800);
   };
 
@@ -285,9 +281,9 @@ export default function SeqConvert() {
   };
 
   const resetAnalysis = () => {
-    setResults(null);
     setSimpleResult('');
     setOrfResults([]);
+    setHasResults(false);
     setActiveStep(1);
   };
 
@@ -296,7 +292,7 @@ export default function SeqConvert() {
       {steps.map((s) => {
         const isCompleted = s.number < activeStep;
         const isActive = s.number === activeStep;
-        const isDisabled = s.number > activeStep && !results && !simpleResult && orfResults.length === 0 && activeMode !== 'sixframe';
+        const isDisabled = s.number > activeStep && !hasResults;
         return (
           <div
             key={s.number}
@@ -311,17 +307,20 @@ export default function SeqConvert() {
     </div>
   );
 
+  const cleanSeqText = cleanSequence(rawInput);
+  const detectedType = cleanSeqText ? detectSequenceType(cleanSeqText) : '';
+
   return (
     <ToolShell slug="seqconvert">
       {renderStepTracker()}
 
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Sequence Input */}
+        {/* Step 1: Sequence Input & Settings */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Enter DNA/RNA/Protein Sequence</h3>
+              <h3 className="bx-step-title">Enter Sequence & Choose Options</h3>
             </div>
 
             <div className="bx-field-group">
@@ -343,26 +342,11 @@ export default function SeqConvert() {
               {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={handleNextFromStep1}
-                disabled={!rawInput.trim()}
-              >
-                Next: Select Mode Settings →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Configure Mode & Settings */}
-        {activeStep === 2 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Choose Conversion Mode</h3>
-            </div>
+            {detectedType && (
+              <div style={{ fontSize: '12.5px', color: 'var(--text3)', marginBottom: '16px', marginTop: '-8px' }}>
+                <strong>Detected Sequence Type:</strong> <span style={{ color: 'var(--accent-d)', fontWeight: 'bold' }}>{detectedType}</span>
+              </div>
+            )}
 
             <div className="bx-field-group">
               <label htmlFor="convert-mode-select" className="bx-label">Conversion Mode</label>
@@ -374,14 +358,14 @@ export default function SeqConvert() {
               >
                 <option value="transcribe">Transcribe (DNA ↔ RNA)</option>
                 <option value="revcomp">Reverse Complement</option>
-                <option value="translate" disabled={seqType === 'PROTEIN'}>Translate (Single Frame)</option>
-                <option value="sixframe" disabled={seqType === 'PROTEIN'}>Six-Frame Alignment Visualizer</option>
-                <option value="orf" disabled={seqType === 'PROTEIN'}>ORF Finder (Open Reading Frame)</option>
+                <option value="translate" disabled={detectedType === 'PROTEIN'}>Translate (Single Frame)</option>
+                <option value="sixframe" disabled={detectedType === 'PROTEIN'}>Six-Frame Alignment Visualizer</option>
+                <option value="orf" disabled={detectedType === 'PROTEIN'}>ORF Finder (Open Reading Frame)</option>
               </select>
             </div>
 
             {activeMode === 'translate' && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '10px', marginBottom: '10px' }}>
                 <div className="bx-field-group">
                   <label htmlFor="frame-select" className="bx-label">Reading Frame</label>
                   <select
@@ -399,20 +383,20 @@ export default function SeqConvert() {
                   </select>
                 </div>
                 <div className="bx-field-group" style={{ justifyContent: 'center' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', color: 'var(--text2)' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', color: 'var(--text2)', marginTop: '24px' }}>
                     <input
                       type="checkbox"
                       checked={readThroughStop}
                       onChange={(e) => setReadThroughStop(e.target.checked)}
                     />
-                    Read through stop codons (*)
+                    Read through stops (*)
                   </label>
                 </div>
               </div>
             )}
 
             {activeMode === 'orf' && (
-              <div className="bx-field-group" style={{ marginTop: '10px' }}>
+              <div className="bx-field-group" style={{ marginTop: '10px', marginBottom: '10px' }}>
                 <label htmlFor="orf-len-input" className="bx-label">Minimum ORF Length (bp)</label>
                 <input
                   id="orf-len-input"
@@ -426,57 +410,34 @@ export default function SeqConvert() {
 
             {performanceWarning && <p style={{ color: 'var(--amber)', fontSize: '12.5px', marginTop: '8px' }}>{performanceWarning}</p>}
 
-            <div style={{ fontSize: '12px', color: 'var(--text3)', borderTop: '1px solid var(--border)', paddingTop: '10px', marginTop: '10px' }}>
-              <strong>Detected Type:</strong> <span style={{ color: 'var(--accent-d)', fontWeight: 'bold' }}>{seqType}</span>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
-              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Analysis →</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Run Analysis */}
-        {activeStep === 3 && (
-          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
-            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Execute Sequence Converter</h3>
-            </div>
-
-            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
-              Solving translation alignments, reading frames, and scanning codons on the <strong>{seqType}</strong> backbone.
-            </p>
-
-            <button
-              type="button"
-              className="bx-btn-primary"
-              style={{ width: '100%', padding: '12px' }}
-              onClick={runSequenceConversion}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <>
-                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
-                  Mapping Reading Frame Triplets...
-                </>
-              ) : (
-                'Run Sequence Conversion'
-              )}
-            </button>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                style={{ width: '100%', padding: '12px' }}
+                onClick={runSequenceConversion}
+                disabled={isAnalyzing || !rawInput.trim()}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px', stroke: 'currentColor', fill: 'none' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" strokeWidth="2.5"/>
+                    </svg>
+                    Converting Sequence...
+                  </>
+                ) : (
+                  'Run Sequence Conversion'
+                )}
+              </button>
             </div>
           </div>
         )}
 
-        {/* Step 4: Outputs */}
-        {activeStep === 4 && (
+        {/* Step 2: Outputs */}
+        {activeStep === 2 && hasResults && (
           <div className="bx-step-section" style={{ alignItems: 'stretch' }}>
             <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
+              <span className="bx-step-badge">Step 2</span>
               <h3 className="bx-step-title">Conversion Outputs</h3>
             </div>
 
@@ -549,7 +510,7 @@ export default function SeqConvert() {
                 onClick={resetAnalysis}
                 style={{ background: 'var(--text2)', boxShadow: 'none' }}
               >
-                ← Convert Another Sequence
+                ← Start Over / Modify Inputs
               </button>
             </div>
           </div>

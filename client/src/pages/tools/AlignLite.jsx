@@ -17,15 +17,14 @@ export default function AlignLite() {
   const [validationError, setValidationError] = useState('');
   const [warning, setWarning] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasResults, setHasResults] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Pairwise Inputs' },
-    { number: 2, title: 'Scoring Settings' },
-    { number: 3, title: 'Run Alignment' },
-    { number: 4, title: 'Monospace Output' }
+    { number: 1, title: 'Inputs & Settings' },
+    { number: 2, title: 'Alignment Output' }
   ];
 
-  const handleNextFromStep1 = () => {
+  const runAlignmentCalculations = () => {
     setValidationError('');
     setWarning('');
 
@@ -37,28 +36,11 @@ export default function AlignLite() {
       return;
     }
 
-    if (cleanRef.length + cleanQuery.length > 3000) {
-      setWarning('Combined sequence length is high. Alignment computation may take a moment.');
-    }
-
     const typeRef = detectSequenceType(cleanRef);
     const typeQuery = detectSequenceType(cleanQuery);
 
     if (typeRef !== typeQuery) {
       setWarning(`Alphabet mismatch: Reference detected as ${typeRef}, Query as ${typeQuery}. Alignment will still run.`);
-    }
-
-    setActiveStep(2);
-  };
-
-  const runAlignmentCalculations = () => {
-    const cleanRef = cleanSequence(refInput);
-    const cleanQuery = cleanSequence(queryInput);
-
-    if (!cleanRef || !cleanQuery) {
-      setValidationError('Please specify both a Reference and Query sequence.');
-      setActiveStep(1);
-      return;
     }
 
     setIsAnalyzing(true);
@@ -78,7 +60,7 @@ export default function AlignLite() {
       if (algo === 'needleman') {
         scoreMatrix = Array(n + 1).fill(null).map(() => Array(m + 1).fill(0));
         for (let i = 0; i <= n; i++) scoreMatrix[i][0] = i * gap;
-        for (let j = 0; j <= m; j++) strokeMatrix = scoreMatrix[0][j] = j * gap;
+        for (let j = 0; j <= m; j++) scoreMatrix[0][j] = j * gap;
 
         for (let i = 1; i <= n; i++) {
           for (let j = 1; j <= m; j++) {
@@ -226,7 +208,8 @@ export default function AlignLite() {
         diffs
       });
 
-      setActiveStep(4);
+      setHasResults(true);
+      setActiveStep(2);
     }, 900);
   };
 
@@ -350,6 +333,7 @@ export default function AlignLite() {
 
   const resetAnalysis = () => {
     setResults(null);
+    setHasResults(false);
     setActiveStep(1);
   };
 
@@ -358,7 +342,7 @@ export default function AlignLite() {
       {steps.map((s) => {
         const isCompleted = s.number < activeStep;
         const isActive = s.number === activeStep;
-        const isDisabled = s.number > activeStep && !results;
+        const isDisabled = s.number > activeStep && !hasResults;
         return (
           <div
             key={s.number}
@@ -378,12 +362,12 @@ export default function AlignLite() {
       {renderStepTracker()}
 
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-        {/* Step 1: Pairwise Input Sequences */}
+        {/* Step 1: Pairwise Input Sequences & Parameters */}
         {activeStep === 1 && (
           <div className="bx-step-section">
             <div className="bx-step-header">
               <span className="bx-step-badge">Step 1</span>
-              <h3 className="bx-step-title">Enter Pairwise Sequences</h3>
+              <h3 className="bx-step-title">Enter Pairwise Sequences & Parameters</h3>
             </div>
 
             <div className="bx-field-group">
@@ -424,28 +408,7 @@ export default function AlignLite() {
               {validationError && <p style={{ color: 'var(--red)', fontSize: '12px', marginTop: '4px' }}>{validationError}</p>}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="bx-btn-primary"
-                onClick={handleNextFromStep1}
-                disabled={!refInput.trim() || !queryInput.trim()}
-              >
-                Next: Configure Scoring Parameters →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Settings & Penalties */}
-        {activeStep === 2 && (
-          <div className="bx-step-section">
-            <div className="bx-step-header">
-              <span className="bx-step-badge">Step 2</span>
-              <h3 className="bx-step-title">Configure Scoring Matrix</h3>
-            </div>
-
-            <div className="bx-field-group">
+            <div className="bx-field-group" style={{ marginTop: '16px' }}>
               <label htmlFor="algo-select" className="bx-label">Alignment Algorithm</label>
               <select
                 id="algo-select"
@@ -463,7 +426,7 @@ export default function AlignLite() {
               </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '16px', marginBottom: '16px' }}>
               <div className="bx-field-group">
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <label htmlFor="match-score-input" className="bx-label">Match</label>
@@ -513,53 +476,34 @@ export default function AlignLite() {
 
             {warning && <p style={{ color: 'var(--amber)', fontSize: '12.5px', marginTop: '8px' }}>{warning}</p>}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(1)}>← Back</button>
-              <button type="button" className="bx-btn-primary" onClick={() => setActiveStep(3)}>Next: Run Alignment →</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <button
+                type="button"
+                className="bx-btn-primary"
+                style={{ width: '100%', padding: '12px' }}
+                onClick={runAlignmentCalculations}
+                disabled={isAnalyzing || !refInput.trim() || !queryInput.trim()}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px', stroke: 'currentColor', fill: 'none' }} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" strokeWidth="2.5"/>
+                    </svg>
+                    Iterating Score Matrices...
+                  </>
+                ) : (
+                  'Run Pairwise Alignment'
+                )}
+              </button>
             </div>
           </div>
         )}
 
-        {/* Step 3: Run Alignment */}
-        {activeStep === 3 && (
-          <div className="bx-step-section" style={{ textAlign: 'center', padding: '30px 20px' }}>
-            <div className="bx-step-header" style={{ justifyContent: 'center' }}>
-              <span className="bx-step-badge">Step 3</span>
-              <h3 className="bx-step-title">Compute Dynamic Alignment</h3>
-            </div>
-
-            <p style={{ fontSize: '14px', color: 'var(--text2)', margin: '12px 0 20px' }}>
-              Solving the score matrix and tracing back paths using dynamic programming matrices.
-            </p>
-
-            <button
-              type="button"
-              className="bx-btn-primary"
-              style={{ width: '100%', padding: '12px' }}
-              onClick={runAlignmentCalculations}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <>
-                  <svg style={{ animation: 'spin 1.2s infinite linear', width: '16px', height: '16px', marginRight: '6px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/></svg>
-                  Iterating Score Matrices...
-                </>
-              ) : (
-                'Run Dynamic Pairwise Alignment'
-              )}
-            </button>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
-              <button type="button" className="bx-tool-btn" onClick={() => setActiveStep(2)} disabled={isAnalyzing}>← Back</button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Results */}
-        {activeStep === 4 && results && (
+        {/* Step 2: Results */}
+        {activeStep === 2 && results && (
           <div className="bx-step-section" style={{ alignItems: 'stretch' }}>
             <div className="bx-step-header">
-              <span className="bx-step-badge">Step 4</span>
+              <span className="bx-step-badge">Step 2</span>
               <h3 className="bx-step-title">Alignment Results</h3>
             </div>
 
@@ -597,7 +541,7 @@ export default function AlignLite() {
             {/* Mutations variant list */}
             {results.diffs.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span className="bx-label">Variant report ({results.diffs.length} differences)</span>
+                <span className="bx-label">Variant Report ({results.diffs.length} differences)</span>
                 <div style={{ overflowY: 'auto', maxHeight: '140px', border: '1px solid var(--border)', borderRadius: '6px' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                     <thead>
@@ -640,7 +584,7 @@ export default function AlignLite() {
                 onClick={resetAnalysis}
                 style={{ background: 'var(--text2)', boxShadow: 'none' }}
               >
-                ← Align Another Sequence Pair
+                ← Start Over / Modify Inputs
               </button>
             </div>
           </div>
