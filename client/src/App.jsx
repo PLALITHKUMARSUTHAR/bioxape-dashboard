@@ -57,13 +57,29 @@ function App() {
   useEffect(() => {
     const fetchTicker = async () => {
       try {
-        const response = await fetch(`${SITE_API_URL}/site/ticker`);
+        const response = await fetch(`${SITE_API_URL}/site/news-feed?limit=30`);
         const result = await response.json();
-        if (result.success && result.data && result.data.items) {
-          setTickerItems(result.data.items.filter(i => i.active !== false));
+        if (result.success && result.data && result.data.length > 0) {
+          setTickerItems(result.data.map(item => ({
+            label: item.category.toUpperCase(),
+            text: item.title
+          })));
+        } else {
+          const fallbackRes = await fetch(`${SITE_API_URL}/site/ticker`);
+          const fallbackResult = await fallbackRes.json();
+          if (fallbackResult.success && fallbackResult.data && fallbackResult.data.items) {
+            setTickerItems(fallbackResult.data.items.filter(i => i.active !== false));
+          }
         }
       } catch (err) {
         console.warn('Could not fetch dynamic ticker config, using static defaults:', err.message);
+        try {
+          const fallbackRes = await fetch(`${SITE_API_URL}/site/ticker`);
+          const fallbackResult = await fallbackRes.json();
+          if (fallbackResult.success && fallbackResult.data && fallbackResult.data.items) {
+            setTickerItems(fallbackResult.data.items.filter(i => i.active !== false));
+          }
+        } catch (e) {}
       }
     };
     fetchTicker();
