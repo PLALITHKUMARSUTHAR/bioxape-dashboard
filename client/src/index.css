@@ -90,9 +90,8 @@ button, input, select, textarea {
 #bx-ticker {
   background: var(--g700);
   color: #fff;
-  padding: 8px 0;
-  font-size: 13px;
-  font-weight: 500;
+  padding: 7px 0;
+  font-size: 12px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
   overflow: hidden;
   white-space: nowrap;

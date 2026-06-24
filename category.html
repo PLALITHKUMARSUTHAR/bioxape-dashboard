@@ -34,6 +34,14 @@
     img{max-width:100%;height:auto;display:block}
     .bx-wrap{max-width:1280px;margin:0 auto;padding:0 28px}
 
+    /* TICKER */
+    #bx-ticker{background:var(--g700);color:#fff;padding:7px 0;overflow:hidden;white-space:nowrap;font-size:12px}
+    #bx-ticker-inner{overflow:hidden}
+    #bx-ticker-track{display:inline-block;animation:ticker-scroll 120s linear infinite}
+    @keyframes ticker-scroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+    #bx-ticker-track b{color:#a8dfc0;margin-right:8px}
+    #bx-ticker-track span{margin-right:60px;opacity:.9}
+
     /* NAV */
     #bx-nav{background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1000}
     .nav-row{display:flex;align-items:center;justify-content:space-between;height:66px}
@@ -372,6 +380,15 @@
 </head>
 <body>
 
+  <!-- TICKER -->
+  <div id="bx-ticker">
+    <div class="bx-wrap" style="overflow:hidden">
+      <div id="bx-ticker-track">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
   <!-- NAV -->
   <div id="bx-nav">
     <div class="bx-wrap">
@@ -646,8 +663,35 @@
         const cfg = data.data;
         if (cfg.category_nav) renderCategoryNav(cfg.category_nav);
         if (cfg.footer) renderFooter(cfg.footer);
+        
+        await fetchExternalNews(cfg.ticker);
       } catch(e) {
         console.warn('Config fetch failed');
+      }
+    }
+
+    async function fetchExternalNews(tickerCfg) {
+      try {
+        const res = await fetch(CMS_API + '/site/news-feed?limit=30');
+        const data = await res.json();
+        
+        const tickerEl = document.getElementById('bx-ticker-track');
+        if (tickerEl) {
+          if (data.success && data.data && data.data.length > 0) {
+            tickerEl.innerHTML = data.data.map(item => {
+              const catLabel = item.category.toUpperCase();
+              return `<b>${catLabel}</b><span>${item.title}</span>`;
+            }).join('');
+          } else if (tickerCfg && tickerCfg.items) {
+            tickerEl.innerHTML = tickerCfg.items.filter(i=>i.active!==false).map(i=>'<b>'+i.label+'</b><span>'+i.text+'</span>').join('');
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch external news:', err.message);
+        const tickerEl = document.getElementById('bx-ticker-track');
+        if (tickerEl && tickerCfg && tickerCfg.items) {
+          tickerEl.innerHTML = tickerCfg.items.filter(i=>i.active!==false).map(i=>'<b>'+i.label+'</b><span>'+i.text+'</span>').join('');
+        }
       }
     }
 

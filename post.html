@@ -38,6 +38,14 @@
       padding: 0 28px;
     }
 
+    /* TICKER */
+    #bx-ticker{background:var(--g700);color:#fff;padding:7px 0;overflow:hidden;white-space:nowrap;font-size:12px}
+    #bx-ticker-inner{overflow:hidden}
+    #bx-ticker-track{display:inline-block;animation:ticker-scroll 120s linear infinite}
+    @keyframes ticker-scroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+    #bx-ticker-track b{color:#a8dfc0;margin-right:8px}
+    #bx-ticker-track span{margin-right:60px;opacity:.9}
+
     /* NAV */
     #bx-nav{background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1000}
     .nav-row{display:flex;align-items:center;justify-content:space-between;height:66px}
@@ -202,6 +210,15 @@
 </head>
 <body>
 
+  <!-- TICKER -->
+  <div id="bx-ticker">
+    <div class="bx-wrap" style="overflow:hidden">
+      <div id="bx-ticker-track">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
   <!-- NAV -->
   <div id="bx-nav">
     <div class="bx-wrap">
@@ -360,14 +377,15 @@
       }
     }
 
-    async function loadCategories() {
+    async function loadSiteConfig() {
       try {
         const res = await fetch(CMS_API + '/site/all');
         const data = await res.json();
-        if (!data.success || !data.data.category_nav) return;
-        const items = data.data.category_nav.items;
-        if (items) {
-          const sorted = [...items]
+        if (!data.success) return;
+        
+        const cfg = data.data;
+        if (cfg.category_nav && cfg.category_nav.items) {
+          const sorted = [...cfg.category_nav.items]
             .sort((a,b) => a.order - b.order)
             .filter(i => i.active !== false && i.label !== 'All Topics' && i.label !== 'all topics');
           const dropdownEl = document.getElementById('explore-dropdown-menu');
@@ -377,8 +395,35 @@
             }).join('');
           }
         }
+        
+        await fetchExternalNews(cfg.ticker);
       } catch(e) {
-        console.warn('Failed to load categories dynamically, using static fallback:', e.message);
+        console.warn('Failed to load site config dynamically, using static fallback:', e.message);
+      }
+    }
+
+    async function fetchExternalNews(tickerCfg) {
+      try {
+        const res = await fetch(CMS_API + '/site/news-feed?limit=30');
+        const data = await res.json();
+        
+        const tickerEl = document.getElementById('bx-ticker-track');
+        if (tickerEl) {
+          if (data.success && data.data && data.data.length > 0) {
+            tickerEl.innerHTML = data.data.map(item => {
+              const catLabel = item.category.toUpperCase();
+              return `<b>${catLabel}</b><span>${item.title}</span>`;
+            }).join('');
+          } else if (tickerCfg && tickerCfg.items) {
+            tickerEl.innerHTML = tickerCfg.items.filter(i=>i.active!==false).map(i=>'<b>'+i.label+'</b><span>'+i.text+'</span>').join('');
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch external news:', err.message);
+        const tickerEl = document.getElementById('bx-ticker-track');
+        if (tickerEl && tickerCfg && tickerCfg.items) {
+          tickerEl.innerHTML = tickerCfg.items.filter(i=>i.active!==false).map(i=>'<b>'+i.label+'</b><span>'+i.text+'</span>').join('');
+        }
       }
     }
 
@@ -392,7 +437,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       loadArticle();
-      loadCategories();
+      loadSiteConfig();
       
       const searchInput = document.getElementById('nav-search-input');
       if (searchInput) {
