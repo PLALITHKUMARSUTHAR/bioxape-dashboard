@@ -11,6 +11,11 @@
     { "source": "/research", "destination": "/research.html" },
     { "source": "/category", "destination": "/category.html" },
     { "source": "/post", "destination": "/post.html" },
+    { "source": "/about", "destination": "/public-pages/about.html" },
+    { "source": "/contact", "destination": "/public-pages/contact.html" },
+    { "source": "/privacy-policy", "destination": "/public-pages/privacy-policy.html" },
+    { "source": "/subscribe", "destination": "/public-pages/subscribe.html" },
+    { "source": "/write-for-us", "destination": "/public-pages/write-for-us.html" },
     { "source": "/forum/(.*)", "destination": "/forum/index.html" },
     { "source": "/forum", "destination": "/forum/index.html" }
   ]

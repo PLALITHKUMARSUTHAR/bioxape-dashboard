@@ -38,13 +38,33 @@ export default defineConfig(({ mode }) => {
             const url = new URL(req.url, 'http://localhost');
             const pathname = url.pathname;
 
-            // Serve parent-level HTML files
-            if (pathname.endsWith('.html') || ['/login', '/register', '/admin', '/editor', '/author', '/store', '/research', '/post'].includes(pathname)) {
-              let filename = pathname;
-              if (!filename.endsWith('.html')) {
-                filename += '.html';
+            const cleanRoutes = {
+              '/login': 'login.html',
+              '/register': 'register.html',
+              '/admin': 'admin.html',
+              '/editor': 'editor.html',
+              '/author': 'author.html',
+              '/store': 'store.html',
+              '/research': 'research.html',
+              '/category': 'category.html',
+              '/post': 'post.html',
+              '/about': 'public-pages/about.html',
+              '/contact': 'public-pages/contact.html',
+              '/privacy-policy': 'public-pages/privacy-policy.html',
+              '/subscribe': 'public-pages/subscribe.html',
+              '/write-for-us': 'public-pages/write-for-us.html'
+            };
+
+            const mappedFile = cleanRoutes[pathname];
+            if (mappedFile) {
+              const filePath = resolve(__dirname, '..', mappedFile);
+              if (fs.existsSync(filePath)) {
+                res.setHeader('Content-Type', 'text/html');
+                res.end(fs.readFileSync(filePath));
+                return;
               }
-              const filePath = resolve(__dirname, '..', filename.replace(/^\//, ''));
+            } else if (pathname.endsWith('.html')) {
+              const filePath = resolve(__dirname, '..', pathname.replace(/^\//, ''));
               if (fs.existsSync(filePath)) {
                 res.setHeader('Content-Type', 'text/html');
                 res.end(fs.readFileSync(filePath));

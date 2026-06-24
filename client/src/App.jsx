@@ -96,7 +96,7 @@ function App() {
     // Direct link to the main site's login page
     toast('Redirecting you to Login page...', { icon: '🔑' });
     setTimeout(() => {
-      window.location.href = '/login.html';
+      window.location.href = '/login';
     }, 1000);
   };
 
@@ -129,79 +129,79 @@ function App() {
               <div className="bx-brand-name">Bio<em><span className="brand-x">X</span>Ape</em></div>
             </a>
 
-            <nav className="nav-links">
-              <a href="/">Home</a>
-              <div className="dropdown">
-                <a href="#" className="dropdown-trigger">Explore ▾</a>
-                <div className="dropdown-menu">
-                  <a href="/category.html?name=Genomics%20%26%20Gene%20Editing">Genomics & Gene Editing</a>
-                  <a href="/category.html?name=Biopharmaceuticals">Biopharmaceuticals</a>
-                  <a href="/category.html?name=Synthetic%20Biology">Synthetic Biology</a>
-                  <a href="/category.html?name=Bioinformatics">Bioinformatics</a>
-                  <a href="/category.html?name=Immunology%20%26%20Vaccines">Immunology & Vaccines</a>
-                  <a href="/category.html?name=Clinical%20Trials">Clinical Trials</a>
-                  <a href="/category.html?name=Industry%20News">Industry News</a>
-                  <a href="/category.html?name=Cancer%20Research">Cancer Research</a>
+              <nav className="nav-links">
+                <a href="/">Home</a>
+                <div className="dropdown">
+                  <a href="#" className="dropdown-trigger">Explore ▾</a>
+                  <div className="dropdown-menu">
+                    <a href="/category?name=Genomics%20%26%20Gene%20Editing">Genomics & Gene Editing</a>
+                    <a href="/category?name=Biopharmaceuticals">Biopharmaceuticals</a>
+                    <a href="/category?name=Synthetic%20Biology">Synthetic Biology</a>
+                    <a href="/category?name=Bioinformatics">Bioinformatics</a>
+                    <a href="/category?name=Immunology%20%26%20Vaccines">Immunology & Vaccines</a>
+                    <a href="/category?name=Clinical%20Trials">Clinical Trials</a>
+                    <a href="/category?name=Industry%20News">Industry News</a>
+                    <a href="/category?name=Cancer%20Research">Cancer Research</a>
+                  </div>
                 </div>
+                <a 
+                  href="/tools" 
+                  style={window.location.pathname.startsWith('/tools') ? { color: 'var(--accent)', fontWeight: 600 } : {}}
+                  className={window.location.pathname.startsWith('/tools') ? 'nav-active' : ''}
+                >
+                  Tools
+                </a>
+                <a href="/store">Store</a>
+                <Link 
+                  to="/" 
+                  style={!window.location.pathname.startsWith('/tools') ? { color: 'var(--accent)', fontWeight: 600 } : {}}
+                  className={!window.location.pathname.startsWith('/tools') ? 'nav-active' : ''}
+                >
+                  Forum
+                </Link>
+                <a href="/write-for-us">Write for Us</a>
+              </nav>
+  
+              <div className="nav-right">
+                <div className="nav-search-bar">
+                  <svg className="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <input 
+                    type="text" 
+                    placeholder="Search topics..." 
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        window.location.href = `/forum?search=${encodeURIComponent(e.target.value)}`;
+                      }
+                    }}
+                  />
+                </div>
+                {currentUser ? (
+                  <>
+                    <a 
+                      className="btn-dash" 
+                      href={
+                        currentUser.role === 'admin' ? '/admin' :
+                        currentUser.role === 'editor' ? '/editor' :
+                        currentUser.role === 'author' ? '/author' : '/login'
+                      }
+                    >
+                      Dashboard ({currentUser.role})
+                    </a>
+                    <span className="btn-dash" onClick={handleLogout} style={{ cursor: 'pointer' }}>
+                      Logout
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="btn-dash" onClick={handlePromptLogin} style={{ cursor: 'pointer' }}>
+                      Dashboard
+                    </span>
+                    <a className="btn-sub" href="/subscribe">
+                      Subscribe ✦
+                    </a>
+                  </>
+                )}
               </div>
-              <a 
-                href="/tools" 
-                style={window.location.pathname.startsWith('/tools') ? { color: 'var(--accent)', fontWeight: 600 } : {}}
-                className={window.location.pathname.startsWith('/tools') ? 'nav-active' : ''}
-              >
-                Tools
-              </a>
-              <a href="/store.html">Store</a>
-              <Link 
-                to="/" 
-                style={!window.location.pathname.startsWith('/tools') ? { color: 'var(--accent)', fontWeight: 600 } : {}}
-                className={!window.location.pathname.startsWith('/tools') ? 'nav-active' : ''}
-              >
-                Forum
-              </Link>
-              <a href="/public-pages/write-for-us.html">Write for Us</a>
-            </nav>
-
-            <div className="nav-right">
-              <div className="nav-search-bar">
-                <svg className="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input 
-                  type="text" 
-                  placeholder="Search topics..." 
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      window.location.href = `/forum?search=${encodeURIComponent(e.target.value)}`;
-                    }
-                  }}
-                />
-              </div>
-              {currentUser ? (
-                <>
-                  <a 
-                    className="btn-dash" 
-                    href={
-                      currentUser.role === 'admin' ? '/admin.html' :
-                      currentUser.role === 'editor' ? '/editor.html' :
-                      currentUser.role === 'author' ? '/author.html' : '/login.html'
-                    }
-                  >
-                    Dashboard ({currentUser.role})
-                  </a>
-                  <span className="btn-dash" onClick={handleLogout} style={{ cursor: 'pointer' }}>
-                    Logout
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="btn-dash" onClick={handlePromptLogin} style={{ cursor: 'pointer' }}>
-                    Dashboard
-                  </span>
-                  <a className="btn-sub" href="/public-pages/subscribe.html">
-                    Subscribe ✦
-                  </a>
-                </>
-              )}
-            </div>
           </div>
         </header>
 
@@ -258,8 +258,8 @@ function App() {
               <p>© 2026 BioXApe. All rights reserved.</p>
             </div>
             <div style={{ display: 'flex', gap: '20px' }}>
-              <a href="/public-pages/privacy-policy.html" style={{ color: 'rgba(255,255,255,0.7)' }}>Privacy Policy</a>
-              <a href="/public-pages/contact.html" style={{ color: 'rgba(255,255,255,0.7)' }}>Contact</a>
+              <a href="/privacy-policy" style={{ color: 'rgba(255,255,255,0.7)' }}>Privacy Policy</a>
+              <a href="/contact" style={{ color: 'rgba(255,255,255,0.7)' }}>Contact</a>
             </div>
           </div>
         </footer>

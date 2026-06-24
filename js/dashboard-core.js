@@ -9,7 +9,7 @@ const CONFIG = {
     ? 'http://localhost:5000/api' 
     : 'https://bioxape-backend.onrender.com/api',
   BLOG_URL:      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' || !window.location.hostname
-    ? 'index.html'
+    ? '/'
     : 'https://www.bioxape.com',
   DASHBOARD_URL: window.location.origin,
   GOOGLE_CLIENT_ID: '775909460532-rnu253qk8csj4kjfmeb95ghf3cfhjje0.apps.googleusercontent.com',
@@ -77,7 +77,7 @@ async function apiCall(endpoint, method = 'GET', body = null, isFormData = false
     const data = await res.json();
     if (res.status === 401) {
       clearAuth();
-      window.location.href = 'login.html';
+      window.location.href = '/login';
       return null;
     }
     return data;
@@ -113,14 +113,14 @@ function getUserRole() { const u = getUser(); return u ? u.role : null; }
 function requireAuth(requiredRole = null) {
   if (!isLoggedIn()) {
     clearAuth();
-    window.location.href = 'login.html';
+    window.location.href = '/login';
     return false;
   }
   const role = getUserRole();
   if (![ROLES.ADMIN, ROLES.EDITOR, ROLES.AUTHOR].includes(role)) {
     console.warn("requireAuth: Invalid user role:", role);
     clearAuth();
-    window.location.href = 'login.html';
+    window.location.href = '/login';
     return false;
   }
   if (requiredRole && role !== requiredRole && role !== ROLES.ADMIN) {
@@ -132,13 +132,13 @@ function requireAuth(requiredRole = null) {
 
 function redirectByRole() {
   const role = getUserRole();
-  if (role === ROLES.ADMIN)  window.location.href = 'admin.html';
-  else if (role === ROLES.EDITOR) window.location.href = 'editor.html';
-  else if (role === ROLES.AUTHOR) window.location.href = 'author.html';
+  if (role === ROLES.ADMIN)  window.location.href = '/admin';
+  else if (role === ROLES.EDITOR) window.location.href = '/editor';
+  else if (role === ROLES.AUTHOR) window.location.href = '/author';
   else {
     console.warn("Unknown or invalid user role:", role);
     clearAuth();
-    window.location.href = 'login.html';
+    window.location.href = '/login';
   }
 }
 
@@ -201,7 +201,7 @@ async function handleEmailLogin(e) {
 async function logout() {
   await apiCall('/auth/logout', 'POST');
   clearAuth();
-  window.location.href = 'login.html';
+  window.location.href = '/login';
 }
 
 async function handleChangePassword(e) {
