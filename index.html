@@ -2735,6 +2735,7 @@
           if (articlesToRender.length > 0) {
             newsItemsEl.innerHTML = articlesToRender.slice(0, 5).map(item => {
               const title = item.title || item.text || '';
+              const displayTitle = title.length > 80 ? title.substring(0, 77) + '...' : title;
               const link = item.link || '#';
               const source = item.source ? `[${item.source}]` : '';
               const category = ((item.category || item.tagText || 'News')).charAt(0).toUpperCase() + ((item.category || item.tagText || 'News')).slice(1);
@@ -2745,7 +2746,7 @@
                   <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
                     <div class="news-dot"></div>
                     <span class="tag tr news-tag-style" style="margin-right: 8px;">${category}</span>
-                    <div class="news-text">${title}</div>
+                    <div class="news-text" title="${title}">${displayTitle}</div>
                   </div>
                   <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
                     <span class="news-source">${source}</span>
@@ -2781,6 +2782,7 @@
           }
           newsItemsEl.innerHTML = fallbackArticles.slice(0, 5).map(item => {
             const title = item.title || item.text || '';
+            const displayTitle = title.length > 80 ? title.substring(0, 77) + '...' : title;
             const link = item.link || '#';
             const source = item.source ? `[${item.source}]` : '';
             const category = ((item.category || item.tagText || 'News')).charAt(0).toUpperCase() + ((item.category || item.tagText || 'News')).slice(1);
@@ -2791,7 +2793,7 @@
                 <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
                   <div class="news-dot"></div>
                   <span class="tag tr news-tag-style" style="margin-right: 8px;">${category}</span>
-                  <div class="news-text">${title}</div>
+                  <div class="news-text" title="${title}">${displayTitle}</div>
                 </div>
                 <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
                   <span class="news-source">${source}</span>
