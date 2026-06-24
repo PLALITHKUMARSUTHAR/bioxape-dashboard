@@ -163,12 +163,11 @@ function App() {
             </nav>
 
             <div className="nav-right">
-              <div className="nav-search-bar" style={{ display: 'flex', alignItems: 'center', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '6px 12px', marginRight: '10px' }}>
-                <svg className="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px', color: 'var(--text3)', marginRight: '6px' }}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <div className="nav-search-bar">
+                <svg className="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input 
                   type="text" 
                   placeholder="Search topics..." 
-                  style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '13px', color: 'var(--text1)' }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       window.location.href = `/forum?search=${encodeURIComponent(e.target.value)}`;

@@ -193,16 +193,17 @@ button, input, select, textarea {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
 }
 
 .nav-links a, .nav-links span {
-  padding: 8px 16px;
-  font-size: 14px;
-  color: var(--text2);
-  border-radius: 8px;
-  font-weight: 500;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text3);
+  border-radius: 7px;
+  font-weight: 400;
   cursor: pointer;
+  transition: all .15s;
 }
 
 .nav-links a:hover, .nav-links span:hover {
@@ -213,31 +214,75 @@ button, input, select, textarea {
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .btn-dash {
-  background: var(--g50);
-  color: var(--accent);
-  font-weight: 600;
   padding: 8px 16px;
+  border: 1.5px solid var(--border);
   border-radius: 8px;
-  border: 1px solid var(--border2);
-  font-size: 14px;
+  font-size: 13px;
+  color: var(--text2);
+  background: none;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all .15s;
 }
 
 .btn-dash:hover {
-  background: var(--g100);
+  background: var(--g50);
+  border-color: var(--border2);
 }
 
 .btn-sub {
+  padding: 9px 18px;
   background: var(--accent);
-  color: var(--white) !important;
-  font-weight: 600;
-  padding: 8px 20px;
+  color: #fff !important;
+  border: none;
   border-radius: 8px;
-  font-size: 14px;
-  box-shadow: 0 4px 12px rgba(39, 163, 99, 0.2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .15s;
+}
+
+/* Integrated Search Bar */
+.nav-search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--off);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  width: 280px;
+  transition: all 0.25s ease;
+  position: relative;
+}
+.nav-search-bar:focus-within {
+  border-color: var(--accent);
+  background: var(--white);
+  box-shadow: 0 4px 12px rgba(39, 163, 99, 0.08);
+}
+.nav-search-icon {
+  color: var(--text3);
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.nav-search-bar input {
+  border: none;
+  background: none;
+  font-size: 13px;
+  color: var(--text1);
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+}
+.nav-search-bar input::placeholder {
+  color: var(--text4);
 }
 
 .btn-sub:hover {
