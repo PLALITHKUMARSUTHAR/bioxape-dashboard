@@ -17,6 +17,7 @@ import VoteButton from '../components/forum/VoteButton';
 import CommentThread from '../components/forum/CommentThread';
 import CommentBox from '../components/forum/CommentBox';
 import TagBadge from '../components/forum/TagBadge';
+import AdSlot from '../components/AdSlot';
 
 export default function ForumPostPage({ currentUser, onPromptLogin }) {
   const { postId } = useParams();
@@ -303,6 +304,7 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
           </div>
         )}
       </div>
+      <AdSlot slotKey="leaderboard2" slotName="Leaderboard 2 (728×90)" />
     </div>
   );
 }
