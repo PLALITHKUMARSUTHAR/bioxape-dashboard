@@ -7,23 +7,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}:root{--accent:#27a363;--g50:#f0faf4;--g700:#136b3d;--text1:#0f1f16;--text3:#4a7060;--text4:#7a9e8c;--border:#e0ece5;--amber:#d97706;--white:#fff;--border2:#c8ddd2;--surface:#f2f7f4;--off:#f8faf9;--g800:#0c4d2c;--text2:#2d4a38;--g100:#d4f0e0;--blue:#2563eb;}
-body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.7;background:#0d0d0d;color:#f8faf9;min-height:100vh}
+*{box-sizing:border-box;margin:0;padding:0}:root{--accent:#27a363;--g50:#f0faf4;--g700:#136b3d;--text1:#0f1f16;--text3:#4a7060;--text4:#7a9e8c;--border:#e0ece5;--amber:#d97706;--white:#fff;--border2:#c8ddd2;--surface:#f2f7f4;--off:#f8faf9;--g800:#0c4d2c;--text2:#2d4a38;--g100:#d4f0e0;--accent-l:#e8f7ef;--blue-l:#dbeafe;}
+body{font-family:'Inter',sans-serif;font-size:16px;line-height:1.7;background:var(--g50);color:var(--text1);min-height:100vh}
 a{text-decoration:none;color:var(--accent)}
 
     /* NAV */
-    #bx-nav{background:#0d0d0d;border-bottom:2px solid #262626;position:sticky;top:0;z-index:1000}
+    #bx-nav{background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1000}
     .bx-wrap{max-width:1280px;margin:0 auto;padding:0 28px}
     .nav-row{display:flex;align-items:center;justify-content:space-between;height:70px}
     .bx-brand{display:flex;align-items:center;gap:12px;text-decoration:none}
     .bx-brand-mark{width:42px;height:42px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(39, 163, 99, 0.2)}
     .bx-brand-mark svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round}
-    .bx-brand-name{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#f8faf9}
+    .bx-brand-name{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--text1)}
     .bx-brand-name em{font-style:italic;color:var(--accent)}
     .brand-x{font-size:1.5em;display:inline-block;line-height:0.8;vertical-align:-0.05em}
     .nav-links{display:flex;align-items:center;gap:2px}
-    .nav-links a{padding:8px 12px;font-size:13px;color:#a3a3a3;border-radius:7px;font-weight:400;transition:all .15s}
-    .nav-links a:hover{background:#161616;color:var(--accent)}
+    .nav-links a{padding:8px 12px;font-size:13px;color:var(--text3);border-radius:7px;font-weight:400;transition:all .15s}
+    .nav-links a:hover{background:var(--g50);color:var(--accent)}
     
     /* Explore Dropdown Container */
     .dropdown {
@@ -43,10 +43,10 @@ a{text-decoration:none;color:var(--accent)}
       top: 100%;
       left: 50%;
       transform: translate(-50%, 10px);
-      background-color: #121212;
+      background-color: var(--white);
       min-width: 220px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 1px solid #262626;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 8px 0;
       z-index: 2000;
@@ -70,7 +70,7 @@ a{text-decoration:none;color:var(--accent)}
     .dropdown-menu a {
       display: block !important;
       padding: 10px 20px !important;
-      color: #a3a3a3 !important;
+      color: var(--text2) !important;
       font-size: 13px !important;
       font-weight: 500 !important;
       text-decoration: none !important;
@@ -79,7 +79,7 @@ a{text-decoration:none;color:var(--accent)}
       border-radius: 0 !important;
     }
     .dropdown-menu a:hover {
-      background-color: #161616 !important;
+      background-color: var(--g50) !important;
       color: var(--accent) !important;
     }
 
@@ -87,8 +87,8 @@ a{text-decoration:none;color:var(--accent)}
     .nav-search-bar {
       display: flex;
       align-items: center;
-      background: #121212;
-      border: 1.5px solid #262626;
+      background: var(--off);
+      border: 1.5px solid var(--border);
       border-radius: 20px;
       padding: 5px 12px;
       width: 280px;
@@ -97,11 +97,11 @@ a{text-decoration:none;color:var(--accent)}
     }
     .nav-search-bar:focus-within {
       border-color: var(--accent);
-      background: #161616;
+      background: var(--white);
       box-shadow: 0 4px 12px rgba(39, 163, 99, 0.08);
     }
     .nav-search-icon {
-      color: #a3a3a3;
+      color: var(--text3);
       width: 14px;
       height: 14px;
       margin-right: 8px;
@@ -112,367 +112,65 @@ a{text-decoration:none;color:var(--accent)}
       border: none;
       background: none;
       font-size: 13px;
-      color: #ffffff;
+      color: var(--text1);
       outline: none;
       width: 100%;
       font-family: inherit;
     }
     .nav-search-bar input::placeholder {
-      color: #525252;
+      color: var(--text4);
     }
     .nav-right{display:flex;align-items:center;gap:10px}
-    .btn-dash{padding:8px 16px;border:1.5px solid #262626;border-radius:8px;font-size:13px;color:#ffffff;background:none;text-decoration:none;font-weight:500}
-    .btn-dash:hover{background:#161616;border-color:#333333}
+    .btn-dash{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text2);background:none;text-decoration:none;font-weight:500}
     .btn-sub{padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
 
-.page{max-width:1200px;margin:0 auto;padding:48px 24px}
-.page-title{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;text-align:center;color:#f8faf9;margin-bottom:8px}
-.page-sub{text-align:center;font-size:15px;color:#a3a3a3;margin-bottom:42px}
-
-.contact-note{text-align:center;margin-top:40px;font-size:14px;color:#a3a3a3}
+.page{max-width:1100px;margin:0 auto;padding:48px 24px}
+.page-title{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;text-align:center;color:var(--text1);margin-bottom:8px}
+.page-sub{text-align:center;font-size:15px;color:var(--text3);margin-bottom:42px}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
+@media(max-width:768px){.plans{grid-template-columns:1fr}}
+.plan{background:#fff;border:1.5px solid var(--border);border-radius:18px;padding:30px;position:relative;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.plan:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(39, 163, 99, 0.05)}
+.plan.star{border-color:var(--accent);border-width:1.5px;position:relative}
+.plan-crown{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:11.5px;font-weight:600;padding:4px 16px;border-radius:20px;white-space:nowrap}
+.plan-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.pi-f{background:var(--surface)}.pi-p{background:var(--accent-l)}.pi-i{background:var(--blue-l)}
+.plan-name{font-size:18px;font-weight:700;margin-bottom:4px}
+.plan-price{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:var(--accent);line-height:1}
+.plan-price sup{font-size:20px;color:var(--text3)}
+.plan-price sub{font-size:14px;color:var(--text3)}
+.plan-desc{font-size:13px;color:var(--text3);margin:8px 0 20px}
+.plan-details{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.plan-feats{list-style:none;margin-bottom:26px}
+.pf{font-size:13.5px;color:#2d4a38;padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.pf:last-child{border-bottom:none}
+.pf::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
+.pf.no{color:var(--text4)}
+.pf.no::before{content:'—';color:var(--border)}
+.btn-subscribe{width:100%;padding:13px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;background:var(--g50);border:1.5px solid var(--border);color:var(--text1);font-family:'Inter',sans-serif;transition:all .15s}
+.plan.star .btn-subscribe{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-subscribe:hover{opacity:.9}
+.plan-toggle{text-align:center;margin-top:14px;font-size:12px;color:var(--text3);cursor:pointer;font-weight:500;user-select:none;transition:color .2s}
+.plan-toggle:hover{color:var(--accent)}
+.contact-note{text-align:center;margin-top:40px;font-size:14px;color:var(--text3)}
 .contact-note a{color:var(--accent)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
-.modal{background:#121212;border:1px solid #262626;border-radius:16px;padding:28px;width:100%;max-width:440px;color:#f8faf9}
-.modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:16px;color:#f8faf9}
+.modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:440px}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:16px}
 .form-group{margin-bottom:14px}
-.form-label{display:block;font-size:13px;font-weight:500;color:#a3a3a3;margin-bottom:5px}
-.form-input{width:100%;padding:10px 13px;border:1.5px solid #262626;border-radius:8px;font-size:13.5px;font-family:'Inter',sans-serif;background:#161616;color:#ffffff}
+.form-label{display:block;font-size:13px;font-weight:500;color:#2d4a38;margin-bottom:5px}
+.form-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13.5px;font-family:'Inter',sans-serif}
 .form-input:focus{outline:none;border-color:var(--accent)}
 .btn-pay{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px}
-.btn-cancel{width:100%;padding:10px;background:none;border:none;font-size:13px;color:#888888;cursor:pointer;margin-top:8px}
-.plan-summary-box{background:#161616;border:1px solid #262626;border-radius:9px;padding:12px 16px;margin-bottom:18px;font-size:14px;color:#a3a3a3}
+.btn-cancel{width:100%;padding:10px;background:none;border:none;font-size:13px;color:var(--text3);cursor:pointer;margin-top:8px}
+.plan-summary-box{background:var(--g50);border-radius:9px;padding:12px 16px;margin-bottom:18px;font-size:14px;color:var(--text3)}
 .success-container{text-align:center;padding:60px 20px}
 .success-emoji{font-size:56px;margin-bottom:20px}
-.success-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#ffffff;margin-bottom:10px}
-.success-detail{font-size:15px;color:#a3a3a3;margin-bottom:8px}
-.success-note{font-size:14px;color:#666666;margin-bottom:28px}
+.success-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--text1);margin-bottom:10px}
+.success-detail{font-size:15px;color:var(--text3);margin-bottom:8px}
+.success-note{font-size:14px;color:var(--text4);margin-bottom:28px}
 .success-btn{display:inline-block;padding:13px 28px;background:var(--accent);color:#fff;border-radius:10px;font-size:15px;font-weight:600;text-decoration:none}
-
-/* Table styling */
-.desktop-plans-table {
-  width: 100%;
-  border-spacing: 0;
-  border-collapse: collapse;
-  margin: 40px auto;
-  background: #121212;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #262626;
-}
-
-.desktop-plans-table th, .desktop-plans-table td {
-  padding: 16px 20px;
-  text-align: left;
-  border-bottom: 1px solid #262626;
-  font-size: 14px;
-  vertical-align: middle;
-}
-
-.desktop-plans-table th {
-  background: #161616;
-  font-weight: 600;
-  position: relative;
-}
-
-.desktop-plans-table th.plan-header {
-  text-align: center;
-  padding: 24px 16px;
-  width: 22%;
-}
-
-.desktop-plans-table th.feature-header {
-  width: 34%;
-}
-
-.desktop-plans-table td.cell-val {
-  text-align: center;
-}
-
-.desktop-plans-table td.feature-name {
-  font-weight: 500;
-  color: #f8faf9;
-}
-
-.desktop-plans-table tr.section-divider td {
-  background: #161616;
-  color: #888888;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 10px 20px;
-  border-bottom: 1px solid #262626;
-  text-transform: uppercase;
-}
-
-.check-icon {
-  color: #27a363;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.cross-icon {
-  color: #525252;
-  font-size: 18px;
-}
-
-.text-val {
-  color: #d1d5db;
-  font-size: 13.5px;
-}
-
-/* Featured plan visual indicators */
-.desktop-plans-table th.featured-plan {
-  border-top: 3px solid #2563eb !important;
-}
-
-.desktop-plans-table th.featured-plan .plan-header-title {
-  color: #2563eb !important;
-}
-
-.desktop-plans-table td.featured-col {
-  background: rgba(37, 99, 235, 0.02);
-}
-
-/* Buttons */
-.btn-subscribe-table {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s ease;
-  margin-top: 14px;
-}
-
-.btn-basic {
-  background: #1a1a1a;
-  color: #ffffff;
-  border: 1.5px solid #333333;
-}
-.btn-basic:hover {
-  background: #262626;
-  border-color: #444444;
-}
-
-.btn-pro {
-  background: #2563eb;
-  color: #ffffff;
-  border: 1.5px solid #2563eb;
-}
-.btn-pro:hover {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
-}
-
-.btn-elite {
-  background: #1a1a1a;
-  color: #ffffff;
-  border: 1.5px solid #333333;
-}
-.btn-elite:hover {
-  background: #262626;
-  border-color: #444444;
-}
-
-.plan-header-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 6px;
-}
-
-.plan-header-price {
-  font-family: 'Playfair Display', serif;
-  font-size: 30px;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.1;
-}
-
-.plan-header-price sup {
-  font-size: 16px;
-  vertical-align: super;
-}
-
-.plan-header-price sub {
-  font-size: 11px;
-  color: #a3a3a3;
-  font-weight: normal;
-}
-
-.plan-crown-blue {
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #2563eb;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 3px 12px;
-  border-radius: 20px;
-  white-space: nowrap;
-}
-
-/* Store Discount Badges */
-.discount-badge {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.discount-basic {
-  background: #262626;
-  color: #a3a3a3;
-  border: 1px solid #333333;
-}
-
-.discount-pro {
-  background: rgba(37, 99, 235, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(37, 99, 235, 0.3);
-}
-
-.discount-elite {
-  background: rgba(39, 163, 99, 0.15);
-  color: #6ee7b7;
-  border: 1px solid rgba(39, 163, 99, 0.3);
-}
-
-/* Mobile responsive styles */
-.mobile-plans-cards {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .desktop-plans-table {
-    display: none !important;
-  }
-  
-  .mobile-plans-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    margin: 30px auto;
-  }
-
-  .mobile-plan-card {
-    background: #121212;
-    border: 1px solid #262626;
-    border-radius: 18px;
-    padding: 24px;
-    position: relative;
-  }
-
-  .mobile-plan-card.featured {
-    border-color: #2563eb;
-    border-width: 2px;
-  }
-
-  .mobile-plan-header {
-    text-align: center;
-    border-bottom: 1px solid #262626;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-  }
-
-  .mobile-plan-name {
-    font-size: 20px;
-    font-weight: 700;
-    color: #ffffff;
-    margin-bottom: 8px;
-  }
-
-  .mobile-plan-card.featured .mobile-plan-name {
-    color: #2563eb;
-  }
-
-  .mobile-plan-price {
-    font-family: 'Playfair Display', serif;
-    font-size: 34px;
-    font-weight: 700;
-    color: #ffffff;
-    line-height: 1.1;
-  }
-
-  .mobile-plan-price sup {
-    font-size: 18px;
-    vertical-align: super;
-  }
-
-  .mobile-plan-price sub {
-    font-size: 12px;
-    color: #a3a3a3;
-  }
-
-  .btn-subscribe-mobile {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    font-size: 14.5px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.15s ease;
-    margin-top: 15px;
-    background: #1a1a1a;
-    color: #ffffff;
-    border: 1.5px solid #333333;
-  }
-
-  .btn-subscribe-mobile:hover {
-    background: #262626;
-  }
-
-  .btn-subscribe-mobile.btn-pro {
-    background: #2563eb;
-    color: #ffffff;
-    border: 1.5px solid #2563eb;
-  }
-
-  .btn-subscribe-mobile.btn-pro:hover {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
-  }
-
-  .mobile-section-title {
-    background: #161616;
-    color: #888888;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 6px 12px;
-    border-radius: 6px;
-    margin-top: 18px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    border-left: 3px solid #262626;
-  }
-
-  .mobile-feature-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    border-bottom: 1px solid #1a1a1a;
-    font-size: 13.5px;
-    color: #d1d5db;
-  }
-
-  .mobile-feature-item:last-child {
-    border-bottom: none;
-  }
-
-  .mobile-feature-item span:first-child {
-    color: #f8faf9;
-    font-weight: 500;
-  }
-}
 </style>
 </head>
 <body>
@@ -521,272 +219,65 @@ a{text-decoration:none;color:var(--accent)}
 <div class="page">
   <div class="page-title">Choose Your Plan</div>
   <div class="page-sub">Join thousands of researchers, scientists and biotech professionals on BioXApe</div>
-  
-  <!-- Desktop Comparison Table -->
-  <table class="desktop-plans-table">
-    <thead>
-      <tr>
-        <th class="feature-header">Features</th>
-        <th class="plan-header">
-          <div class="plan-header-title">Basic</div>
-          <div class="plan-header-price"><sup>₹</sup>99<sub>/mo</sub></div>
-          <button class="btn-subscribe-table btn-basic" onclick="window.location.href='/'">Get Started</button>
-        </th>
-        <th class="plan-header featured-plan featured-col">
-          <div class="plan-crown-blue">✦ Most Popular</div>
-          <div class="plan-header-title">Pro Researcher</div>
-          <div class="plan-header-price"><sup>₹</sup>349<sub>/mo</sub></div>
-          <button class="btn-subscribe-table btn-pro" onclick="openCheckout('pro',349)">Subscribe Now</button>
-        </th>
-        <th class="plan-header">
-          <div class="plan-header-title">Elite</div>
-          <div class="plan-header-price"><sup>₹</sup>1,199<sub>/mo</sub></div>
-          <button class="btn-subscribe-table btn-elite" onclick="openCheckout('institutional',1199)">Subscribe Now</button>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- ARTICLES -->
-      <tr class="section-divider">
-        <td colspan="4">ARTICLES</td>
-      </tr>
-      <tr>
-        <td class="feature-name">Unlimited articles</td>
-        <td class="cell-val"><span class="cross-icon">✗</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-      <tr>
-        <td class="feature-name">PDF/EPUB download</td>
-        <td class="cell-val"><span class="cross-icon">✗</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-      <tr>
-        <td class="feature-name">Early access (read before public)</td>
-        <td class="cell-val"><span class="cross-icon">✗</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-      <tr>
-        <td class="feature-name">Ad-free reading</td>
-        <td class="cell-val"><span class="cross-icon">✗</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-
-      <!-- TOOLS -->
-      <tr class="section-divider">
-        <td colspan="4">TOOLS</td>
-      </tr>
-      <tr>
-        <td class="feature-name">Tools access</td>
-        <td class="cell-val text-val">5 basic tools</td>
-        <td class="cell-val text-val featured-col">All 11 tools</td>
-        <td class="cell-val text-val">All 11 tools</td>
-      </tr>
-      <tr>
-        <td class="feature-name">Sequence length limit</td>
-        <td class="cell-val text-val">up to 500bp</td>
-        <td class="cell-val text-val featured-col">Unlimited</td>
-        <td class="cell-val text-val">Unlimited</td>
-      </tr>
-      <tr>
-        <td class="feature-name">Export results (CSV/FASTA/PDF)</td>
-        <td class="cell-val"><span class="cross-icon">✗</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-
-      <!-- FORUM & COMMUNITY -->
-      <tr class="section-divider">
-        <td colspan="4">FORUM & COMMUNITY</td>
-      </tr>
-      <tr>
-        <td class="feature-name">Read all public forum posts</td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-      <tr>
-        <td class="feature-name">Post/reply/vote</td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-      <tr>
-        <td class="feature-name">Pro-only & invite-only forum sections</td>
-        <td class="cell-val"><span class="cross-icon">✗</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-      <tr>
-        <td class="feature-name">AMA sessions with experts</td>
-        <td class="cell-val text-val">Read only</td>
-        <td class="cell-val text-val featured-col">Ask + read</td>
-        <td class="cell-val text-val">Ask + read</td>
-      </tr>
-
-      <!-- CAREER -->
-      <tr class="section-divider">
-        <td colspan="4">CAREER</td>
-      </tr>
-      <tr>
-        <td class="feature-name">Jobs & internships board</td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-
-      <!-- EXTRAS -->
-      <tr class="section-divider">
-        <td colspan="4">EXTRAS</td>
-      </tr>
-      <tr>
-        <td class="feature-name">Daily biotech fact card</td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-      <tr>
-        <td class="feature-name">Monthly India biotech briefing (PDF)</td>
-        <td class="cell-val"><span class="cross-icon">✗</span></td>
-        <td class="cell-val featured-col"><span class="check-icon">✓</span></td>
-        <td class="cell-val"><span class="check-icon">✓</span></td>
-      </tr>
-      <tr>
-        <td class="feature-name">Team seats</td>
-        <td class="cell-val text-val">1</td>
-        <td class="cell-val text-val featured-col">1</td>
-        <td class="cell-val text-val">up to 15</td>
-      </tr>
-      <tr>
-        <td class="feature-name">Store discount</td>
-        <td class="cell-val text-val">
-          <span class="discount-badge discount-basic">15% off</span>
-        </td>
-        <td class="cell-val text-val featured-col">
-          <span class="discount-badge discount-pro">25% off</span>
-        </td>
-        <td class="cell-val text-val">
-          <span class="discount-badge discount-elite">35% off</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- Mobile Stacked Cards Layout -->
-  <div class="mobile-plans-cards">
-    <!-- Basic -->
-    <div class="mobile-plan-card">
-      <div class="mobile-plan-header">
-        <div class="mobile-plan-name">Basic</div>
-        <div class="mobile-plan-price"><sup>₹</sup>99<sub>/mo</sub></div>
-        <button class="btn-subscribe-mobile" onclick="window.location.href='/'">Get Started</button>
+  <div class="plans" id="plans-container">
+    <!-- Plans rendered by JS or static fallback below -->
+    <div class="plan" onclick="togglePlanCard(this, event)">
+      <div class="plan-icon pi-f">🌱</div>
+      <div class="plan-name">Basic</div>
+      <div class="plan-price"><sup>₹</sup>0<sub>/month</sub></div>
+      <div class="plan-desc">For curious minds just getting started</div>
+      <div class="plan-details">
+        <ul class="plan-feats">
+          <li class="pf">5 articles per month</li>
+          <li class="pf">Weekly newsletter</li>
+          <li class="pf">News and trending feed</li>
+          <li class="pf no">Research paper summaries</li>
+          <li class="pf no">Ad-free reading</li>
+          <li class="pf no">Course discounts</li>
+        </ul>
       </div>
-      <div class="mobile-plan-features">
-        <div class="mobile-section-title">Articles</div>
-        <div class="mobile-feature-item"><span>Unlimited articles</span><span class="cross-icon">✗</span></div>
-        <div class="mobile-feature-item"><span>PDF/EPUB download</span><span class="cross-icon">✗</span></div>
-        <div class="mobile-feature-item"><span>Early access</span><span class="cross-icon">✗</span></div>
-        <div class="mobile-feature-item"><span>Ad-free reading</span><span class="cross-icon">✗</span></div>
-        
-        <div class="mobile-section-title">Tools</div>
-        <div class="mobile-feature-item"><span>Tools access</span><span class="text-val">5 basic tools</span></div>
-        <div class="mobile-feature-item"><span>Sequence length limit</span><span class="text-val">up to 500bp</span></div>
-        <div class="mobile-feature-item"><span>Export results</span><span class="cross-icon">✗</span></div>
-        
-        <div class="mobile-section-title">Forum & Community</div>
-        <div class="mobile-feature-item"><span>Read public forum posts</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Post/reply/vote</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Pro & invite-only sections</span><span class="cross-icon">✗</span></div>
-        <div class="mobile-feature-item"><span>AMA sessions</span><span class="text-val">Read only</span></div>
-        
-        <div class="mobile-section-title">Career</div>
-        <div class="mobile-feature-item"><span>Jobs & internships board</span><span class="check-icon">✓</span></div>
-        
-        <div class="mobile-section-title">Extras</div>
-        <div class="mobile-feature-item"><span>Daily biotech fact card</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Monthly biotech briefing</span><span class="cross-icon">✗</span></div>
-        <div class="mobile-feature-item"><span>Team seats</span><span class="text-val">1</span></div>
-        <div class="mobile-feature-item"><span>Store discount</span><span><span class="discount-badge discount-basic">15% off</span></span></div>
-      </div>
+      <button class="btn-subscribe" onclick="window.location.href='/'">Get Started Free</button>
+      <div class="plan-toggle">View all benefits ▾</div>
     </div>
-
-    <!-- Pro Researcher (Featured) -->
-    <div class="mobile-plan-card featured">
-      <div class="plan-crown-blue">✦ Most Popular</div>
-      <div class="mobile-plan-header">
-        <div class="mobile-plan-name">Pro Researcher</div>
-        <div class="mobile-plan-price"><sup>₹</sup>349<sub>/mo</sub></div>
-        <button class="btn-subscribe-mobile btn-pro" onclick="openCheckout('pro',349)">Subscribe Now</button>
+    <div class="plan star" onclick="togglePlanCard(this, event)">
+      <div class="plan-crown">Most Popular</div>
+      <div class="plan-icon pi-p">🔬</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price"><sup>₹</sup>349<sub>/month</sub></div>
+      <div class="plan-desc">For scientists, students and professionals</div>
+      <div class="plan-details">
+        <ul class="plan-feats">
+          <li class="pf">Unlimited articles</li>
+          <li class="pf">All research summaries</li>
+          <li class="pf">100% ad-free experience</li>
+          <li class="pf">PDF and EPUB downloads</li>
+          <li class="pf">25% off all courses</li>
+          <li class="pf">Early content access</li>
+          <li class="pf">Members-only newsletter</li>
+        </ul>
       </div>
-      <div class="mobile-plan-features">
-        <div class="mobile-section-title">Articles</div>
-        <div class="mobile-feature-item"><span>Unlimited articles</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>PDF/EPUB download</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Early access</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Ad-free reading</span><span class="check-icon">✓</span></div>
-        
-        <div class="mobile-section-title">Tools</div>
-        <div class="mobile-feature-item"><span>Tools access</span><span class="text-val">All 11 tools</span></div>
-        <div class="mobile-feature-item"><span>Sequence length limit</span><span class="text-val">Unlimited</span></div>
-        <div class="mobile-feature-item"><span>Export results</span><span class="check-icon">✓</span></div>
-        
-        <div class="mobile-section-title">Forum & Community</div>
-        <div class="mobile-feature-item"><span>Read public forum posts</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Post/reply/vote</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Pro & invite-only sections</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>AMA sessions</span><span class="text-val">Ask + read</span></div>
-        
-        <div class="mobile-section-title">Career</div>
-        <div class="mobile-feature-item"><span>Jobs & internships board</span><span class="check-icon">✓</span></div>
-        
-        <div class="mobile-section-title">Extras</div>
-        <div class="mobile-feature-item"><span>Daily biotech fact card</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Monthly biotech briefing</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Team seats</span><span class="text-val">1</span></div>
-        <div class="mobile-feature-item"><span>Store discount</span><span><span class="discount-badge discount-pro">25% off</span></span></div>
-      </div>
+      <button class="btn-subscribe" onclick="openCheckout('pro',349)">Subscribe Now</button>
+      <div class="plan-toggle">View all benefits ▾</div>
     </div>
-
-    <!-- Elite -->
-    <div class="mobile-plan-card">
-      <div class="mobile-plan-header">
-        <div class="mobile-plan-name">Elite</div>
-        <div class="mobile-plan-price"><sup>₹</sup>1,199<sub>/mo</sub></div>
-        <button class="btn-subscribe-mobile" onclick="openCheckout('institutional',1199)">Subscribe Now</button>
+    <div class="plan" onclick="togglePlanCard(this, event)">
+      <div class="plan-icon pi-i">🏛️</div>
+      <div class="plan-name">Elite</div>
+      <div class="plan-price"><sup>₹</sup>1,199<sub>/month</sub></div>
+      <div class="plan-desc">For labs, universities and research teams</div>
+      <div class="plan-details">
+        <ul class="plan-feats">
+          <li class="pf">Up to 15 user seats</li>
+          <li class="pf">All Pro features included</li>
+          <li class="pf">Team dashboard and analytics</li>
+          <li class="pf">Custom branded newsletter</li>
+          <li class="pf">API data access</li>
+          <li class="pf">Priority editorial support</li>
+        </ul>
       </div>
-      <div class="mobile-plan-features">
-        <div class="mobile-section-title">Articles</div>
-        <div class="mobile-feature-item"><span>Unlimited articles</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>PDF/EPUB download</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Early access</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Ad-free reading</span><span class="check-icon">✓</span></div>
-        
-        <div class="mobile-section-title">Tools</div>
-        <div class="mobile-feature-item"><span>Tools access</span><span class="text-val">All 11 tools</span></div>
-        <div class="mobile-feature-item"><span>Sequence length limit</span><span class="text-val">Unlimited</span></div>
-        <div class="mobile-feature-item"><span>Export results</span><span class="check-icon">✓</span></div>
-        
-        <div class="mobile-section-title">Forum & Community</div>
-        <div class="mobile-feature-item"><span>Read public forum posts</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Post/reply/vote</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Pro & invite-only sections</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>AMA sessions</span><span class="text-val">Ask + read</span></div>
-        
-        <div class="mobile-section-title">Career</div>
-        <div class="mobile-feature-item"><span>Jobs & internships board</span><span class="check-icon">✓</span></div>
-        
-        <div class="mobile-section-title">Extras</div>
-        <div class="mobile-feature-item"><span>Daily biotech fact card</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Monthly biotech briefing</span><span class="check-icon">✓</span></div>
-        <div class="mobile-feature-item"><span>Team seats</span><span class="text-val">up to 15</span></div>
-        <div class="mobile-feature-item"><span>Store discount</span><span><span class="discount-badge discount-elite">35% off</span></span></div>
-      </div>
+      <button class="btn-subscribe" onclick="openCheckout('institutional',1199)">Subscribe Now</button>
+      <div class="plan-toggle">View all benefits ▾</div>
     </div>
   </div>
-
   <div class="contact-note">Questions? <a href="/contact">Contact us</a> · All prices in INR · Cancel anytime · Secure payment via Razorpay</div>
 </div>
 
@@ -810,6 +301,24 @@ const API = window.location.hostname === 'localhost' || window.location.hostname
 let selectedPlan = null;
 let selectedAmount = 0;
 
+function togglePlanCard(card, event) {
+  if (event.target.closest('.btn-subscribe') || event.target.closest('a')) {
+    return;
+  }
+  const details = card.querySelector('.plan-details');
+  const toggleText = card.querySelector('.plan-toggle');
+  const isExpanded = card.classList.contains('expanded');
+  if (isExpanded) {
+    card.classList.remove('expanded');
+    details.style.maxHeight = '0px';
+    if (toggleText) toggleText.textContent = 'View all benefits ▾';
+  } else {
+    card.classList.add('expanded');
+    details.style.maxHeight = details.scrollHeight + 'px';
+    if (toggleText) toggleText.textContent = 'Hide benefits ▴';
+  }
+}
+
 // Check URL param
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
@@ -821,7 +330,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function openCheckout(plan, amount) {
   selectedPlan   = plan;
   selectedAmount = amount;
-  const names = { pro:'Pro Researcher — ₹349/month', institutional:'Elite — ₹1,199/month' };
+  const names = { pro:'Pro — ₹349/month', institutional:'Elite — ₹1,199/month' };
   document.getElementById('plan-summary').innerHTML = `You are subscribing to: <strong>${names[plan]||plan}</strong>`;
   document.getElementById('checkout-modal').classList.add('open');
 }
@@ -855,7 +364,7 @@ async function processPayment() {
       key:             data.key,
       subscription_id: data.subscriptionId,
       name:            'BioXApe',
-      description:     `${selectedPlan === 'pro' ? 'Pro Researcher' : 'Institutional'} Subscription`,
+      description:     `${selectedPlan === 'pro' ? 'Pro' : 'Elite'} Subscription`,
       prefill:         { name, email, contact: phone },
       theme:           { color: '#27a363' },
       handler: function(response) {

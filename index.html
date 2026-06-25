@@ -1010,9 +1010,10 @@
     .plans-eye{text-align:center;font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-bottom:10px}
     .plans-h{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;text-align:center;color:var(--text1);margin-bottom:8px}
     .plans-sub{text-align:center;font-size:15px;color:var(--text3);margin-bottom:38px}
-    #bx-plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-    .plan{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:28px}
-    .plan.star{border-color:var(--accent);border-width:2px;position:relative}
+    #bx-plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
+    .plan{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:28px;cursor:pointer;transition:border-color .2s,box-shadow .2s;position:relative}
+    .plan:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(39, 163, 99, 0.05)}
+    .plan.star{border-color:var(--accent);border-width:1.5px;position:relative}
     .plan-crown{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:11.5px;font-weight:600;padding:4px 16px;border-radius:20px;white-space:nowrap}
     .plan-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
     .pi-f{background:var(--surface)}.pi-p{background:var(--accent-l)}.pi-i{background:var(--blue-l)}
@@ -1020,12 +1021,15 @@
     .plan-price{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--accent);line-height:1}
     .plan-price sup{font-size:18px;color:var(--text3)}.plan-price sub{font-size:14px;color:var(--text3)}
     .plan-desc{font-size:13px;color:var(--text3);margin:8px 0 20px}
+    .plan-details{max-height:0;overflow:hidden;transition:max-height .3s ease}
     .plan-feats{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
     .pf{font-size:13px;color:var(--text2);display:flex;align-items:flex-start;gap:8px}
     .pf::before{content:'✓';color:var(--accent);font-weight:700;font-size:13px;flex-shrink:0;margin-right:6px}
     .pf.no{color:var(--text4)}.pf.no::before{content:'–';color:var(--border2)}
     .btn-plan{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:var(--surface);border:1.5px solid var(--border);color:var(--text1);font-family:'Inter',sans-serif}
     .plan.star .btn-plan{background:var(--accent);border-color:var(--accent);color:#fff}
+    .plan-toggle{text-align:center;margin-top:14px;font-size:12px;color:var(--text3);cursor:pointer;font-weight:500;user-select:none;transition:color .2s}
+    .plan-toggle:hover{color:var(--accent)}
 
     /* COURSES */
     .course-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;display:flex;cursor:pointer;transition:all .2s}
@@ -2455,18 +2459,46 @@
       });
     }
 
+    function togglePlanCard(card, event) {
+      if (event.target.closest('.btn-plan') || event.target.closest('.btn-subscribe') || event.target.closest('a')) {
+        return;
+      }
+      const details = card.querySelector('.plan-details');
+      const toggleText = card.querySelector('.plan-toggle');
+      const isExpanded = card.classList.contains('expanded');
+      if (isExpanded) {
+        card.classList.remove('expanded');
+        details.style.maxHeight = '0px';
+        if (toggleText) toggleText.textContent = 'View all benefits ▾';
+      } else {
+        card.classList.add('expanded');
+        details.style.maxHeight = details.scrollHeight + 'px';
+        if (toggleText) toggleText.textContent = 'Hide benefits ▴';
+      }
+    }
+
     function renderPlans(data) {
       const el=document.getElementById('bx-plans-grid');
       if(!el||!data.plans) return;
-      el.innerHTML=data.plans.map(plan=>'<div class="plan '+(plan.isFeatured?'star':'')+'">'+
-        (plan.isFeatured?'<div class="plan-crown">Most Popular</div>':'')+
-        '<div class="plan-icon pi-'+(plan.id==='free'?'f':plan.id==='pro'?'p':'i')+'">'+plan.icon+'</div>'+
-        '<div class="plan-name">'+plan.name+'</div>'+
-        '<div class="plan-price"><sup>Rs</sup>'+plan.price+'<sub>/month</sub></div>'+
-        '<div class="plan-desc">'+plan.desc+'</div>'+
-        '<ul class="plan-feats">'+( plan.features||[]).map(f=>'<li class="pf '+(f.included?'':'no')+'">'+f.text+'</li>').join('')+'</ul>'+
-        '<button class="btn-plan" onclick="startSubscription(\''+plan.id+'\')">'+plan.buttonText+'</button>'+
-        '</div>').join('');
+      el.innerHTML=data.plans.map(plan=>{
+        let displayName = plan.name;
+        if (plan.id === 'free' || plan.name === 'Free') displayName = 'Basic';
+        else if (plan.id === 'pro' || plan.name === 'Pro Researcher') displayName = 'Pro';
+        else if (plan.id === 'institutional' || plan.name === 'Institutional') displayName = 'Elite';
+
+        return '<div class="plan '+(plan.isFeatured?'star':'')+'" onclick="togglePlanCard(this, event)">'+
+          (plan.isFeatured?'<div class="plan-crown">Most Popular</div>':'')+
+          '<div class="plan-icon pi-'+(plan.id==='free'?'f':plan.id==='pro'?'p':'i')+'">'+plan.icon+'</div>'+
+          '<div class="plan-name">'+displayName+'</div>'+
+          '<div class="plan-price"><sup>Rs</sup>'+plan.price+'<sub>/month</sub></div>'+
+          '<div class="plan-desc">'+plan.desc+'</div>'+
+          '<div class="plan-details">'+
+            '<ul class="plan-feats">'+( plan.features||[]).map(f=>'<li class="pf '+(f.included?'':'no')+'">'+f.text+'</li>').join('')+'</ul>'+
+          '</div>'+
+          '<button class="btn-plan" onclick="startSubscription(\''+plan.id+'\')">'+plan.buttonText+'</button>'+
+          '<div class="plan-toggle">View all benefits ▾</div>'+
+          '</div>';
+      }).join('');
     }
 
     function renderCourses(data) {
