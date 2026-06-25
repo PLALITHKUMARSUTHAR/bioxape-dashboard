@@ -228,6 +228,26 @@
     .footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
     .ft-copy{font-size:12px;color:#5a8a72}
 
+    /* SIDEBAR & AD STYLING */
+    .with-sidebar{display:grid;grid-template-columns:1fr 302px;gap:32px;margin-top:24px}
+    .sidebar{display:flex;flex-direction:column;gap:22px}
+    .widget{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:20px}
+    .widget-head{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .widget-head-line{width:18px;height:2.5px;background:var(--accent);border-radius:2px}
+    .ad-bar{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--off);padding:10px 0;display:flex;align-items:center;justify-content:center;gap:12px}
+    .ad-pill{font-size:10.5px;color:var(--text4);background:var(--border);padding:2px 8px;border-radius:3px;letter-spacing:.4px;text-transform:uppercase;font-weight:500}
+    .ad-slot{flex:1;max-width:730px;min-height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .ad-slot.placeholder {
+      border: 1.5px dashed var(--border2) !important;
+      background: var(--white) !important;
+      color: var(--text4) !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      box-sizing: border-box !important;
+    }
+
     .loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 0;color:var(--text4)}
     .spinner{width:36px;height:36px;border:3px solid var(--g200);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:14px}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -240,6 +260,8 @@
       .nav-links{flex-wrap:wrap;justify-content:center;width:100%;margin-bottom:8px}
       .nav-search-bar{width:100% !important;margin-left:0 !important;margin-top:0 !important;margin-bottom:4px}
       .nav-right{width:100%;justify-content:center;flex-wrap:wrap;gap:8px}
+      .with-sidebar{grid-template-columns:1fr !important;gap:24px !important;}
+      .sidebar{grid-template-columns:1fr !important;}
     }
     .ticker-wrap {
       overflow: hidden;
@@ -336,9 +358,24 @@
         </div>
       </header>
 
-      <section class="article-body" id="post-body">
-        <!-- Rendered dynamically -->
-      </section>
+      <div class="with-sidebar">
+        <section class="article-body" id="post-body" style="padding: 24px 0 64px;">
+          <!-- Rendered dynamically -->
+        </section>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" style="margin-top: 24px;">
+          <!-- SIDEBAR AD -->
+          <div class="widget" id="bx-ad-sidebar-widget" style="padding:15px; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:4px;">
+              <span class="ad-pill" style="margin:0;">Ad</span>
+            </div>
+            <div class="ad-slot placeholder" id="bx-ad-sidebar" data-slot="sidebar_300x250" style="width: 300px; height: 250px;">
+              Ad Space: Sidebar (300×250)
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   </article>
 
@@ -399,7 +436,33 @@
         document.getElementById('post-date').textContent = formatDate(p.publishedAt || p.createdAt);
         document.getElementById('post-readtime').textContent = `${p.readTimeMinutes || 2} min read`;
         document.getElementById('post-av').textContent = p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU';
-        document.getElementById('post-body').innerHTML = p.bodyHtml || '<p>No content available.</p>';
+        let bodyHtml = p.bodyHtml || '<p>No content available.</p>';
+        
+        // Inject in-article ad placeholder dynamically after paragraph 2 or at the end
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = bodyHtml;
+        const paragraphs = tempDiv.querySelectorAll('p');
+        const adHtml = `
+          <div class="ad-bar" style="margin: 24px 0;">
+            <div style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 12px; flex-direction: column;">
+              <div style="display:flex; justify-content:space-between; width:100%; max-width:730px; align-items:center;">
+                <span class="ad-pill">Ad</span>
+              </div>
+              <div class="ad-slot placeholder" id="bx-ad-inarticle" data-slot="in_article" style="width: 100%; max-width: 730px; min-height: 90px;">
+                Ad Space: In-Article Ad
+              </div>
+            </div>
+          </div>
+        `;
+        if (paragraphs.length >= 3) {
+          const adNode = document.createElement('div');
+          adNode.innerHTML = adHtml;
+          paragraphs[1].parentNode.insertBefore(adNode.firstElementChild, paragraphs[1].nextSibling);
+          bodyHtml = tempDiv.innerHTML;
+        } else {
+          bodyHtml += adHtml;
+        }
+        document.getElementById('post-body').innerHTML = bodyHtml;
 
         if (p.coverImageUrl) {
           document.getElementById('post-cover').src = p.coverImageUrl;
@@ -530,8 +593,38 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadArticle();
+    async function loadAdSenseSlots() {
+      try {
+        const res = await fetch(CMS_API + '/site/config/adsense_slots');
+        const result = await res.json();
+        const slots = result?.data?.data || {};
+        
+        const slotElements = document.querySelectorAll('.ad-slot');
+        slotElements.forEach(el => {
+          const slotKey = el.getAttribute('data-slot');
+          const slotConf = slots[slotKey];
+          if (slotConf && slotConf.active && slotConf.code) {
+            el.innerHTML = slotConf.code;
+            el.classList.remove('placeholder');
+            
+            // Re-run any scripts in the injected code
+            const scripts = el.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+              const newScript = document.createElement('script');
+              Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+              newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+              oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+          }
+        });
+      } catch (err) {
+        console.warn('Failed to load AdSense slots config:', err.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadArticle();
+      await loadAdSenseSlots();
       loadSiteConfig();
       
       const searchInput = document.getElementById('nav-search-input');
