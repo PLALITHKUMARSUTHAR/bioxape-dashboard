@@ -101,7 +101,7 @@ export default defineConfig(({ mode }) => {
         name: 'post-build-copy',
         closeBundle() {
           console.log('Copying parent static files and folders to dist...');
-          const htmlFiles = [
+          const staticFiles = [
             'admin.html',
             'author.html',
             'editor.html',
@@ -111,10 +111,11 @@ export default defineConfig(({ mode }) => {
             'category.html',
             'post.html',
             'research.html',
-            'store.html'
+            'store.html',
+            'ads.txt'
           ];
 
-          htmlFiles.forEach(file => {
+          staticFiles.forEach(file => {
             const src = join(rootDir, file);
             const dest = join(distDir, file);
             if (fs.existsSync(src)) {
