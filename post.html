@@ -417,9 +417,35 @@
     async function downloadArticlePDF() {
       const element = document.getElementById('article-content');
       if (!element) return;
-      
-      const downloadBtn = element.querySelector('.btn-download-pdf');
-      if (downloadBtn) downloadBtn.style.visibility = 'hidden';
+
+      // Clone the element to safely inject the brand header for PDF conversion only
+      const clone = element.cloneNode(true);
+
+      // Remove the download button from the cloned copy
+      const downloadBtn = clone.querySelector('.btn-download-pdf');
+      if (downloadBtn) downloadBtn.remove();
+
+      // Create a beautifully styled PDF header mentioning BioXApe
+      const pdfHeader = document.createElement('div');
+      pdfHeader.style.display = 'flex';
+      pdfHeader.style.justifyContent = 'space-between';
+      pdfHeader.style.alignItems = 'center';
+      pdfHeader.style.borderBottom = '2px solid #27a363'; // BioXApe Green
+      pdfHeader.style.paddingBottom = '12px';
+      pdfHeader.style.marginBottom = '24px';
+      pdfHeader.style.fontFamily = "'Inter', sans-serif";
+
+      pdfHeader.innerHTML = `
+        <div style="font-size: 22px; font-weight: 700; color: #0f1f16; font-family: 'Playfair Display', serif;">
+          Bio<span style="color: #27a363; font-style: italic;">XApe</span>
+        </div>
+        <div style="font-size: 11px; color: #4a7060; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+          Premium Science Insights & Research Reviews
+        </div>
+      `;
+
+      // Insert at the very top of the cloned content
+      clone.insertBefore(pdfHeader, clone.firstChild);
 
       const title = document.getElementById('post-title').textContent || 'article';
       const filename = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.pdf';
@@ -433,11 +459,9 @@
       };
 
       try {
-        await html2pdf().set(opt).from(element).save();
+        await html2pdf().set(opt).from(clone).save();
       } catch (err) {
         console.error('Failed to generate PDF:', err);
-      } finally {
-        if (downloadBtn) downloadBtn.style.visibility = 'visible';
       }
     }
 
