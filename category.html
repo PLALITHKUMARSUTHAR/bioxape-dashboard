@@ -235,6 +235,22 @@
                         linear-gradient(to bottom, white 1px, transparent 1px);
     }
 
+    /* AD BARS & SLOTS */
+    .ad-bar{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--off);padding:10px 0;display:flex;align-items:center;justify-content:center;gap:12px}
+    .ad-pill{font-size:10.5px;color:var(--text4);background:var(--border);padding:2px 8px;border-radius:3px;letter-spacing:.4px;text-transform:uppercase;font-weight:500}
+    .ad-slot{flex:1;max-width:730px;min-height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .ad-slot.placeholder {
+      border: 1.5px dashed var(--border2) !important;
+      background: var(--white) !important;
+      color: var(--text4) !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      box-sizing: border-box !important;
+      min-height: 90px;
+    }
+
     /* MAIN CONTENT */
     .bx-sec{padding:48px 0}
     .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;border-bottom:2px solid var(--border);padding-bottom:13px}
@@ -499,6 +515,16 @@
     </div>
   </section>
 
+  <!-- BOTTOM LEADERBOARD AD -->
+  <div class="ad-bar" id="bx-ad-leaderboard2-bar">
+    <div class="bx-wrap" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 12px;">
+      <span class="ad-pill">Ad</span>
+      <div class="ad-slot placeholder" id="bx-ad-leaderboard2" data-slot="leaderboard2" style="width: 728px; height: 90px;">
+        Ad Space: Leaderboard 2 (728×90)
+      </div>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <footer id="bx-footer">
     <div class="bx-wrap">
@@ -584,6 +610,35 @@
 
     function getParam(name) {
       return new URLSearchParams(window.location.search).get(name);
+    }
+
+    async function loadAdSenseSlots() {
+      try {
+        const res = await fetch(CMS_API + '/site/config/adsense_slots');
+        const result = await res.json();
+        const slots = result?.data?.data || {};
+        
+        const slotElements = document.querySelectorAll('.ad-slot');
+        slotElements.forEach(el => {
+          const slotKey = el.getAttribute('data-slot');
+          const slotConf = slots[slotKey];
+          if (slotConf && slotConf.active && slotConf.code) {
+            el.innerHTML = slotConf.code;
+            el.classList.remove('placeholder');
+            
+            // Re-run any scripts in the injected code
+            const scripts = el.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+              const newScript = document.createElement('script');
+              Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+              newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+              oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+          }
+        });
+      } catch (err) {
+        console.warn('Failed to load AdSense slots config:', err.message);
+      }
     }
 
     async function loadPage() {
@@ -681,6 +736,7 @@
       } catch (e) {
         gridEl.innerHTML = `<div class="no-articles-placeholder">✕ Failed to load articles. Please try again.</div>`;
       }
+      await loadAdSenseSlots();
     }
 
     async function fetchSiteConfig() {

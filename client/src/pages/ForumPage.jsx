@@ -4,6 +4,7 @@ import { getCategories, getTrending, getPosts, searchPosts } from '../api/forum'
 import CategoryCard from '../components/forum/CategoryCard';
 import PostCard from '../components/forum/PostCard';
 import SearchBar from '../components/forum/SearchBar';
+import AdSlot from '../components/AdSlot';
 
 export default function ForumPage({ currentUser, onPromptLogin }) {
   const [categories, setCategories] = useState([]);
@@ -152,6 +153,7 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
           </div>
         </div>
       </div>
+      <AdSlot slotKey="leaderboard2" slotName="Leaderboard 2 (728×90)" />
     </div>
   );
 }

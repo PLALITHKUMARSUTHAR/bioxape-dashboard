@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toolsRegistry } from '../data/toolsRegistry';
+import AdSlot from '../components/AdSlot';
 
 // Category mapping helper
 const CATEGORIES = [
@@ -561,6 +562,7 @@ export default function ToolsHub() {
           </div>
         )}
       </main>
+      <AdSlot slotKey="leaderboard2" slotName="Leaderboard 2 (728×90)" />
     </div>
   );
 }

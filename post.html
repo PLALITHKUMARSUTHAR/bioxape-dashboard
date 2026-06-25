@@ -488,6 +488,17 @@
       const downloadBtn = clone.querySelector('.btn-download-pdf');
       if (downloadBtn) downloadBtn.remove();
 
+      // Remove all ad bars and sidebar elements from the PDF layout
+      const adBars = clone.querySelectorAll('.ad-bar');
+      adBars.forEach(bar => bar.remove());
+      const sidebar = clone.querySelector('.sidebar');
+      if (sidebar) sidebar.remove();
+      const withSidebar = clone.querySelector('.with-sidebar');
+      if (withSidebar) {
+        withSidebar.style.display = 'block';
+        withSidebar.style.marginTop = '0';
+      }
+
       // Create a beautifully styled PDF header mentioning BioXApe
       const pdfHeader = document.createElement('div');
       pdfHeader.style.display = 'flex';

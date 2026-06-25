@@ -1045,3 +1045,45 @@ button, input, select, textarea {
   color: var(--accent);
   padding-left: 24px;
 }
+
+/* AD BARS & SLOTS */
+.ad-bar {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--off);
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.ad-pill {
+  font-size: 10.5px;
+  color: var(--text4);
+  background: var(--border);
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.ad-slot {
+  flex: 1;
+  max-width: 730px;
+  min-height: 56px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ad-slot.placeholder {
+  border: 1.5px dashed var(--border2) !important;
+  background: var(--white) !important;
+  color: var(--text4) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  box-sizing: border-box !important;
+  min-height: 90px;
+}
