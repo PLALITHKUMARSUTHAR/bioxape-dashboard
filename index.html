@@ -1013,23 +1013,40 @@
     #bx-plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
     .plan{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:28px;cursor:pointer;transition:border-color .2s,box-shadow .2s;position:relative}
     .plan:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(39, 163, 99, 0.05)}
-    .plan.star{border-color:var(--accent);border-width:1.5px;position:relative}
+    .plan.star{border-color:#2563eb;border-width:2px;position:relative}
+    .plan.star:hover{border-color:#1d4ed8;box-shadow:0 4px 12px rgba(37, 99, 235, 0.05)}
     .plan-crown{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:11.5px;font-weight:600;padding:4px 16px;border-radius:20px;white-space:nowrap}
+    .plan.star .plan-crown{background:#2563eb}
     .plan-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
-    .pi-f{background:var(--surface)}.pi-p{background:var(--accent-l)}.pi-i{background:var(--blue-l)}
+    .pi-f{background:var(--surface)}.pi-p{background:var(--blue-l)}.pi-i{background:var(--accent-l)}
     .plan-name{font-size:16px;font-weight:700;color:var(--text1);margin-bottom:4px}
     .plan-price{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--accent);line-height:1}
+    .plan.star .plan-price{color:#2563eb}
     .plan-price sup{font-size:18px;color:var(--text3)}.plan-price sub{font-size:14px;color:var(--text3)}
     .plan-desc{font-size:13px;color:var(--text3);margin:8px 0 20px}
+    .plan-highlights{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+    .ph-item{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px}
+    .ph-item::before{content:'✓';font-weight:700;font-size:13px;flex-shrink:0}
+    .plan:not(.star) .ph-item::before{color:var(--accent)}
+    .plan.star .ph-item::before{color:#2563eb}
     .plan-details{max-height:0;overflow:hidden;transition:max-height .3s ease}
+    .pf-group-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text4);letter-spacing:0.8px;margin-top:14px;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px}
+    .pf-group-title:first-child{margin-top:4px}
     .plan-feats{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
     .pf{font-size:13px;color:var(--text2);display:flex;align-items:flex-start;gap:8px}
     .pf::before{content:'✓';color:var(--accent);font-weight:700;font-size:13px;flex-shrink:0;margin-right:6px}
-    .pf.no{color:var(--text4)}.pf.no::before{content:'–';color:var(--border2)}
-    .btn-plan{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:var(--surface);border:1.5px solid var(--border);color:var(--text1);font-family:'Inter',sans-serif}
-    .plan.star .btn-plan{background:var(--accent);border-color:var(--accent);color:#fff}
+    .pf-blue::before{content:'✓' !important;color:#2563eb !important}
+    .pf.no{color:var(--text4)}
+    .pf.no::before{content:'✗' !important;color:#9ca3af !important}
+    .pf.pf-val::before{content:'•' !important;color:var(--text4) !important;font-size:13px !important;margin-right:6px !important}
+    .plan.star .pf.pf-val::before{color:#2563eb !important}
+    .btn-plan{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:var(--surface);border:1.5px solid var(--border);color:var(--text1);font-family:'Inter',sans-serif;transition:all .15s}
+    .btn-plan:hover{border-color:var(--accent);background:var(--accent-l);color:var(--accent-d)}
+    .plan.star .btn-plan{background:#2563eb;border-color:#2563eb;color:#fff}
+    .plan.star .btn-plan:hover{background:#1d4ed8 !important;border-color:#1d4ed8 !important;color:#fff !important}
     .plan-toggle{text-align:center;margin-top:14px;font-size:12px;color:var(--text3);cursor:pointer;font-weight:500;user-select:none;transition:color .2s}
     .plan-toggle:hover{color:var(--accent)}
+    .plan.star .plan-toggle:hover{color:#2563eb}
 
     /* COURSES */
     .course-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;display:flex;cursor:pointer;transition:all .2s}
@@ -2479,22 +2496,150 @@
 
     function renderPlans(data) {
       const el=document.getElementById('bx-plans-grid');
-      if(!el||!data.plans) return;
-      el.innerHTML=data.plans.map(plan=>{
-        let displayName = plan.name;
-        if (plan.id === 'free' || plan.name === 'Free') displayName = 'Basic';
-        else if (plan.id === 'pro' || plan.name === 'Pro Researcher') displayName = 'Pro';
-        else if (plan.id === 'institutional' || plan.name === 'Institutional') displayName = 'Elite';
+      if(!el) return;
 
+      const staticPlans = [
+        {
+          id: 'free',
+          name: 'Basic',
+          price: '99',
+          desc: 'For curious minds just getting started',
+          icon: '🌱',
+          isFeatured: false,
+          buttonText: 'Get Started Free',
+          highlights: ['5 articles', '5 basic tools', '15% store discount'],
+          featuresHtml: `
+            <div class="pf-group-title">Articles</div>
+            <ul class="plan-feats">
+              <li class="pf">Unlimited articles</li>
+              <li class="pf no">PDF / EPUB download</li>
+              <li class="pf no">Early access (read before public)</li>
+              <li class="pf">Ad-free reading</li>
+            </ul>
+            <div class="pf-group-title">Tools</div>
+            <ul class="plan-feats">
+              <li class="pf pf-val">Tools access: 5 basic tools</li>
+              <li class="pf pf-val">Sequence limit: Up to 500bp</li>
+              <li class="pf no">Export results (CSV/FASTA/PDF)</li>
+            </ul>
+            <div class="pf-group-title">Forum & Community</div>
+            <ul class="plan-feats">
+              <li class="pf">Read all public forum posts</li>
+              <li class="pf">Post, reply & vote</li>
+              <li class="pf no">Pro-only & invite-only sections</li>
+              <li class="pf pf-val">AMA sessions: Read only</li>
+            </ul>
+            <div class="pf-group-title">Career</div>
+            <ul class="plan-feats">
+              <li class="pf">Jobs & internships board</li>
+            </ul>
+            <div class="pf-group-title">Extras</div>
+            <ul class="plan-feats">
+              <li class="pf">Daily biotech fact card</li>
+              <li class="pf no">Monthly India biotech briefing (PDF)</li>
+              <li class="pf pf-val">Team seats: 1</li>
+              <li class="pf pf-val">Store discount: 15% off</li>
+            </ul>
+          `
+        },
+        {
+          id: 'pro',
+          name: 'Pro',
+          price: '349',
+          desc: 'For scientists, students and professionals',
+          icon: '🔬',
+          isFeatured: true,
+          buttonText: 'Subscribe Now',
+          highlights: ['Unlimited articles', 'All 11 tools', '25% store discount'],
+          featuresHtml: `
+            <div class="pf-group-title">Articles</div>
+            <ul class="plan-feats">
+              <li class="pf pf-blue">Unlimited articles</li>
+              <li class="pf pf-blue">PDF / EPUB download</li>
+              <li class="pf pf-blue">Early access (read before public)</li>
+              <li class="pf pf-blue">Ad-free reading</li>
+            </ul>
+            <div class="pf-group-title">Tools</div>
+            <ul class="plan-feats">
+              <li class="pf pf-val">Tools access: All 11 tools</li>
+              <li class="pf pf-val">Sequence limit: Unlimited</li>
+              <li class="pf pf-blue">Export results (CSV/FASTA/PDF)</li>
+            </ul>
+            <div class="pf-group-title">Forum & Community</div>
+            <ul class="plan-feats">
+              <li class="pf pf-blue">Read all public forum posts</li>
+              <li class="pf pf-blue">Post, reply & vote</li>
+              <li class="pf pf-blue">Pro-only & invite-only sections</li>
+              <li class="pf pf-val">AMA sessions: Ask + read</li>
+            </ul>
+            <div class="pf-group-title">Career</div>
+            <ul class="plan-feats">
+              <li class="pf pf-blue">Jobs & internships board</li>
+            </ul>
+            <div class="pf-group-title">Extras</div>
+            <ul class="plan-feats">
+              <li class="pf pf-blue">Daily biotech fact card</li>
+              <li class="pf pf-blue">Monthly India biotech briefing (PDF)</li>
+              <li class="pf pf-val">Team seats: 1</li>
+              <li class="pf pf-val">Store discount: 25% off</li>
+            </ul>
+          `
+        },
+        {
+          id: 'institutional',
+          name: 'Elite',
+          price: '1,199',
+          desc: 'For labs, universities and research teams',
+          icon: '🏛️',
+          isFeatured: false,
+          buttonText: 'Contact Us',
+          highlights: ['Unlimited articles', 'All 11 tools', 'Up to 15 seats', '35% store discount'],
+          featuresHtml: `
+            <div class="pf-group-title">Articles</div>
+            <ul class="plan-feats">
+              <li class="pf">Unlimited articles</li>
+              <li class="pf">PDF / EPUB download</li>
+              <li class="pf">Early access (read before public)</li>
+              <li class="pf">Ad-free reading</li>
+            </ul>
+            <div class="pf-group-title">Tools</div>
+            <ul class="plan-feats">
+              <li class="pf pf-val">Tools access: All 11 tools</li>
+              <li class="pf pf-val">Sequence limit: Unlimited</li>
+              <li class="pf">Export results (CSV/FASTA/PDF)</li>
+            </ul>
+            <div class="pf-group-title">Forum & Community</div>
+            <ul class="plan-feats">
+              <li class="pf">Read all public forum posts</li>
+              <li class="pf">Post, reply & vote</li>
+              <li class="pf">Pro-only & invite-only sections</li>
+              <li class="pf pf-val">AMA sessions: Ask + read</li>
+            </ul>
+            <div class="pf-group-title">Career</div>
+            <ul class="plan-feats">
+              <li class="pf">Jobs & internships board</li>
+            </ul>
+            <div class="pf-group-title">Extras</div>
+            <ul class="plan-feats">
+              <li class="pf">Daily biotech fact card</li>
+              <li class="pf">Monthly India biotech briefing (PDF)</li>
+              <li class="pf pf-val">Team seats: Up to 15</li>
+              <li class="pf pf-val">Store discount: 35% off</li>
+            </ul>
+          `
+        }
+      ];
+
+      el.innerHTML=staticPlans.map(plan=>{
+        const highlightList = plan.highlights.map(h => `<li class="ph-item">${h}</li>`).join('');
         return '<div class="plan '+(plan.isFeatured?'star':'')+'" onclick="togglePlanCard(this, event)">'+
           (plan.isFeatured?'<div class="plan-crown">Most Popular</div>':'')+
           '<div class="plan-icon pi-'+(plan.id==='free'?'f':plan.id==='pro'?'p':'i')+'">'+plan.icon+'</div>'+
-          '<div class="plan-name">'+displayName+'</div>'+
-          '<div class="plan-price"><sup>Rs</sup>'+plan.price+'<sub>/month</sub></div>'+
+          '<div class="plan-name">'+plan.name+'</div>'+
+          '<div class="plan-price"><sup>₹</sup>'+plan.price+'<sub>/month</sub></div>'+
           '<div class="plan-desc">'+plan.desc+'</div>'+
-          '<div class="plan-details">'+
-            '<ul class="plan-feats">'+( plan.features||[]).map(f=>'<li class="pf '+(f.included?'':'no')+'">'+f.text+'</li>').join('')+'</ul>'+
-          '</div>'+
+          '<ul class="plan-highlights">'+highlightList+'</ul>'+
+          '<div class="plan-details">'+plan.featuresHtml+'</div>'+
           '<button class="btn-plan" onclick="startSubscription(\''+plan.id+'\')">'+plan.buttonText+'</button>'+
           '<div class="plan-toggle">View all benefits ▾</div>'+
           '</div>';

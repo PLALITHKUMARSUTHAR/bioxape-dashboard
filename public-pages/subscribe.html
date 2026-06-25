@@ -131,27 +131,42 @@ a{text-decoration:none;color:var(--accent)}
 @media(max-width:768px){.plans{grid-template-columns:1fr}}
 .plan{background:#fff;border:1.5px solid var(--border);border-radius:18px;padding:30px;position:relative;cursor:pointer;transition:border-color .2s,box-shadow .2s}
 .plan:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(39, 163, 99, 0.05)}
-.plan.star{border-color:var(--accent);border-width:1.5px;position:relative}
+.plan.star{border-color:#2563eb;border-width:2px;position:relative}
+.plan.star:hover{border-color:#1d4ed8;box-shadow:0 4px 12px rgba(37, 99, 235, 0.05)}
 .plan-crown{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:11.5px;font-weight:600;padding:4px 16px;border-radius:20px;white-space:nowrap}
+.plan.star .plan-crown{background:#2563eb}
 .plan-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
-.pi-f{background:var(--surface)}.pi-p{background:var(--accent-l)}.pi-i{background:var(--blue-l)}
+.pi-f{background:var(--surface)}.pi-p{background:var(--blue-l)}.pi-i{background:var(--accent-l)}
 .plan-name{font-size:18px;font-weight:700;margin-bottom:4px}
 .plan-price{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:var(--accent);line-height:1}
+.plan.star .plan-price{color:#2563eb}
 .plan-price sup{font-size:20px;color:var(--text3)}
 .plan-price sub{font-size:14px;color:var(--text3)}
 .plan-desc{font-size:13px;color:var(--text3);margin:8px 0 20px}
+.plan-highlights{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.ph-item{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px}
+.ph-item::before{content:'✓';font-weight:700;font-size:13px;flex-shrink:0}
+.plan:not(.star) .ph-item::before{color:var(--accent)}
+.plan.star .ph-item::before{color:#2563eb}
 .plan-details{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.pf-group-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text4);letter-spacing:0.8px;margin-top:14px;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.pf-group-title:first-child{margin-top:4px}
 .plan-feats{list-style:none;margin-bottom:26px}
 .pf{font-size:13.5px;color:#2d4a38;padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .pf:last-child{border-bottom:none}
 .pf::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
+.pf-blue::before{content:'✓' !important;color:#2563eb !important}
 .pf.no{color:var(--text4)}
-.pf.no::before{content:'—';color:var(--border)}
+.pf.no::before{content:'✗' !important;color:#9ca3af !important}
+.pf.pf-val::before{content:'•' !important;color:var(--text4) !important;font-size:13px !important;margin-right:6px !important}
+.plan.star .pf.pf-val::before{color:#2563eb !important}
 .btn-subscribe{width:100%;padding:13px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;background:var(--g50);border:1.5px solid var(--border);color:var(--text1);font-family:'Inter',sans-serif;transition:all .15s}
-.plan.star .btn-subscribe{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn-subscribe:hover{opacity:.9}
+.btn-subscribe:hover{border-color:var(--accent);background:var(--accent-l);color:var(--accent-d)}
+.plan.star .btn-subscribe{background:#2563eb;border-color:#2563eb;color:#fff}
+.plan.star .btn-subscribe:hover{background:#1d4ed8 !important;border-color:#1d4ed8 !important;color:#fff !important}
 .plan-toggle{text-align:center;margin-top:14px;font-size:12px;color:var(--text3);cursor:pointer;font-weight:500;user-select:none;transition:color .2s}
 .plan-toggle:hover{color:var(--accent)}
+.plan.star .plan-toggle:hover{color:#2563eb}
 .contact-note{text-align:center;margin-top:40px;font-size:14px;color:var(--text3)}
 .contact-note a{color:var(--accent)}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
@@ -224,16 +239,44 @@ a{text-decoration:none;color:var(--accent)}
     <div class="plan" onclick="togglePlanCard(this, event)">
       <div class="plan-icon pi-f">🌱</div>
       <div class="plan-name">Basic</div>
-      <div class="plan-price"><sup>₹</sup>0<sub>/month</sub></div>
+      <div class="plan-price"><sup>₹</sup>99<sub>/month</sub></div>
       <div class="plan-desc">For curious minds just getting started</div>
+      <ul class="plan-highlights">
+        <li class="ph-item">5 articles</li>
+        <li class="ph-item">5 basic tools</li>
+        <li class="ph-item">15% store discount</li>
+      </ul>
       <div class="plan-details">
+        <div class="pf-group-title">Articles</div>
         <ul class="plan-feats">
-          <li class="pf">5 articles per month</li>
-          <li class="pf">Weekly newsletter</li>
-          <li class="pf">News and trending feed</li>
-          <li class="pf no">Research paper summaries</li>
-          <li class="pf no">Ad-free reading</li>
-          <li class="pf no">Course discounts</li>
+          <li class="pf">Unlimited articles</li>
+          <li class="pf no">PDF / EPUB download</li>
+          <li class="pf no">Early access (read before public)</li>
+          <li class="pf">Ad-free reading</li>
+        </ul>
+        <div class="pf-group-title">Tools</div>
+        <ul class="plan-feats">
+          <li class="pf pf-val">Tools access: 5 basic tools</li>
+          <li class="pf pf-val">Sequence limit: Up to 500bp</li>
+          <li class="pf no">Export results (CSV/FASTA/PDF)</li>
+        </ul>
+        <div class="pf-group-title">Forum & Community</div>
+        <ul class="plan-feats">
+          <li class="pf">Read all public forum posts</li>
+          <li class="pf">Post, reply & vote</li>
+          <li class="pf no">Pro-only & invite-only sections</li>
+          <li class="pf pf-val">AMA sessions: Read only</li>
+        </ul>
+        <div class="pf-group-title">Career</div>
+        <ul class="plan-feats">
+          <li class="pf">Jobs & internships board</li>
+        </ul>
+        <div class="pf-group-title">Extras</div>
+        <ul class="plan-feats">
+          <li class="pf">Daily biotech fact card</li>
+          <li class="pf no">Monthly India biotech briefing (PDF)</li>
+          <li class="pf pf-val">Team seats: 1</li>
+          <li class="pf pf-val">Store discount: 15% off</li>
         </ul>
       </div>
       <button class="btn-subscribe" onclick="window.location.href='/'">Get Started Free</button>
@@ -245,15 +288,42 @@ a{text-decoration:none;color:var(--accent)}
       <div class="plan-name">Pro</div>
       <div class="plan-price"><sup>₹</sup>349<sub>/month</sub></div>
       <div class="plan-desc">For scientists, students and professionals</div>
+      <ul class="plan-highlights">
+        <li class="ph-item">Unlimited articles</li>
+        <li class="ph-item">All 11 tools</li>
+        <li class="ph-item">25% store discount</li>
+      </ul>
       <div class="plan-details">
+        <div class="pf-group-title">Articles</div>
         <ul class="plan-feats">
-          <li class="pf">Unlimited articles</li>
-          <li class="pf">All research summaries</li>
-          <li class="pf">100% ad-free experience</li>
-          <li class="pf">PDF and EPUB downloads</li>
-          <li class="pf">25% off all courses</li>
-          <li class="pf">Early content access</li>
-          <li class="pf">Members-only newsletter</li>
+          <li class="pf pf-blue">Unlimited articles</li>
+          <li class="pf pf-blue">PDF / EPUB download</li>
+          <li class="pf pf-blue">Early access (read before public)</li>
+          <li class="pf pf-blue">Ad-free reading</li>
+        </ul>
+        <div class="pf-group-title">Tools</div>
+        <ul class="plan-feats">
+          <li class="pf pf-val">Tools access: All 11 tools</li>
+          <li class="pf pf-val">Sequence limit: Unlimited</li>
+          <li class="pf pf-blue">Export results (CSV/FASTA/PDF)</li>
+        </ul>
+        <div class="pf-group-title">Forum & Community</div>
+        <ul class="plan-feats">
+          <li class="pf pf-blue">Read all public forum posts</li>
+          <li class="pf pf-blue">Post, reply & vote</li>
+          <li class="pf pf-blue">Pro-only & invite-only sections</li>
+          <li class="pf pf-val">AMA sessions: Ask + read</li>
+        </ul>
+        <div class="pf-group-title">Career</div>
+        <ul class="plan-feats">
+          <li class="pf pf-blue">Jobs & internships board</li>
+        </ul>
+        <div class="pf-group-title">Extras</div>
+        <ul class="plan-feats">
+          <li class="pf pf-blue">Daily biotech fact card</li>
+          <li class="pf pf-blue">Monthly India biotech briefing (PDF)</li>
+          <li class="pf pf-val">Team seats: 1</li>
+          <li class="pf pf-val">Store discount: 25% off</li>
         </ul>
       </div>
       <button class="btn-subscribe" onclick="openCheckout('pro',349)">Subscribe Now</button>
@@ -264,14 +334,43 @@ a{text-decoration:none;color:var(--accent)}
       <div class="plan-name">Elite</div>
       <div class="plan-price"><sup>₹</sup>1,199<sub>/month</sub></div>
       <div class="plan-desc">For labs, universities and research teams</div>
+      <ul class="plan-highlights">
+        <li class="ph-item">Unlimited articles</li>
+        <li class="ph-item">All 11 tools</li>
+        <li class="ph-item">Up to 15 seats</li>
+        <li class="ph-item">35% store discount</li>
+      </ul>
       <div class="plan-details">
+        <div class="pf-group-title">Articles</div>
         <ul class="plan-feats">
-          <li class="pf">Up to 15 user seats</li>
-          <li class="pf">All Pro features included</li>
-          <li class="pf">Team dashboard and analytics</li>
-          <li class="pf">Custom branded newsletter</li>
-          <li class="pf">API data access</li>
-          <li class="pf">Priority editorial support</li>
+          <li class="pf">Unlimited articles</li>
+          <li class="pf">PDF / EPUB download</li>
+          <li class="pf">Early access (read before public)</li>
+          <li class="pf">Ad-free reading</li>
+        </ul>
+        <div class="pf-group-title">Tools</div>
+        <ul class="plan-feats">
+          <li class="pf pf-val">Tools access: All 11 tools</li>
+          <li class="pf pf-val">Sequence limit: Unlimited</li>
+          <li class="pf">Export results (CSV/FASTA/PDF)</li>
+        </ul>
+        <div class="pf-group-title">Forum & Community</div>
+        <ul class="plan-feats">
+          <li class="pf">Read all public forum posts</li>
+          <li class="pf">Post, reply & vote</li>
+          <li class="pf">Pro-only & invite-only sections</li>
+          <li class="pf pf-val">AMA sessions: Ask + read</li>
+        </ul>
+        <div class="pf-group-title">Career</div>
+        <ul class="plan-feats">
+          <li class="pf">Jobs & internships board</li>
+        </ul>
+        <div class="pf-group-title">Extras</div>
+        <ul class="plan-feats">
+          <li class="pf">Daily biotech fact card</li>
+          <li class="pf">Monthly India biotech briefing (PDF)</li>
+          <li class="pf pf-val">Team seats: Up to 15</li>
+          <li class="pf pf-val">Store discount: 35% off</li>
         </ul>
       </div>
       <button class="btn-subscribe" onclick="openCheckout('institutional',1199)">Subscribe Now</button>
