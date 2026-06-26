@@ -67,12 +67,19 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
           <line x1="12" y1="80" x2="53" y2="80" stroke="white" strokeWidth="1.5" opacity=".5"/>
         </svg>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
-          <div className="bx-brand-mark" style={{ width: '46px', height: '46px', background: 'var(--accent)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(39, 163, 99, 0.2)', flexShrink: 0 }}>
-            <svg viewBox="0 0 24 24" style={{ width: '26px', height: '26px', fill: 'none', stroke: '#fff', strokeWidth: 2.5, strokeLinecap: 'round' }}><path d="m8 18.8 8.1-13.6"/><path d="M14 20h2"/><path d="m9 10 7.4-4"/><path d="m17 14.5-8-4.8"/><path d="M8 4h2"/><path d="m15.5 18-7.5-4.5"/><path d="m10 4 8 13.6"/></svg>
+          <picture style={{ height: '46px', display: 'block' }}>
+            <source media="(max-width: 768px)" srcSet="/assets/icon_mobile.png" />
+            <img src="/assets/icon.png" alt="BioXApe Icon" style={{ height: '46px', width: 'auto', objectFit: 'contain', display: 'block' }} />
+          </picture>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <picture style={{ height: '38px', display: 'block' }}>
+              <source media="(max-width: 768px)" srcSet="/assets/main_logo_mobile.png" />
+              <img src="/assets/main_logo.png" alt="BioXApe" style={{ height: '38px', width: 'auto', objectFit: 'contain', display: 'block' }} />
+            </picture>
+            <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700' }}>
+              Community Forum
+            </h1>
           </div>
-          <h1>
-            Bio<em><span className="brand-x">X</span>Ape</em> Community Forum
-          </h1>
         </div>
         <p>Engage with global experts, researchers, and enthusiasts. Share discoveries, discuss methodologies, and explore biotechnology together.</p>
       </div>

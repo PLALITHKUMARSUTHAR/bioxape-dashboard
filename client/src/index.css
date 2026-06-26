@@ -154,12 +154,12 @@ button, input, select, textarea {
 .bx-brand-mark {
   width: 42px;
   height: 42px;
-  background: var(--accent);
+  background: transparent;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(39, 163, 99, 0.2);
+  box-shadow: none;
 }
 
 .bx-brand-mark svg {
