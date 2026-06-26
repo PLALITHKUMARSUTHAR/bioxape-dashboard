@@ -1212,6 +1212,64 @@
     .art-card.ea-locked {
       border: 1.5px solid #fde68a !important;
       background: #fffdf9;
+      position: relative;
+      overflow: hidden;
+    }
+    .art-card.ea-locked .art-body,
+    .art-card.ea-locked .article-cover-thumb-wrap,
+    .art-card.ea-locked .art-img {
+      filter: blur(5px);
+      opacity: 0.6;
+      pointer-events: none;
+      user-select: none;
+    }
+    .ea-lock-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      background: rgba(253, 253, 249, 0.3);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+    .ea-lock-badge-floating {
+      background: #d97706;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .carousel-slide.ea-locked-slide {
+      position: relative;
+    }
+    .carousel-slide.ea-locked-slide .hero-main-img img,
+    .carousel-slide.ea-locked-slide .hero-main-body {
+      filter: blur(5px);
+      opacity: 0.6;
+      pointer-events: none;
+      user-select: none;
+    }
+    .carousel-slide.ea-locked-slide .hero-main-img::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.2);
+      z-index: 2;
     }
     .art-card.early-access-card {
       border-left: 4px solid var(--accent) !important;
@@ -1545,11 +1603,63 @@
         const role = user.role;
         const tier = (user.subscriptionTier || 'free').toLowerCase();
         const isStaff = ['admin', 'editor', 'author'].includes(role);
-        const isPremium = ['basic', 'pro', 'elite', 'institutional'].includes(tier);
+        const isPremium = ['basic', 'pro', 'elite'].includes(tier);
         return isStaff || isPremium;
       } catch (e) {
         return false;
       }
+    }
+
+    function showEarlyAccessModal(postId, publishedAtStr) {
+      const publishedDate = publishedAtStr ? new Date(publishedAtStr) : new Date();
+      const diffTime = Date.now() - publishedDate.getTime();
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      const daysRemaining = Math.max(0, Math.ceil(10 - diffDays));
+
+      let modal = document.getElementById('bx-ea-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'bx-ea-modal';
+        modal.className = 'bx-modal-overlay';
+        modal.innerHTML = `
+          <div class="bx-modal-content" onclick="event.stopPropagation()">
+            <div class="bx-modal-header">
+              <h3><span>🔒</span> Premium Early Access</h3>
+              <button class="bx-modal-close" onclick="closeEaModal()">&times;</button>
+            </div>
+            <div class="bx-modal-body" style="text-align: center; padding: 10px 0;">
+              <div style="font-size: 40px; margin-bottom: 16px;">✦</div>
+              <p style="font-size: 14.5px; color: var(--text2); line-height: 1.6; margin-bottom: 20px;">
+                This article is in early access. It was written by an editor or admin and is currently exclusive to premium members.
+              </p>
+              <div style="background: var(--off); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                <span style="font-size: 13px; color: var(--text3);">Availability Countdown</span>
+                <div id="ea-modal-timer" style="font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 4px;">
+                  Unlocking for all in ${daysRemaining} days
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <a href="/subscribe" class="btn-ea-primary" style="display: block; background: var(--accent); color: var(--white) !important; font-weight: 600; padding: 12px; border-radius: 8px; font-size: 14px; text-decoration: none; box-shadow: 0 4px 12px rgba(39,163,99,0.25);">
+                  Subscribe to Read Instantly
+                </a>
+                <a href="/login" class="btn-ea-secondary" style="display: block; color: var(--text2) !important; font-weight: 500; font-size: 14px; padding: 12px; border: 1.5px solid var(--border); border-radius: 8px; text-decoration: none;">
+                  Sign In to Account
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+        modal.addEventListener('click', closeEaModal);
+        document.body.appendChild(modal);
+      } else {
+        document.getElementById('ea-modal-timer').textContent = `Unlocking for all in ${daysRemaining} days`;
+      }
+      modal.classList.add('active');
+    }
+
+    function closeEaModal() {
+      const modal = document.getElementById('bx-ea-modal');
+      if (modal) modal.classList.remove('active');
     }
 
     function renderPostCardMarkup(p, isEA, isAuthorized, clickHandler) {
@@ -1562,11 +1672,18 @@
       
       let eaBadge = '';
       let cardClass = 'art-card';
+      let lockOverlay = '';
+      
       if (isEA) {
         cardClass += ' early-access-card';
         if (!isAuthorized) {
           eaBadge = `<div class="ea-badge-locked" style="margin-left: 8px;">✦ Early Access 🔒</div>`;
           cardClass += ' ea-locked';
+          lockOverlay = `
+            <div class="ea-lock-overlay">
+              <span class="ea-lock-badge-floating">🔒 Locked</span>
+            </div>
+          `;
         } else {
           eaBadge = `<div class="ea-badge-unlocked" style="margin-left: 8px;">✦ Early Access</div>`;
         }
@@ -1576,6 +1693,7 @@
       
       return `
         <div class="${cardClass}" onclick="${clickHandler}">
+          ${lockOverlay}
           ${thumbHtml}
           <div class="art-body">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -2313,7 +2431,9 @@
       gridEl.innerHTML = paginatedPosts.map((p, idx) => {
         const absoluteIndex = start + idx;
         const isEA = p.isEarlyAccess || (page === 1 && absoluteIndex < 2);
-        const clickHandler = `window.location.href='/post?id=${p._id}'`;
+        const clickHandler = isEA && !isAuthorized
+          ? `showEarlyAccessModal('${p._id}', '${p.publishedAt || p.createdAt || ''}')`
+          : `window.location.href='/post?id=${p._id}'`;
         return renderPostCardMarkup(p, isEA, isAuthorized, clickHandler);
       }).join('');
 
@@ -2342,9 +2462,11 @@
             const absoluteIndex = start + idx;
             const isEA = p.isEarlyAccess || (page === 1 && absoluteIndex < 2);
             const postLink = p._id || p.postId || p.link || '#';
-            const clickHandler = postLink.startsWith('http') || postLink.includes('.html')
-              ? `window.open('${postLink}', '_blank')`
-              : `window.location.href='/post?id=${postLink}'`;
+            const clickHandler = isEA && !isAuthorized
+              ? `showEarlyAccessModal('${postLink}', '${p.publishedAt || p.createdAt || ''}')`
+              : (postLink.startsWith('http') || postLink.includes('.html')
+                  ? `window.open('${postLink}', '_blank')`
+                  : `window.location.href='/post?id=${postLink}'`);
               
             return renderPostCardMarkup(p, isEA, isAuthorized, clickHandler);
           }).join('');
@@ -2369,7 +2491,9 @@
         const isAuthorized = checkUserAuthorized();
         gridEl.innerHTML = data.posts.map((p, idx) => {
           const isEA = p.isEarlyAccess || (page === 1 && idx < 2);
-          const clickHandler = `window.location.href='/post?id=${p._id}'`;
+          const clickHandler = isEA && !isAuthorized
+            ? `showEarlyAccessModal('${p._id}', '${p.publishedAt || p.createdAt || ''}')`
+            : `window.location.href='/post?id=${p._id}'`;
           return renderPostCardMarkup(p, isEA, isAuthorized, clickHandler);
         }).join('');
 
@@ -2758,6 +2882,23 @@
           coverHtml = `<img class="hero-featured-cover" src="${p.coverImageUrl}" alt="${p.title}"/>`;
         }
 
+        const isAuthorized = checkUserAuthorized();
+        const isEA = p.isEarlyAccess || (idx < 2);
+        
+        let slideClass = 'carousel-slide';
+        let slideClickHandler = `window.location.href='/post?id=${p._id}'`;
+        let slideLockOverlay = '';
+
+        if (isEA && !isAuthorized) {
+          slideClass += ' ea-locked-slide';
+          slideClickHandler = `showEarlyAccessModal('${p._id}', '${p.publishedAt || p.createdAt || ''}')`;
+          slideLockOverlay = `
+            <div class="ea-lock-overlay" style="background: none;">
+              <span class="ea-lock-badge-floating">🔒 Locked</span>
+            </div>
+          `;
+        }
+
         // Keep IDs on the very first slide so CMS config site overrides work
         const slideIdAttr = idx === 0 ? 'id="bx-hero-card"' : '';
         const titleIdAttr = idx === 0 ? 'id="bx-hero-title"' : '';
@@ -2767,8 +2908,9 @@
         const dateIdAttr = idx === 0 ? 'id="bx-hero-date"' : '';
 
         return `
-          <div class="carousel-slide" ${slideIdAttr} style="width: ${100 / carouselPosts.length}%; min-width: ${100 / carouselPosts.length}%;" onclick="window.location.href='/post?id=${p._id}'">
+          <div class="${slideClass}" ${slideIdAttr} style="width: ${100 / carouselPosts.length}%; min-width: ${100 / carouselPosts.length}%;" onclick="${slideClickHandler}">
             <div class="hero-main-img" style="position:relative;">
+              ${slideLockOverlay}
               ${coverHtml}
               <div class="hero-img-over"></div>
               <svg class="hero-dna-svg" viewBox="0 0 65 130" fill="none">
@@ -2784,8 +2926,6 @@
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                 <span class="tag tg" style="margin: 0;">${category}</span>
                 ${(() => {
-                  const isAuthorized = checkUserAuthorized();
-                  const isEA = p.isEarlyAccess || (idx < 2);
                   if (isEA) {
                     if (!isAuthorized) {
                       return `<span class="ea-badge-locked">✦ Early Access 🔒</span>`;

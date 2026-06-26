@@ -482,7 +482,7 @@
         const role = user.role;
         const tier = (user.subscriptionTier || 'free').toLowerCase();
         const isStaff = ['admin', 'editor', 'author'].includes(role);
-        const isPremium = ['basic', 'pro', 'elite', 'institutional'].includes(tier);
+        const isPremium = ['basic', 'pro', 'elite'].includes(tier);
         return isStaff || isPremium;
       } catch (e) {
         return false;
@@ -545,6 +545,11 @@
           } else {
             previewHtml = bodyHtml.slice(0, 200) + '...';
           }
+
+          const publishedDate = new Date(p.publishedAt || p.createdAt || Date.now());
+          const diffTime = Date.now() - publishedDate.getTime();
+          const diffDays = diffTime / (1000 * 60 * 60 * 24);
+          const daysRemaining = Math.max(0, Math.ceil(10 - diffDays));
           
           document.getElementById('post-body').innerHTML = `
             <div>
@@ -562,6 +567,12 @@
                   <p>
                     This article is in early access. It is currently exclusive to premium members.
                   </p>
+                  <div style="background: var(--off); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 18px; text-align: center;">
+                    <span style="font-size: 12px; color: var(--text3); display: block;">Availability Countdown</span>
+                    <div style="font-size: 15px; font-weight: 700; color: var(--accent); margin-top: 4px;">
+                      Unlocking for all in ${daysRemaining} days
+                    </div>
+                  </div>
                   <div class="ea-cta-buttons">
                     <a href="/subscribe" class="btn-ea-primary">Subscribe to Read Instantly</a>
                     <a href="/login" class="btn-ea-secondary">Sign In to Account</a>

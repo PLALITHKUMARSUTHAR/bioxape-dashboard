@@ -427,6 +427,145 @@
         overflow: hidden;
       }
     }
+    
+    /* Modal Styles */
+    .bx-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9999;
+    }
+    .bx-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .bx-modal-content {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      padding: 26px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .bx-modal-overlay.active .bx-modal-content {
+      transform: translateY(0) scale(1);
+    }
+    .bx-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    .bx-modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bx-modal-close {
+      background: none;
+      border: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: var(--text3);
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .bx-modal-close:hover {
+      color: var(--text1);
+    }
+    
+    /* Early Access locked styles */
+    .art-card.ea-locked {
+      border: 1.5px solid #fde68a !important;
+      background: #fffdf9;
+      position: relative;
+      overflow: hidden;
+    }
+    .art-card.ea-locked .art-body,
+    .art-card.ea-locked .article-cover-thumb-wrap,
+    .art-card.ea-locked .art-img {
+      filter: blur(5px);
+      opacity: 0.6;
+      pointer-events: none;
+      user-select: none;
+    }
+    .ea-lock-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      background: rgba(253, 253, 249, 0.3);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+    .ea-lock-badge-floating {
+      background: #d97706;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .art-card.early-access-card {
+      border-left: 4px solid var(--accent) !important;
+    }
+    .ea-badge-locked {
+      font-size: 10px;
+      font-weight: 700;
+      color: #b45309;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      padding: 3px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .ea-badge-unlocked {
+      font-size: 10px;
+      font-weight: 700;
+      color: #15803d;
+      background: #e8f7ef;
+      border: 1px solid #a8dfc0;
+      padding: 3px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -571,6 +710,125 @@
       ? 'http://localhost:5000/api' 
       : 'https://bioxape-backend.onrender.com/api';
 
+    function checkUserAuthorized() {
+      const userStr = localStorage.getItem('bioxape_user');
+      if (!userStr) return false;
+      try {
+        const user = JSON.parse(userStr);
+        const role = user.role;
+        const tier = (user.subscriptionTier || 'free').toLowerCase();
+        const isStaff = ['admin', 'editor', 'author'].includes(role);
+        const isPremium = ['basic', 'pro', 'elite'].includes(tier);
+        return isStaff || isPremium;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function showEarlyAccessModal(postId, publishedAtStr) {
+      const publishedDate = publishedAtStr ? new Date(publishedAtStr) : new Date();
+      const diffTime = Date.now() - publishedDate.getTime();
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      const daysRemaining = Math.max(0, Math.ceil(10 - diffDays));
+
+      let modal = document.getElementById('bx-ea-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'bx-ea-modal';
+        modal.className = 'bx-modal-overlay';
+        modal.innerHTML = `
+          <div class="bx-modal-content" onclick="event.stopPropagation()">
+            <div class="bx-modal-header">
+              <h3><span>🔒</span> Premium Early Access</h3>
+              <button class="bx-modal-close" onclick="closeEaModal()">&times;</button>
+            </div>
+            <div class="bx-modal-body" style="text-align: center; padding: 10px 0;">
+              <div style="font-size: 40px; margin-bottom: 16px;">✦</div>
+              <p style="font-size: 14.5px; color: var(--text2); line-height: 1.6; margin-bottom: 20px;">
+                This article is in early access. It was written by an editor or admin and is currently exclusive to premium members.
+              </p>
+              <div style="background: var(--off); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                <span style="font-size: 13px; color: var(--text3);">Availability Countdown</span>
+                <div id="ea-modal-timer" style="font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 4px;">
+                  Unlocking for all in ${daysRemaining} days
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <a href="/subscribe" class="btn-ea-primary" style="display: block; background: var(--accent); color: var(--white) !important; font-weight: 600; padding: 12px; border-radius: 8px; font-size: 14px; text-decoration: none; box-shadow: 0 4px 12px rgba(39,163,99,0.25);">
+                  Subscribe to Read Instantly
+                </a>
+                <a href="/login" class="btn-ea-secondary" style="display: block; color: var(--text2) !important; font-weight: 500; font-size: 14px; padding: 12px; border: 1.5px solid var(--border); border-radius: 8px; text-decoration: none;">
+                  Sign In to Account
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+        modal.addEventListener('click', closeEaModal);
+        document.body.appendChild(modal);
+      } else {
+        document.getElementById('ea-modal-timer').textContent = `Unlocking for all in ${daysRemaining} days`;
+      }
+      modal.classList.add('active');
+    }
+
+    function closeEaModal() {
+      const modal = document.getElementById('bx-ea-modal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function renderPostCardMarkup(p, isEA, isAuthorized, clickHandler) {
+      let thumbHtml = '';
+      if (p.coverImageUrl) {
+        thumbHtml = `<div class="article-cover-thumb-wrap"><img src="${p.coverImageUrl}" class="article-cover-thumb-img" alt="${p.title}"/></div>`;
+      } else {
+        thumbHtml = `<div class="art-img ai1">🔬</div>`;
+      }
+      
+      let eaBadge = '';
+      let cardClass = 'art-card';
+      let lockOverlay = '';
+      
+      if (isEA) {
+        cardClass += ' early-access-card';
+        if (!isAuthorized) {
+          eaBadge = `<div class="ea-badge-locked" style="margin-left: 8px;">✦ Early Access 🔒</div>`;
+          cardClass += ' ea-locked';
+          lockOverlay = `
+            <div class="ea-lock-overlay">
+              <span class="ea-lock-badge-floating">🔒 Locked</span>
+            </div>
+          `;
+        } else {
+          eaBadge = `<div class="ea-badge-unlocked" style="margin-left: 8px;">✦ Early Access</div>`;
+        }
+      }
+      
+      const avatar = p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU';
+      
+      return `
+        <div class="${cardClass}" onclick="${clickHandler}">
+          ${lockOverlay}
+          ${thumbHtml}
+          <div class="art-body">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="tag tg" style="margin: 0;">${p.category || 'Science'}</span>
+              ${eaBadge}
+            </div>
+            <div class="art-title">${p.title}</div>
+            <div class="art-exc">${p.excerpt || ''}</div>
+            <div class="art-meta">
+              <div class="art-meta-left">
+                <div class="av">${avatar}</div>
+                <span>${p.authorName || 'Author'}</span>
+              </div>
+              <span>${p.readTimeMinutes || 1} min read</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     const CATEGORY_DESCS = {
       "Genomics & Gene Editing": {
         desc: "Deep dive into CRISPR systems, base/prime editing, NGS sequencing technologies, and next-gen molecular therapeutics.",
@@ -712,31 +970,13 @@
           return;
         }
 
-        gridEl.innerHTML = data.posts.map(p => {
-          let thumbHtml = '';
-          if (p.coverImageUrl) {
-            thumbHtml = `<div class="article-cover-thumb-wrap"><img src="${p.coverImageUrl}" class="article-cover-thumb-img" alt="${p.title}"/></div>`;
-          } else {
-            thumbHtml = `<div class="art-img ai1">🔬</div>`;
-          }
-
-          return `
-            <div class="art-card" onclick="window.location.href='/post?id=${p._id}'">
-              ${thumbHtml}
-              <div class="art-body">
-                <span class="tag tg">${p.category || 'Science'}</span>
-                <div class="art-title">${p.title}</div>
-                <div class="art-exc">${p.excerpt || ''}</div>
-                <div class="art-meta">
-                  <div class="art-meta-left">
-                    <div class="av">${p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU'}</div>
-                    <span>${p.authorName || 'Author'}</span>
-                  </div>
-                  <span>${p.readTimeMinutes || 1} min read</span>
-                </div>
-              </div>
-            </div>
-          `;
+        const isAuthorized = checkUserAuthorized();
+        gridEl.innerHTML = data.posts.map((p, idx) => {
+          const isEA = p.isEarlyAccess || (idx < 2);
+          const clickHandler = isEA && !isAuthorized
+            ? `showEarlyAccessModal('${p._id}', '${p.publishedAt || p.createdAt || ''}')`
+            : `window.location.href='/post?id=${p._id}'`;
+          return renderPostCardMarkup(p, isEA, isAuthorized, clickHandler);
         }).join('');
 
       } catch (e) {
