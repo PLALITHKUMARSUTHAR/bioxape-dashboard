@@ -1089,3 +1089,9 @@ button, input, select, textarea {
   box-sizing: border-box !important;
   min-height: 90px;
 }
+
+@media (max-width: 768px) {
+  .ad-hide-mobile {
+    display: none !important;
+  }
+}

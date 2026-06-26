@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toolsRegistry } from '../../data/toolsRegistry';
+import AdSlot from '../AdSlot';
 
 export function CopyButton({ text, className = '' }) {
   const [copied, setCopied] = useState(false);
@@ -569,6 +570,8 @@ export default function ToolShell({ slug, children }) {
             <span>{tool.scopeNote}</span>
           </div>
         )}
+
+        <AdSlot slotKey="TOOLS_RESULT" />
       </div>
     </div>
   );

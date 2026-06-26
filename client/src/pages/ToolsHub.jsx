@@ -562,7 +562,6 @@ export default function ToolsHub() {
           </div>
         )}
       </main>
-      <AdSlot slotKey="leaderboard2" slotName="Leaderboard 2 (728×90)" />
     </div>
   );
 }

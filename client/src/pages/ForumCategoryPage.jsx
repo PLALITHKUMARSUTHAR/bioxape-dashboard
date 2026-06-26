@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getPosts, getCategories } from '../api/forum';
 import PostCard from '../components/forum/PostCard';
 import TagBadge from '../components/forum/TagBadge';
+import AdSlot from '../components/AdSlot';
 
 export default function ForumCategoryPage({ currentUser, onPromptLogin }) {
   const { slug } = useParams();
@@ -128,8 +129,13 @@ export default function ForumCategoryPage({ currentUser, onPromptLogin }) {
           ) : (
             <>
               <div className="posts-list">
-                {posts.map((post) => (
-                  <PostCard key={post._id} post={post} />
+                {posts.map((post, index) => (
+                  <React.Fragment key={post._id}>
+                    <PostCard post={post} />
+                    {(index + 1) % 5 === 0 && (
+                      <AdSlot slotKey="FORUM_FEED" />
+                    )}
+                  </React.Fragment>
                 ))}
               </div>
 
@@ -189,6 +195,8 @@ export default function ForumCategoryPage({ currentUser, onPromptLogin }) {
               We encourage respectful, scientific discussions. Keep research-backed citations where applicable, and respect community diversity.
             </p>
           </div>
+
+          <AdSlot slotKey="SIDEBAR" />
         </div>
       </div>
     </div>

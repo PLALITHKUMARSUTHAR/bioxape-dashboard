@@ -84,6 +84,8 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
         <p>Engage with global experts, researchers, and enthusiasts. Share discoveries, discuss methodologies, and explore biotechnology together.</p>
       </div>
 
+      <AdSlot slotKey="HOMEPAGE" />
+
       <div className="forum-layout">
         {/* Main Content Area */}
         <div className="forum-content">
@@ -110,8 +112,13 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
             ) : latestPosts.length === 0 ? (
               <p style={{ color: 'var(--text4)' }}>No discussions found.</p>
             ) : (
-              latestPosts.map((post) => (
-                <PostCard key={post._id} post={post} />
+              latestPosts.map((post, index) => (
+                <React.Fragment key={post._id}>
+                  <PostCard post={post} />
+                  {(index + 1) % 5 === 0 && (
+                    <AdSlot slotKey="FORUM_FEED" />
+                  )}
+                </React.Fragment>
               ))
             )}
           </div>
@@ -158,9 +165,10 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
               <span className="tag-badge" onClick={() => navigate('/?tag=AI')}>#AI</span>
             </div>
           </div>
+
+          <AdSlot slotKey="SIDEBAR" />
         </div>
       </div>
-      <AdSlot slotKey="leaderboard2" slotName="Leaderboard 2 (728×90)" />
     </div>
   );
 }

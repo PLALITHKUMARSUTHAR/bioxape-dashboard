@@ -181,6 +181,45 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
   const isAuthor = currentUser && post.author?._id === currentUser._id;
   const canDeletePost = isAuthor || isAdmin;
 
+  const renderPostBody = () => {
+    if (!post.body) return null;
+    const paragraphs = post.body.split(/\r?\n\s*\r?\n/);
+    
+    if (paragraphs.length <= 3) {
+      return (
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {post.body}
+        </ReactMarkdown>
+      );
+    }
+
+    const firstPart = paragraphs.slice(0, 3).join('\n\n');
+    const secondPart = paragraphs.slice(3, 6).join('\n\n');
+    const thirdPart = paragraphs.slice(6).join('\n\n');
+
+    return (
+      <>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {firstPart}
+        </ReactMarkdown>
+        <AdSlot slotKey="ARTICLE_MID1" />
+        {secondPart && (
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {secondPart}
+          </ReactMarkdown>
+        )}
+        {paragraphs.length > 6 && (
+          <AdSlot slotKey="ARTICLE_MID2" />
+        )}
+        {thirdPart && (
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {thirdPart}
+          </ReactMarkdown>
+        )}
+      </>
+    );
+  };
+
   return (
     <div className="bx-wrap">
       {/* Post Detail Card */}
@@ -226,6 +265,7 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
             </div>
 
             <h1 className="post-title">{post.title}</h1>
+            <AdSlot slotKey="ARTICLE_TOP" className="ad-hide-mobile" />
 
             <div className="post-card-meta" style={{ border: 'none', padding: 0 }}>
               <div className="post-card-author">
@@ -256,9 +296,7 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
           </div>
 
           <div className="post-body">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {post.body}
-            </ReactMarkdown>
+            {renderPostBody()}
           </div>
 
           <div className="tags-cloud">
@@ -266,6 +304,8 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
               <TagBadge key={idx} tag={t} />
             ))}
           </div>
+
+          <AdSlot slotKey="ARTICLE_BOTTOM" className="ad-hide-mobile" />
         </div>
       </div>
 
@@ -304,7 +344,6 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
           </div>
         )}
       </div>
-      <AdSlot slotKey="leaderboard2" slotName="Leaderboard 2 (728×90)" />
     </div>
   );
 }
