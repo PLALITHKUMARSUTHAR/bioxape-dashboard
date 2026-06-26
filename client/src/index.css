@@ -1138,6 +1138,7 @@ button, input, select, textarea {
 /* Blur style for list cards */
 .early-access-blur-content {
   filter: blur(5px);
+  -webkit-user-select: none;
   user-select: none;
   pointer-events: none;
   opacity: 0.6;
