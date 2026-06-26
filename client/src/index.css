@@ -1082,7 +1082,8 @@ button, input, select, textarea {
   align-items: center;
   justify-content: center;
 }
-.ad-slot.placeholder {
+/* Styling for empty/placeholder ad slots matching the main page outlines & dimensions */
+ins.adsbygoogle:not(:has(iframe)) {
   border: 1.5px dashed var(--border2) !important;
   background: var(--white) !important;
   color: var(--text4) !important;
@@ -1091,71 +1092,61 @@ button, input, select, textarea {
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
   box-sizing: border-box !important;
-  min-height: 90px;
   display: flex !important;
   align-items: center;
   justify-content: center;
 }
 
-.ad-slot.placeholder:has(iframe) {
-  border: none !important;
-  background: transparent !important;
-  min-height: auto !important;
+/* Sidebar dimensions */
+.ad-wrapper:has(ins[data-ad-slot="5051678940"]) ins.adsbygoogle:not(:has(iframe)) {
+  width: 300px !important;
+  height: 250px !important;
+  margin: 0 auto;
+}
+.ad-wrapper:has(ins[data-ad-slot="5051678940"]) ins.adsbygoogle:not(:has(iframe))::after {
+  content: "Ad Space: Sidebar (300×250)";
 }
 
-.ad-slot:has(iframe) .ad-placeholder-label {
-  display: none !important;
+/* Horizontal banner dimensions (728x90) for all other slots */
+.ad-wrapper:not(:has(ins[data-ad-slot="5051678940"])) ins.adsbygoogle:not(:has(iframe)) {
+  width: 728px !important;
+  height: 90px !important;
+  margin: 0 auto;
+}
+.ad-wrapper:has(ins[data-ad-slot="7085412975"]) ins.adsbygoogle:not(:has(iframe))::after {
+  content: "Ad Space: Leaderboard (728×90)";
+}
+.ad-wrapper:has(ins[data-ad-slot="2425515605"]) ins.adsbygoogle:not(:has(iframe))::after {
+  content: "Ad Space: Forum Feed (728×90)";
+}
+.ad-wrapper:has(ins[data-ad-slot="4842393014"]) ins.adsbygoogle:not(:has(iframe))::after {
+  content: "Ad Space: Article Top (728×90)";
+}
+.ad-wrapper:has(ins[data-ad-slot="3529311344"]) ins.adsbygoogle:not(:has(iframe))::after {
+  content: "Ad Space: Article Mid 1 (728×90)";
+}
+.ad-wrapper:has(ins[data-ad-slot="9032919462"]) ins.adsbygoogle:not(:has(iframe))::after {
+  content: "Ad Space: Article Mid 2 (728×90)";
+}
+.ad-wrapper:has(ins[data-ad-slot="7740019091"]) ins.adsbygoogle:not(:has(iframe))::after {
+  content: "Ad Space: Article Bottom (728×90)";
+}
+.ad-wrapper:has(ins[data-ad-slot="7486270597"]) ins.adsbygoogle:not(:has(iframe))::after {
+  content: "Ad Space: Tools Result (728×90)";
 }
 
-.bx-ad-sidebar-widget {
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.bx-ad-header {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  align-items: center;
-  margin-bottom: 4px;
-}
-
-.bx-ad-pill-no-margin {
-  margin: 0 !important;
-}
-
-.bx-ad-flex-center {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-}
-
-.ad-slot-300x250 {
-  width: 300px;
-  height: 250px;
-  min-height: 250px !important;
-}
-
-.ad-slot-728x90 {
-  width: 728px;
-  height: 90px;
-  min-height: 90px !important;
+@media (max-width: 768px) {
+  .ad-wrapper:not(:has(ins[data-ad-slot="5051678940"])) ins.adsbygoogle:not(:has(iframe)) {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 90px !important;
+  }
 }
 
 @media (max-width: 768px) {
   .ad-hide-mobile {
     display: none !important;
-  }
-  .ad-slot-728x90 {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 90px !important;
   }
 }
 
