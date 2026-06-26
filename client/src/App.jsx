@@ -123,10 +123,7 @@ function App() {
         <header id="bx-nav">
           <div className="bx-wrap nav-row">
             <a className="bx-brand" href="/">
-              <div className="bx-brand-mark">
-                <svg viewBox="0 0 24 24"><path d="m8 18.8 8.1-13.6"/><path d="M14 20h2"/><path d="m9 10 7.4-4"/><path d="m17 14.5-8-4.8"/><path d="M8 4h2"/><path d="m15.5 18-7.5-4.5"/><path d="m10 4 8 13.6"/></svg>
-              </div>
-              <div className="bx-brand-name">Bio<em><span className="brand-x">X</span>Ape</em></div>
+              <img src="/assets/main_logo.png" alt="BioXApe" style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
             </a>
 
               <nav className="nav-links">
