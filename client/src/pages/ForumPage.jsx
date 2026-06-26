@@ -59,12 +59,12 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
     <div className="bx-wrap">
       {/* Hero Section */}
       <div className="forum-hero">
-        <svg className="hero-dna-svg" viewBox="0 0 65 130" fill="none" style={{ position: 'absolute', top: '22px', right: '22px', opacity: 0.18, width: '65px', height: '130px' }}>
-          <path d="M12 6 Q54 26 12 53 Q54 80 12 107 Q54 127 12 145" stroke="white" strokeWidth="2.5" fill="none"/>
-          <path d="M53 6 Q11 26 53 53 Q11 80 53 107 Q11 127 53 145" stroke="#6ee7b7" strokeWidth="2.5" fill="none"/>
-          <line x1="12" y1="26" x2="53" y2="26" stroke="white" strokeWidth="1.5" opacity=".5"/>
-          <line x1="53" y1="53" x2="12" y2="53" stroke="white" strokeWidth="1.5" opacity=".5"/>
-          <line x1="12" y1="80" x2="53" y2="80" stroke="white" strokeWidth="1.5" opacity=".5"/>
+        <svg className="hero-dna-svg" viewBox="0 0 65 130" fill="none" style={{ position: 'absolute', top: '22px', right: '22px', opacity: 0.25, width: '65px', height: '130px' }}>
+          <path d="M12 6 Q54 26 12 53 Q54 80 12 107 Q54 127 12 145" stroke="var(--g200)" strokeWidth="2.5" fill="none"/>
+          <path d="M53 6 Q11 26 53 53 Q11 80 53 107 Q11 127 53 145" stroke="var(--accent)" strokeWidth="2.5" fill="none"/>
+          <line x1="12" y1="26" x2="53" y2="26" stroke="var(--g100)" strokeWidth="1.5" opacity=".5"/>
+          <line x1="53" y1="53" x2="12" y2="53" stroke="var(--g100)" strokeWidth="1.5" opacity=".5"/>
+          <line x1="12" y1="80" x2="53" y2="80" stroke="var(--g100)" strokeWidth="1.5" opacity=".5"/>
         </svg>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
           <picture style={{ height: '46px', display: 'block' }}>

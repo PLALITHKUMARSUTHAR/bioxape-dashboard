@@ -299,12 +299,13 @@ button, input, select, textarea {
 
 /* Hero Banner */
 .forum-hero {
-  background: linear-gradient(135deg, var(--g900) 0%, var(--g700) 100%);
-  color: var(--white);
+  background: var(--white);
+  color: var(--text1);
+  border: 2px solid var(--accent);
   padding: 48px 32px;
   border-radius: var(--radius);
   margin-bottom: 40px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 4px 20px rgba(39, 163, 99, 0.05);
   position: relative;
   overflow: hidden;
 }
@@ -314,16 +315,17 @@ button, input, select, textarea {
   font-size: 38px;
   margin-bottom: 0;
   font-weight: 700;
+  color: var(--text1);
 }
 
 .forum-hero h1 em {
   font-style: italic;
-  color: #6ee7b7;
+  color: var(--accent);
 }
 
 .forum-hero p {
   font-size: 16px;
-  opacity: 0.9;
+  color: var(--text3);
   max-width: 600px;
 }
 
