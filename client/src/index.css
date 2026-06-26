@@ -1299,14 +1299,91 @@ button, input, select, textarea {
   100% { transform: translateY(0px); }
 }
 
-/* Collapse unfilled/empty ad slots to prevent layout gaps */
-ins.adsbygoogle[data-ad-status="unfilled"] {
-  display: none !important;
+/* Show empty/loading ad slots as styled placeholders with dimensions */
+ins.adsbygoogle:not(:has(iframe)) {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--border2) !important;
+  background: var(--white) !important;
+  color: var(--text4) !important;
+  box-sizing: border-box !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .5px !important;
+  position: relative;
+  width: 100% !important;
+  min-height: 90px;
 }
-.ad-wrapper:has(ins.adsbygoogle[data-ad-status="unfilled"]),
-.ad-wrapper:not(:has(iframe)) {
-  display: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  height: 0 !important;
+
+/* Specific dimensions for forum and article placeholders */
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="HOMEPAGE"] {
+  min-height: 90px;
+  max-width: 728px;
 }
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="HOMEPAGE"]::after {
+  content: "Ad Space: Homepage (728×90)";
+}
+
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="SIDEBAR"] {
+  min-height: 250px;
+  max-width: 300px;
+}
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="SIDEBAR"]::after {
+  content: "Ad Space: Sidebar (300×250)";
+}
+
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="FORUM_FEED"] {
+  min-height: 90px;
+  max-width: 728px;
+}
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="FORUM_FEED"]::after {
+  content: "Ad Space: Forum Feed (728×90)";
+}
+
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="ARTICLE_TOP"] {
+  min-height: 90px;
+  max-width: 728px;
+}
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="ARTICLE_TOP"]::after {
+  content: "Ad Space: Article Top (728×90)";
+}
+
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="ARTICLE_MID1"] {
+  min-height: 90px;
+  max-width: 728px;
+}
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="ARTICLE_MID1"]::after {
+  content: "Ad Space: Article Mid 1 (728×90)";
+}
+
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="ARTICLE_MID2"] {
+  min-height: 90px;
+  max-width: 728px;
+}
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="ARTICLE_MID2"]::after {
+  content: "Ad Space: Article Mid 2 (728×90)";
+}
+
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="ARTICLE_BOTTOM"] {
+  min-height: 90px;
+  max-width: 728px;
+}
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="ARTICLE_BOTTOM"]::after {
+  content: "Ad Space: Article Bottom (728×90)";
+}
+
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="TOOLS_RESULT"] {
+  min-height: 90px;
+  max-width: 728px;
+}
+ins.adsbygoogle:not(:has(iframe))[data-slot-key="TOOLS_RESULT"]::after {
+  content: "Ad Space: Tools Result (728×90)";
+}
+
+/* Fallback label */
+ins.adsbygoogle:not(:has(iframe))::after {
+  content: "Ad Space: " attr(data-slot-key);
+}
+
