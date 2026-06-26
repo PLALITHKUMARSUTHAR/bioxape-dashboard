@@ -1082,8 +1082,7 @@ button, input, select, textarea {
   align-items: center;
   justify-content: center;
 }
-/* Styling for empty/placeholder ad slots matching the main page outlines & dimensions */
-ins.adsbygoogle:not(:has(iframe)) {
+.ad-slot.placeholder {
   border: 1.5px dashed var(--border2) !important;
   background: var(--white) !important;
   color: var(--text4) !important;
@@ -1092,56 +1091,7 @@ ins.adsbygoogle:not(:has(iframe)) {
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
   box-sizing: border-box !important;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Sidebar dimensions */
-.ad-wrapper:has(ins[data-ad-slot="5051678940"]) ins.adsbygoogle:not(:has(iframe)) {
-  width: 300px !important;
-  height: 250px !important;
-  margin: 0 auto;
-}
-.ad-wrapper:has(ins[data-ad-slot="5051678940"]) ins.adsbygoogle:not(:has(iframe))::after {
-  content: "Ad Space: Sidebar (300×250)";
-}
-
-/* Horizontal banner dimensions (728x90) for all other slots */
-.ad-wrapper:not(:has(ins[data-ad-slot="5051678940"])) ins.adsbygoogle:not(:has(iframe)) {
-  width: 728px !important;
-  height: 90px !important;
-  margin: 0 auto;
-}
-.ad-wrapper:has(ins[data-ad-slot="7085412975"]) ins.adsbygoogle:not(:has(iframe))::after {
-  content: "Ad Space: Leaderboard (728×90)";
-}
-.ad-wrapper:has(ins[data-ad-slot="2425515605"]) ins.adsbygoogle:not(:has(iframe))::after {
-  content: "Ad Space: Forum Feed (728×90)";
-}
-.ad-wrapper:has(ins[data-ad-slot="4842393014"]) ins.adsbygoogle:not(:has(iframe))::after {
-  content: "Ad Space: Article Top (728×90)";
-}
-.ad-wrapper:has(ins[data-ad-slot="3529311344"]) ins.adsbygoogle:not(:has(iframe))::after {
-  content: "Ad Space: Article Mid 1 (728×90)";
-}
-.ad-wrapper:has(ins[data-ad-slot="9032919462"]) ins.adsbygoogle:not(:has(iframe))::after {
-  content: "Ad Space: Article Mid 2 (728×90)";
-}
-.ad-wrapper:has(ins[data-ad-slot="7740019091"]) ins.adsbygoogle:not(:has(iframe))::after {
-  content: "Ad Space: Article Bottom (728×90)";
-}
-.ad-wrapper:has(ins[data-ad-slot="7486270597"]) ins.adsbygoogle:not(:has(iframe))::after {
-  content: "Ad Space: Tools Result (728×90)";
-}
-
-@media (max-width: 768px) {
-  .ad-wrapper:not(:has(ins[data-ad-slot="5051678940"])) ins.adsbygoogle:not(:has(iframe)) {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 90px !important;
-  }
+  min-height: 90px;
 }
 
 @media (max-width: 768px) {
