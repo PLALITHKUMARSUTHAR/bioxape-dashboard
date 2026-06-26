@@ -4,6 +4,7 @@ import { getPosts, getCategories } from '../api/forum';
 import PostCard from '../components/forum/PostCard';
 import TagBadge from '../components/forum/TagBadge';
 import AdSlot from '../components/AdSlot';
+import { checkEarlyAccess } from '../utils/earlyAccess';
 
 export default function ForumCategoryPage({ currentUser, onPromptLogin }) {
   const { slug } = useParams();
@@ -43,7 +44,15 @@ export default function ForumCategoryPage({ currentUser, onPromptLogin }) {
           setError('Category not found');
         }
 
-        setPosts(postsRes.data?.data || []);
+        const rawPosts = postsRes.data?.data || [];
+        const sorted = [...rawPosts].sort((a, b) => {
+          const isA_EA = checkEarlyAccess(a, null).isEarlyAccess;
+          const isB_EA = checkEarlyAccess(b, null).isEarlyAccess;
+          if (isA_EA && !isB_EA) return -1;
+          if (!isA_EA && isB_EA) return 1;
+          return 0;
+        });
+        setPosts(sorted);
         setTotalPages(postsRes.data?.totalPages || 1);
 
         // Collect tags from posts for filter chips
