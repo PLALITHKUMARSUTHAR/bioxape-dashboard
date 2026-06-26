@@ -84,6 +84,8 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
         <p>Engage with global experts, researchers, and enthusiasts. Share discoveries, discuss methodologies, and explore biotechnology together.</p>
       </div>
 
+      <AdSlot slotKey="HOMEPAGE" />
+
       <div className="forum-layout">
         {/* Main Content Area */}
         <div className="forum-content">

@@ -1299,11 +1299,12 @@ button, input, select, textarea {
   100% { transform: translateY(0px); }
 }
 
-/* Collapse unfilled ad slots to prevent layout gaps */
+/* Collapse unfilled/empty ad slots to prevent layout gaps */
 ins.adsbygoogle[data-ad-status="unfilled"] {
   display: none !important;
 }
-.ad-wrapper:has(ins.adsbygoogle[data-ad-status="unfilled"]) {
+.ad-wrapper:has(ins.adsbygoogle[data-ad-status="unfilled"]),
+.ad-wrapper:not(:has(iframe)) {
   display: none !important;
   margin: 0 !important;
   padding: 0 !important;
