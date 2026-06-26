@@ -1218,8 +1218,8 @@
     .art-card.ea-locked .art-body,
     .art-card.ea-locked .article-cover-thumb-wrap,
     .art-card.ea-locked .art-img {
-      filter: blur(5px);
-      opacity: 0.6;
+      filter: blur(20px);
+      opacity: 0.02;
       pointer-events: none;
       user-select: none;
     }
@@ -1256,8 +1256,8 @@
     }
     .carousel-slide.ea-locked-slide .hero-main-img img,
     .carousel-slide.ea-locked-slide .hero-main-body {
-      filter: blur(5px);
-      opacity: 0.6;
+      filter: blur(20px);
+      opacity: 0.02;
       pointer-events: none;
       user-select: none;
     }
@@ -1681,7 +1681,7 @@
           cardClass += ' ea-locked';
           lockOverlay = `
             <div class="ea-lock-overlay">
-              <span class="ea-lock-badge-floating">🔒 Locked</span>
+              <span class="ea-lock-badge-floating">🔒 Early Access</span>
             </div>
           `;
         } else {
@@ -2418,6 +2418,13 @@
       }
     ];
 
+    if (OFFLINE_POSTS.length >= 2) {
+      OFFLINE_POSTS[0].isEarlyAccess = true;
+      OFFLINE_POSTS[0].publishedAt = new Date().toISOString();
+      OFFLINE_POSTS[1].isEarlyAccess = true;
+      OFFLINE_POSTS[1].publishedAt = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    }
+
     function renderOfflineArticles(page) {
       const gridEl = document.getElementById('bx-latest-articles-grid');
       if (!gridEl) return;
@@ -2429,8 +2436,7 @@
 
       const isAuthorized = checkUserAuthorized();
       gridEl.innerHTML = paginatedPosts.map((p, idx) => {
-        const absoluteIndex = start + idx;
-        const isEA = p.isEarlyAccess || (page === 1 && absoluteIndex < 2);
+        const isEA = !!p.isEarlyAccess;
         const clickHandler = isEA && !isAuthorized
           ? `showEarlyAccessModal('${p._id}', '${p.publishedAt || p.createdAt || ''}')`
           : `window.location.href='/post?id=${p._id}'`;
@@ -2459,8 +2465,7 @@
           
           const isAuthorized = checkUserAuthorized();
           gridEl.innerHTML = paginated.map((p, idx) => {
-            const absoluteIndex = start + idx;
-            const isEA = p.isEarlyAccess || (page === 1 && absoluteIndex < 2);
+            const isEA = !!p.isEarlyAccess;
             const postLink = p._id || p.postId || p.link || '#';
             const clickHandler = isEA && !isAuthorized
               ? `showEarlyAccessModal('${postLink}', '${p.publishedAt || p.createdAt || ''}')`
@@ -2490,7 +2495,7 @@
         
         const isAuthorized = checkUserAuthorized();
         gridEl.innerHTML = data.posts.map((p, idx) => {
-          const isEA = p.isEarlyAccess || (page === 1 && idx < 2);
+          const isEA = !!p.isEarlyAccess;
           const clickHandler = isEA && !isAuthorized
             ? `showEarlyAccessModal('${p._id}', '${p.publishedAt || p.createdAt || ''}')`
             : `window.location.href='/post?id=${p._id}'`;
@@ -2883,7 +2888,7 @@
         }
 
         const isAuthorized = checkUserAuthorized();
-        const isEA = p.isEarlyAccess || (idx < 2);
+        const isEA = !!p.isEarlyAccess;
         
         let slideClass = 'carousel-slide';
         let slideClickHandler = `window.location.href='/post?id=${p._id}'`;
@@ -2894,7 +2899,7 @@
           slideClickHandler = `showEarlyAccessModal('${p._id}', '${p.publishedAt || p.createdAt || ''}')`;
           slideLockOverlay = `
             <div class="ea-lock-overlay" style="background: none;">
-              <span class="ea-lock-badge-floating">🔒 Locked</span>
+              <span class="ea-lock-badge-floating">🔒 Early Access</span>
             </div>
           `;
         }

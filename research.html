@@ -866,8 +866,8 @@
     .art-card.ea-locked .art-body,
     .art-card.ea-locked .article-cover-thumb-wrap,
     .art-card.ea-locked .art-img {
-      filter: blur(5px);
-      opacity: 0.6;
+      filter: blur(20px);
+      opacity: 0.02;
       pointer-events: none;
       user-select: none;
     }
@@ -1129,7 +1129,7 @@
           cardClass += ' ea-locked';
           lockOverlay = `
             <div class="ea-lock-overlay">
-              <span class="ea-lock-badge-floating">🔒 Locked</span>
+              <span class="ea-lock-badge-floating">🔒 Early Access</span>
             </div>
           `;
         } else {
