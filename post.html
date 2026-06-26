@@ -268,6 +268,80 @@
     .ticker-wrap {
       overflow: hidden;
     }
+
+    /* Early Access Paywall Styles */
+    .early-access-post-cta-overlay {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      margin: 20px 0;
+      background: linear-gradient(135deg, var(--off) 0%, var(--surface) 100%);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+    }
+    .ea-cta-card {
+      max-width: 480px;
+      text-align: center;
+      background: var(--white);
+      padding: 32px 28px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border2);
+      box-shadow: 0 10px 25px rgba(39, 163, 99, 0.08);
+    }
+    .ea-cta-icon {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 12px;
+    }
+    .ea-cta-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--text1);
+      margin-bottom: 12px;
+    }
+    .ea-cta-card p {
+      font-size: 13.5px;
+      color: var(--text3);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .ea-cta-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn-ea-primary {
+      display: block;
+      background: var(--accent);
+      color: var(--white) !important;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(39, 163, 99, 0.25);
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .btn-ea-primary:hover {
+      background: var(--accent-d);
+      transform: translateY(-1px);
+    }
+    .btn-ea-secondary {
+      display: block;
+      color: var(--text2) !important;
+      font-weight: 500;
+      font-size: 13px;
+      padding: 10px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .btn-ea-secondary:hover {
+      background: var(--off);
+    }
   </style>
 </head>
 <body>
@@ -400,6 +474,21 @@
       ? 'http://localhost:5000/api' 
       : 'https://bioxape-backend.onrender.com/api';
 
+    function checkUserAuthorized() {
+      const userStr = localStorage.getItem('bioxape_user');
+      if (!userStr) return false;
+      try {
+        const user = JSON.parse(userStr);
+        const role = user.role;
+        const tier = (user.subscriptionTier || 'free').toLowerCase();
+        const isStaff = ['admin', 'editor', 'author'].includes(role);
+        const isPremium = ['basic', 'pro', 'elite', 'institutional'].includes(tier);
+        return isStaff || isPremium;
+      } catch (e) {
+        return false;
+      }
+    }
+
     function getParam(name) {
       return new URLSearchParams(window.location.search).get(name);
     }
@@ -443,32 +532,80 @@
         document.getElementById('post-readtime').textContent = `${p.readTimeMinutes || 2} min read`;
         document.getElementById('post-av').textContent = p.authorName ? p.authorName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() : 'AU';
         let bodyHtml = p.bodyHtml || '<p>No content available.</p>';
+        const isAuthorized = checkUserAuthorized();
         
-        // Inject in-article ad placeholder dynamically after paragraph 2 or at the end
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = bodyHtml;
-        const paragraphs = tempDiv.querySelectorAll('p');
-        const adHtml = `
-          <div class="ad-bar" style="margin: 24px 0;">
-            <div style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 12px; flex-direction: column;">
-              <div style="display:flex; justify-content:space-between; width:100%; max-width:730px; align-items:center;">
-                <span class="ad-pill">Ad</span>
+        if (p.isEarlyAccess && !isAuthorized) {
+          // Show the first paragraph as a teaser and blur the rest with a premium paywall card
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = bodyHtml;
+          const paragraphs = tempDiv.querySelectorAll('p');
+          let previewHtml = '';
+          if (paragraphs.length > 0) {
+            previewHtml = paragraphs[0].outerHTML;
+          } else {
+            previewHtml = bodyHtml.slice(0, 200) + '...';
+          }
+          
+          document.getElementById('post-body').innerHTML = `
+            <div>
+              ${previewHtml}
+            </div>
+            <div style="position: relative; margin-top: 24px; min-height: 280px;">
+              <div style="filter: blur(4px); user-select: none; pointer-events: none; opacity: 0.4;">
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin elementum, lorem ac imperdiet tristique, purus nisi dictum lacus, sit amet accumsan est urna ac tortor.</p>
+                <p>Aenean ut imperdiet felis. Curabitur vel leo nec felis consequat vulputate. Proin non risus accumsan, elementum dolor sit amet, consectetur mi. Sed tristique lorem vitae risus molestie tempor.</p>
               </div>
-              <div class="ad-slot placeholder" id="bx-ad-inarticle" data-slot="in_article" style="width: 100%; max-width: 730px; min-height: 90px;">
-                Ad Space: In-Article Ad
+              <div class="early-access-post-cta-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10;">
+                <div class="ea-cta-card">
+                  <span class="ea-cta-icon">🔒</span>
+                  <h2>✦ Premium Early Access ✦</h2>
+                  <p>
+                    This article is in early access. It is currently exclusive to premium members.
+                  </p>
+                  <div class="ea-cta-buttons">
+                    <a href="/subscribe" class="btn-ea-primary">Subscribe to Read Instantly</a>
+                    <a href="/login" class="btn-ea-secondary">Sign In to Account</a>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-        if (paragraphs.length >= 3) {
-          const adNode = document.createElement('div');
-          adNode.innerHTML = adHtml;
-          paragraphs[1].parentNode.insertBefore(adNode.firstElementChild, paragraphs[1].nextSibling);
-          bodyHtml = tempDiv.innerHTML;
+          `;
+          
+          // Disable PDF download button
+          const downloadBtn = document.querySelector('.btn-download-pdf');
+          if (downloadBtn) {
+            downloadBtn.style.opacity = '0.5';
+            downloadBtn.style.pointerEvents = 'none';
+            downloadBtn.setAttribute('title', 'Locked content');
+            downloadBtn.onclick = null;
+          }
         } else {
-          bodyHtml += adHtml;
+          // Inject in-article ad placeholder dynamically after paragraph 2 or at the end
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = bodyHtml;
+          const paragraphs = tempDiv.querySelectorAll('p');
+          const adHtml = `
+            <div class="ad-bar" style="margin: 24px 0;">
+              <div style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 12px; flex-direction: column;">
+                <div style="display:flex; justify-content:space-between; width:100%; max-width:730px; align-items:center;">
+                  <span class="ad-pill">Ad</span>
+                </div>
+                <div class="ad-slot placeholder" id="bx-ad-inarticle" data-slot="in_article" style="width: 100%; max-width: 730px; min-height: 90px;">
+                  Ad Space: In-Article Ad
+                </div>
+              </div>
+            </div>
+          `;
+          if (paragraphs.length >= 3) {
+            const adNode = document.createElement('div');
+            adNode.innerHTML = adHtml;
+            paragraphs[1].parentNode.insertBefore(adNode.firstElementChild, paragraphs[1].nextSibling);
+            bodyHtml = tempDiv.innerHTML;
+          } else {
+            bodyHtml += adHtml;
+          }
+          document.getElementById('post-body').innerHTML = bodyHtml;
         }
-        document.getElementById('post-body').innerHTML = bodyHtml;
 
         if (p.coverImageUrl) {
           document.getElementById('post-cover').src = p.coverImageUrl;

@@ -5,7 +5,6 @@ import CategoryCard from '../components/forum/CategoryCard';
 import PostCard from '../components/forum/PostCard';
 import SearchBar from '../components/forum/SearchBar';
 import AdSlot from '../components/AdSlot';
-import { checkEarlyAccess } from '../utils/earlyAccess';
 
 export default function ForumPage({ currentUser, onPromptLogin }) {
   const [categories, setCategories] = useState([]);
@@ -35,16 +34,7 @@ export default function ForumPage({ currentUser, onPromptLogin }) {
 
         setCategories(catRes.data?.data || []);
         setTrending(trendRes.data?.data || []);
-        
-        const rawPosts = postsRes.data?.data || [];
-        const sorted = [...rawPosts].sort((a, b) => {
-          const isA_EA = checkEarlyAccess(a, null).isEarlyAccess;
-          const isB_EA = checkEarlyAccess(b, null).isEarlyAccess;
-          if (isA_EA && !isB_EA) return -1;
-          if (!isA_EA && isB_EA) return 1;
-          return 0;
-        });
-        setLatestPosts(sorted);
+        setLatestPosts(postsRes.data?.data || []);
       } catch (err) {
         console.error('Error fetching forum home data:', err);
         setError('Could not load forum data. Please try again later.');

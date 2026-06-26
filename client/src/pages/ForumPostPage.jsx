@@ -18,7 +18,6 @@ import CommentThread from '../components/forum/CommentThread';
 import CommentBox from '../components/forum/CommentBox';
 import TagBadge from '../components/forum/TagBadge';
 import AdSlot from '../components/AdSlot';
-import { checkEarlyAccess } from '../utils/earlyAccess';
 
 export default function ForumPostPage({ currentUser, onPromptLogin }) {
   const { postId } = useParams();
@@ -181,7 +180,6 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
 
   const isAuthor = currentUser && post.author?._id === currentUser._id;
   const canDeletePost = isAuthor || isAdmin;
-  const { isEarlyAccess, isAuthorized, daysRemaining } = checkEarlyAccess(post, currentUser);
 
   const renderPostBody = () => {
     if (!post.body) return null;
@@ -297,82 +295,55 @@ export default function ForumPostPage({ currentUser, onPromptLogin }) {
             </div>
           </div>
 
-          {isEarlyAccess && !isAuthorized ? (
-            <div className="early-access-post-cta-overlay">
-              <div className="ea-cta-card">
-                <span className="ea-cta-icon">🔒</span>
-                <h2>✦ Premium Early Access ✦</h2>
-                <p>
-                  This article is in early access. It was written by an editor or admin and is currently exclusive to premium members.
-                </p>
-                <div className="ea-cta-meta">
-                  It will automatically become public in <strong>{daysRemaining} days</strong>.
-                </div>
-                <div className="ea-cta-buttons">
-                  <a href="/subscribe" className="btn-ea-primary">Subscribe to Read Instantly</a>
-                  {!currentUser && (
-                    <span onClick={onPromptLogin} className="btn-ea-secondary" style={{ cursor: 'pointer' }}>
-                      Sign In to Account
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="post-body">
-                {renderPostBody()}
-              </div>
+          <div className="post-body">
+            {renderPostBody()}
+          </div>
 
-              <div className="tags-cloud">
-                {post.tags?.map((t, idx) => (
-                  <TagBadge key={idx} tag={t} />
-                ))}
-              </div>
+          <div className="tags-cloud">
+            {post.tags?.map((t, idx) => (
+              <TagBadge key={idx} tag={t} />
+            ))}
+          </div>
 
-              <AdSlot slotKey="ARTICLE_BOTTOM" className="ad-hide-mobile" />
-            </>
-          )}
+          <AdSlot slotKey="ARTICLE_BOTTOM" className="ad-hide-mobile" />
         </div>
       </div>
 
       {/* Comments section */}
-      {!(isEarlyAccess && !isAuthorized) && (
-        <div className="comments-section">
-          <h2 className="comments-header">
-            {post.commentCount || 0} {post.commentCount === 1 ? 'Response' : 'Responses'}
-          </h2>
+      <div className="comments-section">
+        <h2 className="comments-header">
+          {post.commentCount || 0} {post.commentCount === 1 ? 'Response' : 'Responses'}
+        </h2>
 
-          {post.isLocked && (
-            <div className="closed-banner">
-              🔒 This thread is locked. You cannot reply or post comments to it.
-            </div>
-          )}
+        {post.isLocked && (
+          <div className="closed-banner">
+            🔒 This thread is locked. You cannot reply or post comments to it.
+          </div>
+        )}
 
-          <CommentThread 
-            comments={comments}
-            currentUser={currentUser}
-            postAuthorId={post.author?._id}
-            isPostLocked={post.isLocked}
-            onVoteComment={handleVoteComment}
-            onReplySubmit={(commentId, body) => handleNewComment(body, commentId)}
-            onDeleteComment={handleDeleteComment}
-            onAcceptAnswer={handleAcceptComment}
-            onPromptLogin={onPromptLogin}
-          />
+        <CommentThread 
+          comments={comments}
+          currentUser={currentUser}
+          postAuthorId={post.author?._id}
+          isPostLocked={post.isLocked}
+          onVoteComment={handleVoteComment}
+          onReplySubmit={(commentId, body) => handleNewComment(body, commentId)}
+          onDeleteComment={handleDeleteComment}
+          onAcceptAnswer={handleAcceptComment}
+          onPromptLogin={onPromptLogin}
+        />
 
-          {!post.isLocked && (
-            <div style={{ marginTop: '40px', borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '14px' }}>Your Response</h3>
-              <CommentBox 
-                isLoggedIn={isLoggedIn}
-                onPromptLogin={onPromptLogin}
-                onSubmit={(body) => handleNewComment(body)}
-              />
-            </div>
-          )}
-        </div>
-      )}
+        {!post.isLocked && (
+          <div style={{ marginTop: '40px', borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '14px' }}>Your Response</h3>
+            <CommentBox 
+              isLoggedIn={isLoggedIn}
+              onPromptLogin={onPromptLogin}
+              onSubmit={(body) => handleNewComment(body)}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
