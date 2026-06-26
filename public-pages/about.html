@@ -166,6 +166,8 @@ a{text-decoration:none;color:var(--accent)}
 .btn-primary{display:inline-block;padding:12px 24px;background:var(--accent);color:#fff;border-radius:9px;font-size:14px;font-weight:600}
 .btn-secondary{display:inline-block;padding:12px 24px;border:1.5px solid var(--border);color:var(--text2);border-radius:9px;font-size:14px}
 @media(max-width:768px){.values-grid,.team-grid,.stats-strip{grid-template-columns:1fr 1fr}.hero-about h1{font-size:32px}}
+.bx-brand-logo-pic { height: 38px; display: block; }
+.bx-brand-logo-img { height: 38px; width: auto; object-fit: contain; display: block; }
 </style>
 </head>
 <body>
@@ -174,13 +176,13 @@ a{text-decoration:none;color:var(--accent)}
     <div class="bx-wrap">
       <div class="nav-row">
         <a class="bx-brand" href="/">
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/icon_mobile.png">
-            <img src="/assets/icon.png" alt="BioXApe Icon" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/icon.png" alt="BioXApe Icon" class="bx-brand-logo-img" />
           </picture>
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/main_logo_mobile.png">
-            <img src="/assets/main_logo.png" alt="BioXApe" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/main_logo.png" alt="BioXApe" class="bx-brand-logo-img" />
           </picture>
         </a>
         <div class="nav-links">

@@ -1134,6 +1134,15 @@
     .no-articles-placeholder { grid-column: 1/-1; text-align: center; color: var(--text4); padding: 40px; }
     .article-cover-thumb-img { width:100%; height:100%; object-fit:cover; }
     .author-av-img { object-fit:cover; }
+    .bx-brand-logo-pic { height: 38px; display: block; }
+    .bx-brand-logo-img { height: 38px; width: auto; object-fit: contain; display: block; }
+    .bx-ad-sidebar-widget { padding:15px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .bx-ad-header { display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:4px; }
+    .bx-ad-pill-no-margin { margin:0 !important; }
+    .ad-slot-300x250 { width: 300px; height: 250px; }
+    .ad-slot-728x90 { width: 728px; height: 90px; }
+    .ad-bar-margin-top { margin-top: 32px !important; }
+    .bx-ad-flex-center { width: 100%; display: flex; justify-content: center; align-items: center; gap: 12px; }
 
     /* RESPONSIVE */
     @media(max-width:1024px){
@@ -1297,13 +1306,13 @@
     <div class="bx-wrap">
       <div class="nav-row">
         <a class="bx-brand" href="/">
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/icon_mobile.png">
-            <img src="/assets/icon.png" alt="BioXApe Icon" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/icon.png" alt="BioXApe Icon" class="bx-brand-logo-img" />
           </picture>
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/main_logo_mobile.png">
-            <img src="/assets/main_logo.png" alt="BioXApe" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/main_logo.png" alt="BioXApe" class="bx-brand-logo-img" />
           </picture>
         </a>
         <div class="nav-links">
@@ -1457,11 +1466,11 @@
             <div class="nl-note">GDPR compliant - Unsubscribe anytime</div>
           </div>
           <!-- SIDEBAR AD -->
-          <div class="widget" id="bx-ad-sidebar-widget" style="padding:15px; display:flex; flex-direction:column; align-items:center; gap:8px;">
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:4px;">
-              <span class="ad-pill" style="margin:0;">Ad</span>
+          <div class="widget bx-ad-sidebar-widget" id="bx-ad-sidebar-widget">
+            <div class="bx-ad-header">
+              <span class="ad-pill bx-ad-pill-no-margin">Ad</span>
             </div>
-            <div class="ad-slot placeholder" id="bx-ad-sidebar" data-slot="sidebar_300x250" style="width: 300px; height: 250px;">
+            <div class="ad-slot placeholder ad-slot-300x250" id="bx-ad-sidebar" data-slot="sidebar_300x250">
               Ad Space: Sidebar (300×250)
             </div>
           </div>
@@ -1478,11 +1487,11 @@
             </div>
           </div>
           <!-- EVENTS AD SLOT -->
-          <div class="widget" id="bx-ad-events-widget" style="padding:15px; display:flex; flex-direction:column; align-items:center; gap:8px;">
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:4px;">
-              <span class="ad-pill" style="margin:0;">Ad</span>
+          <div class="widget bx-ad-sidebar-widget" id="bx-ad-events-widget">
+            <div class="bx-ad-header">
+              <span class="ad-pill bx-ad-pill-no-margin">Ad</span>
             </div>
-            <div class="ad-slot placeholder" id="bx-ad-events-sidebar" data-slot="sidebar_300x250" style="width: 300px; height: 250px;">
+            <div class="ad-slot placeholder ad-slot-300x250" id="bx-ad-events-sidebar" data-slot="sidebar_300x250">
               Ad Space: Sidebar (300×250)
             </div>
           </div>
@@ -1490,10 +1499,10 @@
       </div>
 
       <!-- TOP LEADERBOARD AD (Placed after latest articles) -->
-      <div class="ad-bar" id="bx-ad-leaderboard1-bar" style="margin-top: 32px;">
-        <div style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 12px;">
+      <div class="ad-bar ad-bar-margin-top" id="bx-ad-leaderboard1-bar">
+        <div class="bx-ad-flex-center">
           <span class="ad-pill">Ad</span>
-          <div class="ad-slot placeholder" id="bx-ad-leaderboard1" data-slot="leaderboard1" style="width: 728px; height: 90px;">
+          <div class="ad-slot placeholder ad-slot-728x90" id="bx-ad-leaderboard1" data-slot="leaderboard1">
             Ad Space: Leaderboard 1 (728×90)
           </div>
         </div>
@@ -1548,9 +1557,9 @@
 
   <!-- BOTTOM LEADERBOARD AD -->
   <div class="ad-bar" id="bx-ad-leaderboard2-bar">
-    <div class="bx-wrap" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 12px;">
+    <div class="bx-wrap bx-ad-flex-center">
       <span class="ad-pill">Ad</span>
-      <div class="ad-slot placeholder" id="bx-ad-leaderboard2" data-slot="leaderboard2" style="width: 728px; height: 90px;">
+      <div class="ad-slot placeholder ad-slot-728x90" id="bx-ad-leaderboard2" data-slot="leaderboard2">
         Ad Space: Leaderboard 2 (728×90)
       </div>
     </div>

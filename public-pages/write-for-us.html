@@ -154,6 +154,8 @@ a{text-decoration:none;color:var(--accent)}
 .footer-simple{background:var(--g800);color:#9dc9b5;text-align:center;padding:24px;font-size:13px}
 .footer-simple a{color:#6ee7b7}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bx-brand-logo-pic { height: 38px; display: block; }
+.bx-brand-logo-img { height: 38px; width: auto; object-fit: contain; display: block; }
 </style>
 </head>
 <body>
@@ -162,13 +164,13 @@ a{text-decoration:none;color:var(--accent)}
     <div class="bx-wrap">
       <div class="nav-row">
         <a class="bx-brand" href="/">
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/icon_mobile.png">
-            <img src="/assets/icon.png" alt="BioXApe Icon" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/icon.png" alt="BioXApe Icon" class="bx-brand-logo-img" />
           </picture>
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/main_logo_mobile.png">
-            <img src="/assets/main_logo.png" alt="BioXApe" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/main_logo.png" alt="BioXApe" class="bx-brand-logo-img" />
           </picture>
         </a>
         <div class="nav-links">

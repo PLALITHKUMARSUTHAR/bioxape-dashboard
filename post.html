@@ -342,6 +342,15 @@
     .btn-ea-secondary:hover {
       background: var(--off);
     }
+    .bx-brand-logo-pic { height: 38px; display: block; }
+    .bx-brand-logo-img { height: 38px; width: auto; object-fit: contain; display: block; }
+    .vertical-align-middle { vertical-align: middle; }
+    .post-body-padding { padding: 24px 0 64px; }
+    .sidebar-margin-top { margin-top: 24px !important; }
+    .bx-ad-sidebar-widget { padding:15px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .bx-ad-header { display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:4px; }
+    .bx-ad-pill-no-margin { margin:0 !important; }
+    .ad-slot-300x250 { width: 300px; height: 250px; }
   </style>
 </head>
 <body>
@@ -360,13 +369,13 @@
     <div class="bx-wrap">
       <div class="nav-row">
         <a class="bx-brand" href="/">
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/icon_mobile.png">
-            <img src="/assets/icon.png" alt="BioXApe Icon" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/icon.png" alt="BioXApe Icon" class="bx-brand-logo-img" />
           </picture>
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/main_logo_mobile.png">
-            <img src="/assets/main_logo.png" alt="BioXApe" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/main_logo.png" alt="BioXApe" class="bx-brand-logo-img" />
           </picture>
         </a>
         <div class="nav-links">
@@ -415,7 +424,7 @@
         <div class="art-top-row">
           <span class="art-cat" id="post-category">Science</span>
           <button class="btn-download-pdf" onclick="downloadArticlePDF()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="vertical-align-middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             <span>Download PDF</span>
           </button>
         </div>
@@ -439,18 +448,18 @@
       </header>
 
       <div class="with-sidebar">
-        <section class="article-body" id="post-body" style="padding: 24px 0 64px;">
+        <section class="article-body post-body-padding" id="post-body">
           <!-- Rendered dynamically -->
         </section>
 
         <!-- SIDEBAR -->
-        <aside class="sidebar" style="margin-top: 24px;">
+        <aside class="sidebar sidebar-margin-top">
           <!-- SIDEBAR AD -->
-          <div class="widget" id="bx-ad-sidebar-widget" style="padding:15px; display:flex; flex-direction:column; align-items:center; gap:8px;">
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom:4px;">
-              <span class="ad-pill" style="margin:0;">Ad</span>
+          <div class="widget bx-ad-sidebar-widget" id="bx-ad-sidebar-widget">
+            <div class="bx-ad-header">
+              <span class="ad-pill bx-ad-pill-no-margin">Ad</span>
             </div>
-            <div class="ad-slot placeholder" id="bx-ad-sidebar" data-slot="sidebar_300x250" style="width: 300px; height: 250px;">
+            <div class="ad-slot placeholder ad-slot-300x250" id="bx-ad-sidebar" data-slot="sidebar_300x250">
               Ad Space: Sidebar (300×250)
             </div>
           </div>

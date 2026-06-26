@@ -927,8 +927,9 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       display: inline-flex;
-      align-items: center;
     }
+    .bx-brand-logo-pic { height: 38px; display: block; }
+    .bx-brand-logo-img { height: 38px; width: auto; object-fit: contain; display: block; }
   </style>
 </head>
 <body>
@@ -950,13 +951,13 @@
     <div class="bx-wrap">
       <div class="nav-row">
         <a class="bx-brand" href="/">
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/icon_mobile.png">
-            <img src="/assets/icon.png" alt="BioXApe Icon" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/icon.png" alt="BioXApe Icon" class="bx-brand-logo-img" />
           </picture>
-          <picture style="height: 38px; display: block;">
+          <picture class="bx-brand-logo-pic">
             <source media="(max-width: 768px)" srcset="/assets/main_logo_mobile.png">
-            <img src="/assets/main_logo.png" alt="BioXApe" style="height: 38px; width: auto; object-fit: contain; display: block;" />
+            <img src="/assets/main_logo.png" alt="BioXApe" class="bx-brand-logo-img" />
           </picture>
         </a>
         <div class="nav-links">
