@@ -1298,3 +1298,14 @@ button, input, select, textarea {
   50% { transform: translateY(-8px); }
   100% { transform: translateY(0px); }
 }
+
+/* Collapse unfilled ad slots to prevent layout gaps */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}
+.ad-wrapper:has(ins.adsbygoogle[data-ad-status="unfilled"]) {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+}
