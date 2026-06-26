@@ -112,7 +112,8 @@ export default defineConfig(({ mode }) => {
             'post.html',
             'research.html',
             'store.html',
-            'ads.txt'
+            'ads.txt',
+            'favicon.ico'
           ];
 
           staticFiles.forEach(file => {
