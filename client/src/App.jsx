@@ -123,15 +123,13 @@ function App() {
         <header id="bx-nav">
           <div className="bx-wrap nav-row">
             <a className="bx-brand" href="/">
-              <div className="bx-brand-mark" style={{ background: 'none', boxShadow: 'none', width: 'auto', height: '38px' }}>
-                <picture>
-                  <source media="(max-width: 768px)" srcSet="/assets/icon_mobile.png" />
-                  <img src="/assets/icon.png" alt="BioXApe Icon" style={{ height: '100%', width: 'auto', objectFit: 'contain' }} />
-                </picture>
-              </div>
-              <picture>
+              <picture style={{ height: '38px', display: 'block' }}>
+                <source media="(max-width: 768px)" srcSet="/assets/icon_mobile.png" />
+                <img src="/assets/icon.png" alt="BioXApe Icon" style={{ height: '38px', width: 'auto', objectFit: 'contain', display: 'block' }} />
+              </picture>
+              <picture style={{ height: '38px', display: 'block' }}>
                 <source media="(max-width: 768px)" srcSet="/assets/main_logo_mobile.png" />
-                <img src="/assets/main_logo.png" alt="BioXApe" style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
+                <img src="/assets/main_logo.png" alt="BioXApe" style={{ height: '38px', width: 'auto', objectFit: 'contain', display: 'block' }} />
               </picture>
             </a>
 
