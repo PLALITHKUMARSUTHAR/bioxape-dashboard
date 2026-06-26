@@ -80,7 +80,12 @@
 <div class="dash-layout d-none" id="dash-layout">
   <aside class="dash-sidebar">
     <div class="sidebar-brand">
-      <div class="sidebar-brand-mark" style="background: none; box-shadow: none;"><img src="/assets/master.svg" alt="BioXApe" style="width: 100%; height: 100%; object-fit: contain;" /></div>
+      <div class="sidebar-brand-mark" style="background: none; box-shadow: none;">
+          <picture>
+            <source srcset="/assets/master.svg" type="image/svg+xml">
+            <img src="/assets/main_logo.png" alt="BioXApe" style="width: 100%; height: 100%; object-fit: contain;" />
+          </picture>
+        </div>
       <div class="sidebar-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
       <span class="sidebar-role-badge role-admin" id="sidebar-role-badge">ADMIN</span>
     </div>

@@ -143,7 +143,13 @@ li{font-size:15px;color:var(--text2);line-height:1.8;margin-bottom:5px}
     <div class="bx-wrap">
       <div class="nav-row">
         <a class="bx-brand" href="/">
-          <img src="/assets/main_logo.png" alt="BioXApe" style="height: 38px; width: auto; object-fit: contain;" />
+          <div class="bx-brand-mark" style="background: none; box-shadow: none;">
+            <picture>
+              <source srcset="/assets/master.svg" type="image/svg+xml">
+              <img src="/assets/main_logo.png" alt="BioXApe" style="width: 100%; height: 100%; object-fit: contain;" />
+            </picture>
+          </div>
+          <div class="bx-brand-name">Bio<em><span class="brand-x">X</span>Ape</em></div>
         </a>
         <div class="nav-links">
           <a href="/">Home</a>
