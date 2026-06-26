@@ -1606,6 +1606,8 @@
       ? 'http://localhost:5000/api' 
       : 'https://bioxape-backend.onrender.com/api';
 
+    let earlyAccessIds = [];
+
     function checkUserAuthorized() {
       const userStr = localStorage.getItem('bioxape_user');
       if (!userStr) return false;
@@ -2333,11 +2335,11 @@
         siteConfig = data.data;
         const cfg = data.data;
         if (cfg.category_nav)         renderCategoryNav(cfg.category_nav);
-        if (cfg.hero_featured||cfg.hero_stack) renderHero(cfg.hero_featured, cfg.hero_stack);
         if (cfg.latest_articles)      renderLatestArticlesConfig(cfg.latest_articles);
         
         latestArticlesShowCover = cfg.latest_articles?.showCoverImage !== false;
-        fetchLatestArticles(1);
+        await fetchLatestArticles(1);
+        if (cfg.hero_featured||cfg.hero_stack) renderHero(cfg.hero_featured, cfg.hero_stack);
         
         fetchResearchSpotlight();
         fetchTrendingPosts();
@@ -2351,8 +2353,7 @@
         await fetchExternalNews(cfg.ticker, cfg.news_strip);
       } catch(e) { 
         console.warn('CMS sync failed - using static fallback', e.message); 
-        fetchLatestArticles(1);
-        await fetchExternalNews();
+        await fetchLatestArticles(1);
         fetchResearchSpotlight();
         fetchTrendingPosts();
         fetchUpcomingEvents();
@@ -2456,6 +2457,7 @@
 
       renderPagination(total, page);
       if (page === 1) {
+        earlyAccessIds = OFFLINE_POSTS.filter(p => p.isEarlyAccess).map(p => p._id.toString());
         initCarousel(OFFLINE_POSTS);
       }
     }
@@ -2489,6 +2491,7 @@
 
           renderPagination(total, page);
           if (page === 1) {
+            earlyAccessIds = manualItems.filter(p => p.isEarlyAccess).map(p => (p._id || p.postId || p.link || '').toString());
             initCarousel(manualItems);
           }
           return;
@@ -2517,6 +2520,7 @@
         
         // Populate the hero carousel dynamically from page 1 posts
         if (page === 1) {
+          earlyAccessIds = data.posts.filter(p => p.isEarlyAccess).map(p => p._id.toString());
           initCarousel(data.posts);
         }
       } catch(e) {
@@ -2606,32 +2610,45 @@
           }
         }
       }
-      if (stack && stack.items) stack.items.forEach((item,i)=>{
-        const card=document.getElementById('bx-stack-'+i);
-        if(!card) return;
-        const t=card.querySelector('.stack-title'),m=card.querySelector('.stack-meta'),tag=card.querySelector('.tag'),thumb=card.querySelector('.stack-thumb');
-        if(t) t.textContent=item.title||'';
-        if(m) m.textContent=item.meta||'';
-        if(tag) tag.textContent=item.tagText||'';
-        if(thumb) {
-          thumb.innerHTML = '';
-          const isUrl = item.emoji && (item.emoji.startsWith('http') || item.emoji.startsWith('/') || item.emoji.includes('.'));
-          const imgUrl = isUrl ? item.emoji : (item.coverImageUrl || null);
-          
-          if (imgUrl) {
-            thumb.innerHTML = `<img class="stack-thumb-img" src="${imgUrl}" alt="${item.title || 'image'}" />`;
-            thumb.className = 'stack-thumb'; // Remove th-* classes to avoid bg overlap
-          } else {
-            thumb.textContent = item.emoji || '🔬';
-            if (item.themeClass) {
-              thumb.className = 'stack-thumb ' + item.themeClass;
+      if (stack && stack.items) {
+        const filteredItems = stack.items.filter(item => {
+          const pId = item.postId || item._id;
+          return !pId || !earlyAccessIds.includes(pId.toString());
+        });
+
+        for (let i = 0; i < 4; i++) {
+          const card = document.getElementById('bx-stack-' + i);
+          if (card) card.style.display = 'none';
+        }
+
+        filteredItems.slice(0, 4).forEach((item, i) => {
+          const card = document.getElementById('bx-stack-' + i);
+          if (!card) return;
+          card.style.display = '';
+          const t = card.querySelector('.stack-title'), m = card.querySelector('.stack-meta'), tag = card.querySelector('.tag'), thumb = card.querySelector('.stack-thumb');
+          if (t) t.textContent = item.title || '';
+          if (m) m.textContent = item.meta || '';
+          if (tag) tag.textContent = item.tagText || '';
+          if (thumb) {
+            thumb.innerHTML = '';
+            const isUrl = item.emoji && (item.emoji.startsWith('http') || item.emoji.startsWith('/') || item.emoji.includes('.'));
+            const imgUrl = isUrl ? item.emoji : (item.coverImageUrl || null);
+            
+            if (imgUrl) {
+              thumb.innerHTML = `<img class="stack-thumb-img" src="${imgUrl}" alt="${item.title || 'image'}" />`;
+              thumb.className = 'stack-thumb';
+            } else {
+              thumb.textContent = item.emoji || '🔬';
+              if (item.themeClass) {
+                thumb.className = 'stack-thumb ' + item.themeClass;
+              }
             }
           }
-        }
-        if (item.postId) {
-          card.onclick = () => window.location.href = `/post?id=${item.postId}`;
-        }
-      });
+          if (item.postId) {
+            card.onclick = () => window.location.href = `/post?id=${item.postId}`;
+          }
+        });
+      }
     }
 
     function renderNewsStrip(data) {
@@ -2881,7 +2898,14 @@
       const indicators = document.getElementById('bx-carousel-indicators');
       if (!track || !posts || posts.length === 0) return;
 
-      carouselPosts = posts.slice(0, 4); // Take top 4 posts
+      const nonEAPosts = posts.filter(p => !p.isEarlyAccess);
+      carouselPosts = nonEAPosts.slice(0, 4); // Take top 4 posts
+
+      if (carouselPosts.length === 0) {
+        track.innerHTML = '';
+        if (indicators) indicators.innerHTML = '';
+        return;
+      }
 
       // Set explicit track width based on slide count
       track.style.width = `${carouselPosts.length * 100}%`;

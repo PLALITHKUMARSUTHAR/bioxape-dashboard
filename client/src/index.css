@@ -302,12 +302,16 @@ button, input, select, textarea {
   background: var(--white);
   color: var(--text1);
   border: 2px solid var(--accent);
-  padding: 48px 32px;
+  padding: 24px 32px;
   border-radius: var(--radius);
-  margin-bottom: 40px;
+  margin-bottom: 12px;
   box-shadow: 0 4px 20px rgba(39, 163, 99, 0.05);
   position: relative;
   overflow: hidden;
+}
+
+.forum-homepage-ad {
+  margin: 8px auto !important;
 }
 
 .forum-hero h1 {
